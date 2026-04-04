@@ -5,7 +5,12 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  // .env is optional — release/TestFlight builds use --dart-define instead.
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // No .env bundled — fall back to --dart-define / production defaults.
+  }
   runApp(
     const ProviderScope(
       child: MalsatApp(),

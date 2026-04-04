@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Malsat App</string>
+	<string>MalSat</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -66,5 +66,15 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>MalSat needs camera access to let you take photos of your livestock for listings.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MalSat needs photo library access to let you attach livestock photos to listings.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>MalSat saves listing photos you capture so you can reuse them later.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>MalSat uses your location to tag listings and show nearby livestock for sale.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

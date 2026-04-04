@@ -6,7 +6,11 @@
       "WebFetch(domain:commons.wikimedia.org)",
       "WebFetch(domain:en.wikipedia.org)",
       "Bash(curl -sI https://malsat-ai.vercel.app/ky)",
-      "Bash(curl -s https://malsat-ai.vercel.app/ky)"
+      "Bash(curl -s https://malsat-ai.vercel.app/ky)",
+      "Bash(ls /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/.env* /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/assets)",
+      "Bash(grep -E \"^\\\\.env|\\\\.env$\" /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/.gitignore)",
+      "Bash(plutil -lint /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/ios/Runner/Info.plist /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/ios/Runner/PrivacyInfo.xcprivacy)",
+      "Bash(xmllint --noout /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/ios/Runner/Base.lproj/LaunchScreen.storyboard)"
     ]
   }
 }
