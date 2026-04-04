@@ -29,6 +29,12 @@ class ListingModel {
   final SellerModel? seller;
   final RegionModel? region;
   final bool isFavorited;
+  // Mode B — invest instead of direct-buy
+  final bool modeBEligible;
+  final int? modeBMinInvestmentKgs;
+  final int? modeBExpectedReturnPercent;
+  final int? modeBDurationMonths;
+  final String? modeBCaretakerName;
 
   const ListingModel({
     required this.id,
@@ -57,6 +63,11 @@ class ListingModel {
     this.seller,
     this.region,
     this.isFavorited = false,
+    this.modeBEligible = false,
+    this.modeBMinInvestmentKgs,
+    this.modeBExpectedReturnPercent,
+    this.modeBDurationMonths,
+    this.modeBCaretakerName,
   });
 
   factory ListingModel.fromJson(Map<String, dynamic> json) {
@@ -95,6 +106,11 @@ class ListingModel {
           ? RegionModel.fromJson(json['region'] as Map<String, dynamic>)
           : null,
       isFavorited: json['isFavorited'] as bool? ?? false,
+      modeBEligible: json['modeBEligible'] as bool? ?? false,
+      modeBMinInvestmentKgs: json['modeBMinInvestmentKgs'] as int?,
+      modeBExpectedReturnPercent: json['modeBExpectedReturnPercent'] as int?,
+      modeBDurationMonths: json['modeBDurationMonths'] as int?,
+      modeBCaretakerName: json['modeBCaretakerName'] as String?,
     );
   }
 

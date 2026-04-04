@@ -281,34 +281,46 @@ class _DetailContent extends StatelessWidget {
           ],
         ),
 
-        // Fixed contact buttons
+        // Fixed dual-mode CTAs
         if (listing.seller != null)
           Positioned(
             left: 16,
             right: 16,
             bottom: MediaQuery.of(context).padding.bottom + 16,
-            child: Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _makeCall(listing.seller!.phone),
-                    icon: const Icon(LucideIcons.phone, size: 18),
-                    label: Text(t(dict, 'listing.call')),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(0, 52),
+                // Mode A — buy directly (Өзүм алам)
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _makeCall(listing.seller!.phone),
+                        icon: const Icon(LucideIcons.phone, size: 18),
+                        label: const Text('Өзүм алам'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.textPrimary,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(0, 52),
+                          elevation: 0,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _ChatButton(
+                        sellerId: listing.seller!.id,
+                        listingId: listing.id,
+                        label: t(dict, 'listing.chat'),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ChatButton(
-                    sellerId: listing.seller!.id,
-                    listingId: listing.id,
-                    label: t(dict, 'listing.chat'),
-                  ),
-                ),
+                // Mode B — invest (Малчы жалдайм) — only when eligible
+                if (listing.modeBEligible) ...[
+                  const SizedBox(height: 10),
+                  _InvestButton(listing: listing),
+                ],
               ],
             ),
           ),
@@ -668,6 +680,348 @@ class _ChatButton extends ConsumerWidget {
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(0, 52),
       ),
+    );
+  }
+}
+
+class _InvestButton extends StatelessWidget {
+  final ListingModel listing;
+  const _InvestButton({required this.listing});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showInvestSheet(context),
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.primary, AppColors.primaryDark],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryDark.withValues(alpha: 0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Icon(LucideIcons.trendingUp, size: 18, color: Colors.white),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Малчы жалдайм',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      height: 1.1,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Малчы карайт → пайда ал',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (listing.modeBExpectedReturnPercent != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '+${listing.modeBExpectedReturnPercent}%',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primaryDark,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showInvestSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _InvestSheet(listing: listing),
+    );
+  }
+}
+
+class _InvestSheet extends StatelessWidget {
+  final ListingModel listing;
+  const _InvestSheet({required this.listing});
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.75,
+      maxChildSize: 0.9,
+      minChildSize: 0.5,
+      expand: false,
+      builder: (_, scroll) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SingleChildScrollView(
+          controller: scroll,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Малчы жалдайсың — кантип иштейт',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Сиз акча салыңыз. Малчы карайт. Сатылганда пайда сизге.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary.withValues(alpha: 0.9),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Investment terms
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundSecondary,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  children: [
+                    _TermRow(
+                      label: 'Эң аз инвестиция',
+                      value: '${_fmt(listing.modeBMinInvestmentKgs ?? 0)} сом',
+                    ),
+                    const Divider(height: 20),
+                    _TermRow(
+                      label: 'Күтүлгөн пайда',
+                      value: '+${listing.modeBExpectedReturnPercent ?? 0}%',
+                      highlight: true,
+                    ),
+                    const Divider(height: 20),
+                    _TermRow(
+                      label: 'Мөөнөтү',
+                      value: '${listing.modeBDurationMonths ?? 0} ай',
+                    ),
+                    const Divider(height: 20),
+                    _TermRow(
+                      label: 'Малчы',
+                      value: listing.modeBCaretakerName ?? '-',
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // 3 steps
+              const _StepRow(
+                num: '1',
+                title: 'Акча салыңыз',
+                desc: 'Эң аз сумманы QR аркылуу жөнөтөсүз',
+              ),
+              const SizedBox(height: 12),
+              const _StepRow(
+                num: '2',
+                title: 'Малчы карайт',
+                desc: 'Апта сайын видео-отчёт алып турасыз',
+              ),
+              const SizedBox(height: 12),
+              const _StepRow(
+                num: '3',
+                title: 'Пайда алыңыз',
+                desc: 'Сатылганда акчаңыз кайра банкка түшөт',
+              ),
+
+              const SizedBox(height: 24),
+
+              // CTA
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Жакында — Beta да ачылат'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text(
+                    'Инвестиция кылуу',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: Text(
+                  'Курман айт / той / экспорт сатуудан пайда',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static String _fmt(int n) {
+    final s = n.toString();
+    final buf = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buf.write(' ');
+      buf.write(s[i]);
+    }
+    return buf.toString();
+  }
+}
+
+class _TermRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool highlight;
+  const _TermRow({required this.label, required this.value, this.highlight = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: highlight ? AppColors.primary : AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StepRow extends StatelessWidget {
+  final String num;
+  final String title;
+  final String desc;
+  const _StepRow({required this.num, required this.title, required this.desc});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: const BoxDecoration(
+            color: AppColors.primary,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              num,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                desc,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

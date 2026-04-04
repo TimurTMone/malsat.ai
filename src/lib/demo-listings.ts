@@ -54,6 +54,12 @@ type Demo = {
   viewsCount: number;
   favoritesCount: number;
   hoursAgo: number;
+  // Mode B (invest + caretaker raises it) fields — null when not eligible
+  modeBEligible?: boolean;
+  modeBMinInvestmentKgs?: number;
+  modeBExpectedReturnPercent?: number;
+  modeBDurationMonths?: number;
+  modeBCaretakerName?: string;
 };
 
 const DEMOS: Demo[] = [
@@ -80,6 +86,11 @@ const DEMOS: Demo[] = [
     viewsCount: 247,
     favoritesCount: 18,
     hoursAgo: 3,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 40000,
+    modeBExpectedReturnPercent: 18,
+    modeBDurationMonths: 6,
+    modeBCaretakerName: "Асылбек Жолдошев",
   },
   {
     id: "demo-2",
@@ -104,6 +115,11 @@ const DEMOS: Demo[] = [
     viewsCount: 312,
     favoritesCount: 28,
     hoursAgo: 2,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 20000,
+    modeBExpectedReturnPercent: 22,
+    modeBDurationMonths: 3,
+    modeBCaretakerName: "Нурлан Осмонов",
   },
   {
     id: "demo-3",
@@ -152,6 +168,11 @@ const DEMOS: Demo[] = [
     viewsCount: 512,
     favoritesCount: 47,
     hoursAgo: 8,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 90000,
+    modeBExpectedReturnPercent: 15,
+    modeBDurationMonths: 8,
+    modeBCaretakerName: "Эркин Мамбетов",
   },
   {
     id: "demo-5",
@@ -176,6 +197,11 @@ const DEMOS: Demo[] = [
     viewsCount: 89,
     favoritesCount: 6,
     hoursAgo: 48,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 45000,
+    modeBExpectedReturnPercent: 25,
+    modeBDurationMonths: 2,
+    modeBCaretakerName: "Самат Абдыев",
   },
   {
     id: "demo-6",
@@ -200,6 +226,11 @@ const DEMOS: Demo[] = [
     viewsCount: 203,
     favoritesCount: 22,
     hoursAgo: 5,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 95000,
+    modeBExpectedReturnPercent: 20,
+    modeBDurationMonths: 6,
+    modeBCaretakerName: "Эркин Мамбетов",
   },
   {
     id: "demo-7",
@@ -248,6 +279,11 @@ const DEMOS: Demo[] = [
     viewsCount: 67,
     favoritesCount: 4,
     hoursAgo: 12,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 9000,
+    modeBExpectedReturnPercent: 30,
+    modeBDurationMonths: 4,
+    modeBCaretakerName: "Мирлан Керимов",
   },
   {
     id: "demo-9",
@@ -272,6 +308,11 @@ const DEMOS: Demo[] = [
     viewsCount: 189,
     favoritesCount: 15,
     hoursAgo: 16,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 55000,
+    modeBExpectedReturnPercent: 16,
+    modeBDurationMonths: 8,
+    modeBCaretakerName: "Асылбек Жолдошев",
   },
   {
     id: "demo-10",
@@ -296,6 +337,11 @@ const DEMOS: Demo[] = [
     viewsCount: 178,
     favoritesCount: 19,
     hoursAgo: 20,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 50000,
+    modeBExpectedReturnPercent: 14,
+    modeBDurationMonths: 12,
+    modeBCaretakerName: "Мелис Токтогулов",
   },
   {
     id: "demo-11",
@@ -320,6 +366,11 @@ const DEMOS: Demo[] = [
     viewsCount: 92,
     favoritesCount: 7,
     hoursAgo: 30,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 40000,
+    modeBExpectedReturnPercent: 18,
+    modeBDurationMonths: 5,
+    modeBCaretakerName: "Самат Абдыев",
   },
   {
     id: "demo-12",
@@ -344,6 +395,11 @@ const DEMOS: Demo[] = [
     viewsCount: 143,
     favoritesCount: 11,
     hoursAgo: 10,
+    modeBEligible: true,
+    modeBMinInvestmentKgs: 60000,
+    modeBExpectedReturnPercent: 17,
+    modeBDurationMonths: 7,
+    modeBCaretakerName: "Талгат Сулайманов",
   },
 ];
 
@@ -432,6 +488,11 @@ export function getDemoListings(opts?: {
         nameKy: d.regionNameKy,
         nameRu: d.regionNameRu,
       },
+      modeBEligible: d.modeBEligible ?? false,
+      modeBMinInvestmentKgs: d.modeBMinInvestmentKgs ?? null,
+      modeBExpectedReturnPercent: d.modeBExpectedReturnPercent ?? null,
+      modeBDurationMonths: d.modeBDurationMonths ?? null,
+      modeBCaretakerName: d.modeBCaretakerName ?? null,
     })),
     pagination: {
       page,

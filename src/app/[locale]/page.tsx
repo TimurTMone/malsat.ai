@@ -104,13 +104,15 @@ export default async function HomePage({
   const isKy = locale === "ky";
 
   const t = {
-    heroTag: isKy ? "Кыргызстандын №1 мал базары" : "Рынок скота №1 в Кыргызстане",
-    heroTitle: isKy ? "Мал сатуу жана сатып алуу — оңой, тез, ишенимдүү" : "Покупка и продажа скота — легко, быстро, надёжно",
+    heroTag: isKy ? "ЭКИ ЖОЛУ • ANY ANIMAL. YOUR WAY." : "ДВА СПОСОБА • ANY ANIMAL. YOUR WAY.",
+    heroTitle: isKy
+      ? "Мал сатып ал. Же малчы жалдап пайда тап."
+      : "Купи скот. Или найми пастуха и получай прибыль.",
     heroSubtitle: isKy
-      ? "Миңдеген текшерилген малчылар. Бардык аймактардан жарыялар. Бир колуңда."
-      : "Тысячи проверенных фермеров. Объявления со всех регионов. В одном месте.",
-    ctaBrowse: isKy ? "Малды көрүү" : "Смотреть скот",
-    ctaSell: isKy ? "Жарыя берүү" : "Разместить объявление",
+      ? "Ар бир жарыяда эки тандоо: өзүң алып кетесиң, же малчы карайт да жыл аягында пайда менен сатылат."
+      : "В каждом объявлении два выбора: забрать себе, или пастух вырастит — продашь с прибылью.",
+    ctaBrowse: isKy ? "Өзүм алам" : "Купить себе",
+    ctaSell: isKy ? "Малчы жалдайм" : "Нанять пастуха",
     statFarmers: isKy ? "малчы" : "фермеров",
     statListings: isKy ? "активдүү жарыя" : "активных объявлений",
     statRegions: isKy ? "аймак" : "регионов",
@@ -181,16 +183,23 @@ export default async function HomePage({
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
                 href={`/${locale}/search`}
-                className="inline-flex items-center gap-2 rounded-xl bg-malsat-green px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-malsat-green-dark hover:shadow-md active:scale-[0.98]"
+                className="group inline-flex items-center gap-2 rounded-xl border-2 border-foreground bg-white px-5 py-3 text-sm font-bold text-foreground shadow-sm transition-all hover:bg-foreground hover:text-white active:scale-[0.98]"
               >
                 <Search className="h-4 w-4" />
                 {t.ctaBrowse}
+                <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide opacity-60 group-hover:opacity-80">
+                  {isKy ? "Режим A" : "Mode A"}
+                </span>
               </Link>
               <Link
-                href={`/${locale}/sell`}
-                className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-malsat-green hover:text-malsat-green active:scale-[0.98]"
+                href={`/${locale}/search`}
+                className="group inline-flex items-center gap-2 rounded-xl bg-malsat-green px-5 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-malsat-green-dark hover:shadow-md active:scale-[0.98]"
               >
+                <TrendingUp className="h-4 w-4" />
                 {t.ctaSell}
+                <span className="ml-1 rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-bold">
+                  +15-30%
+                </span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
