@@ -27,4 +27,11 @@ class ApiEndpoints {
 
   // Users
   static String user(String id) => '/api/users/$id';
+
+  // Herd (Livestock CRM)
+  static const String herd = '/api/herd';
+  static String herdAnimal(String id) => '/api/herd/$id';
+
+  // Caretakers
+  static const String caretakers = '/api/caretakers';
 }

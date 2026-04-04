@@ -52,8 +52,8 @@ class BottomNavBar extends ConsumerWidget {
                 isPrimary: true,
               ),
               _NavItem(
-                icon: LucideIcons.messageCircle,
-                label: t(dict, 'nav.messages'),
+                icon: LucideIcons.layers,
+                label: 'Менин мал',
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
               ),

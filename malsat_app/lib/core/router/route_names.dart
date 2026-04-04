@@ -11,4 +11,7 @@ class RouteNames {
   static const String otpVerify = 'otp-verify';
   static const String publicProfile = 'public-profile';
   static const String chat = 'chat';
+  static const String herd = 'herd';
+  static const String animalDetail = 'animal-detail';
+  static const String caretakers = 'caretakers';
 }

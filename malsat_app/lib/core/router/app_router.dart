@@ -6,6 +6,7 @@ import '../widgets/malsat_header.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/sell/presentation/screens/sell_screen.dart';
+// ignore: unused_import
 import '../../features/messages/presentation/screens/messages_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/listing_detail/presentation/screens/listing_detail_screen.dart';
@@ -13,6 +14,9 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/profile/presentation/screens/public_profile_screen.dart';
 import '../../features/messages/presentation/screens/chat_screen.dart';
+import '../../features/herd/presentation/screens/herd_screen.dart';
+import '../../features/herd/presentation/screens/animal_detail_screen.dart';
+import '../../features/herd/presentation/screens/caretakers_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -70,9 +74,9 @@ final appRouter = GoRouter(
           navigatorKey: _shellNavigatorMessagesKey,
           routes: [
             GoRoute(
-              name: RouteNames.messages,
-              path: '/messages',
-              builder: (context, state) => const MessagesScreen(),
+              name: RouteNames.herd,
+              path: '/herd',
+              builder: (context, state) => const HerdScreen(),
             ),
           ],
         ),
@@ -126,6 +130,19 @@ final appRouter = GoRouter(
       builder: (context, state) => ChatScreen(
         conversationId: state.pathParameters['id']!,
       ),
+    ),
+    GoRoute(
+      name: RouteNames.animalDetail,
+      path: '/herd/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) =>
+          AnimalDetailScreen(id: state.pathParameters['id']!),
+    ),
+    GoRoute(
+      name: RouteNames.caretakers,
+      path: '/caretakers',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const CaretakersScreen(),
     ),
   ],
 );
