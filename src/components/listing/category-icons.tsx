@@ -34,7 +34,7 @@ function SheepIcon({ className }: { className?: string }) {
   );
 }
 
-function GoatIcon({ className }: { className?: string }) {
+function ArashanIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" fill="currentColor" className={className}>
       <path d="M50 18l4-12h-4l-4 8c-2-2-4-4-7-4h-14c-3 0-5 2-7 4l-4-8h-4l4 12c-3 2-5 6-5 10v8c0 4 2 8 6 10v5c0 1 1 2 2 2h4c1 0 2-1 2-2v-4h12v4c0 1 1 2 2 2h4c1 0 2-1 2-2v-5c4-2 6-6 6-10v-8c0-4-2-8-5-10zM26 36c-2 0-3-2-3-4s1-4 3-4 3 2 3 4-1 4-3 4zm16 4h-10v-3c0-1-1-1-1-1h-2s0 0 0 0h2l-1 1v3h0zm0-4c-2 0-3-2-3-4s1-4 3-4 3 2 3 4-1 4-3 4z" />
@@ -46,7 +46,7 @@ const categories = [
   { key: "horse", value: "HORSE", Icon: HorseIcon, color: "bg-amber-100 text-amber-800" },
   { key: "cattle", value: "CATTLE", Icon: CattleIcon, color: "bg-orange-100 text-orange-800" },
   { key: "sheep", value: "SHEEP", Icon: SheepIcon, color: "bg-emerald-100 text-emerald-800" },
-  { key: "goat", value: "GOAT", Icon: GoatIcon, color: "bg-sky-100 text-sky-800" },
+  { key: "arashan", value: "ARASHAN", Icon: ArashanIcon, color: "bg-purple-100 text-purple-800" },
 ] as const;
 
 export function CategoryIcons({ locale, dict, activeCategory }: CategoryIconsProps) {

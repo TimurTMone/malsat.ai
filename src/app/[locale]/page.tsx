@@ -93,9 +93,9 @@ const demoListings = [
   },
   {
     id: "6",
-    title: "Эчки, сүт, 2 жаш",
-    priceKgs: 18000,
-    category: "GOAT",
+    title: "Арашан кой, 2 жаш",
+    priceKgs: 45000,
+    category: "ARASHAN",
     breed: null,
     ageMonths: 24,
     weightKg: 45,

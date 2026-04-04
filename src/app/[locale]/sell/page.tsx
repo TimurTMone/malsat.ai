@@ -43,7 +43,7 @@ export default async function SellPage({
               { label: dict.categories.horse, value: "HORSE", emoji: "🐴" },
               { label: dict.categories.cattle, value: "CATTLE", emoji: "🐄" },
               { label: dict.categories.sheep, value: "SHEEP", emoji: "🐑" },
-              { label: dict.categories.goat, value: "GOAT", emoji: "🐐" },
+              { label: dict.categories.arashan, value: "ARASHAN", emoji: "🐏" },
             ].map((cat) => (
               <button
                 key={cat.value}
