@@ -4,7 +4,9 @@
       "WebFetch(domain:unsplash.com)",
       "WebFetch(domain:www.pexels.com)",
       "WebFetch(domain:commons.wikimedia.org)",
-      "WebFetch(domain:en.wikipedia.org)"
+      "WebFetch(domain:en.wikipedia.org)",
+      "Bash(curl -sI https://malsat-ai.vercel.app/ky)",
+      "Bash(curl -s https://malsat-ai.vercel.app/ky)"
     ]
   }
 }
