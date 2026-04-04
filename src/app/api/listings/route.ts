@@ -1,23 +1,29 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
-import { ok, errorResponse, handleError } from "@/lib/response";
+import { ok, handleError } from "@/lib/response";
 import { Prisma } from "@/generated/prisma/client";
+import { getDemoListings } from "@/lib/demo-listings";
 
 export async function GET(req: NextRequest) {
-  try {
-    const url = new URL(req.url);
-    const category = url.searchParams.get("category");
-    const minPrice = url.searchParams.get("minPrice");
-    const maxPrice = url.searchParams.get("maxPrice");
-    const regionId = url.searchParams.get("regionId");
-    const breed = url.searchParams.get("breed");
-    const gender = url.searchParams.get("gender");
-    const sort = url.searchParams.get("sort") || "newest";
-    const page = parseInt(url.searchParams.get("page") || "1");
-    const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 50);
-    const skip = (page - 1) * limit;
+  const url = new URL(req.url);
+  const category = url.searchParams.get("category");
+  const minPrice = url.searchParams.get("minPrice");
+  const maxPrice = url.searchParams.get("maxPrice");
+  const regionId = url.searchParams.get("regionId");
+  const breed = url.searchParams.get("breed");
+  const gender = url.searchParams.get("gender");
+  const sort = url.searchParams.get("sort") || "newest";
+  const page = parseInt(url.searchParams.get("page") || "1");
+  const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 50);
+  const skip = (page - 1) * limit;
 
+  const demoFallback = () =>
+    ok(
+      getDemoListings({ category, minPrice, maxPrice, sort, page, limit })
+    );
+
+  try {
     const where: Prisma.ListingWhereInput = {
       status: "ACTIVE",
     };
@@ -63,6 +69,9 @@ export async function GET(req: NextRequest) {
       prisma.listing.count({ where }),
     ]);
 
+    // Empty DB → serve demo data so the app never shows a blank feed.
+    if (total === 0) return demoFallback();
+
     return ok({
       listings,
       pagination: {
@@ -73,7 +82,9 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    return handleError(error);
+    // DB unreachable or migrations not applied → serve demo data.
+    console.warn("[listings] demo fallback:", error);
+    return demoFallback();
   }
 }
 
