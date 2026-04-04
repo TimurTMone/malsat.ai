@@ -83,21 +83,20 @@ class ListingCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              // Mode B — "Малчы жалдаса болот" pill
+              // Mode B — investable pill (bottom-left)
               if (listing.modeBEligible)
                 Positioned(
                   bottom: 8,
                   left: 8,
-                  right: 8,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 5),
+                        horizontal: 7, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(5),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
+                          color: Colors.black.withValues(alpha: 0.18),
                           blurRadius: 6,
                         ),
                       ],
@@ -106,17 +105,17 @@ class ListingCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(LucideIcons.trendingUp,
-                            size: 11, color: Colors.white),
-                        const SizedBox(width: 4),
+                            size: 10, color: Colors.white),
+                        const SizedBox(width: 3),
                         Text(
                           listing.modeBExpectedReturnPercent != null
-                              ? 'Малчы жалдаса болот • +${listing.modeBExpectedReturnPercent}%'
-                              : 'Малчы жалдаса болот',
+                              ? 'Жалдаса +${listing.modeBExpectedReturnPercent}%'
+                              : 'Жалдаса болот',
                           style: const TextStyle(
-                            fontSize: 10,
+                            fontSize: 9,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
-                            letterSpacing: 0.2,
+                            letterSpacing: 0.1,
                           ),
                         ),
                       ],
