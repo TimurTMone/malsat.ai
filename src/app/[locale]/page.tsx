@@ -6,6 +6,22 @@ import type { Locale } from "@/i18n/config";
 import { Header } from "@/components/layout/header";
 import { ListingCard } from "@/components/listing/listing-card";
 
+// Stock livestock photos from Wikimedia Commons (public domain / CC-licensed)
+const PHOTO = {
+  horseMountains: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Biandintz_eta_zaldiak_-_modified2.jpg/1200px-Biandintz_eta_zaldiak_-_modified2.jpg",
+  horseNokota: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Nokota_Horses_cropped.jpg/800px-Nokota_Horses_cropped.jpg",
+  horsePony: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Horse-and-pony.jpg/800px-Horse-and-pony.jpg",
+  horseMareFoal: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Mare_foal_poland.jpg/800px-Mare_foal_poland.jpg",
+  horseField: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Horsescd1l-095.jpg/800px-Horsescd1l-095.jpg",
+  cowFleckvieh: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg/800px-Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg",
+  cowHerd: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Cattle_Selwyn_Road_Boulia_Shire_Central_Western_Queensland_P1080822_%28cropped%29.jpg/800px-Cattle_Selwyn_Road_Boulia_Shire_Central_Western_Queensland_P1080822_%28cropped%29.jpg",
+  cowAngus: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Aberdeen_Angus_im_Gadental_2.JPG/800px-Aberdeen_Angus_im_Gadental_2.JPG",
+  sheepFlock: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flock_of_sheep.jpg/800px-Flock_of_sheep.jpg",
+  sheepTurkmen: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Turkmen_sheep.jpg/800px-Turkmen_sheep.jpg",
+  sheepMountain: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/A_curious_Welsh_Mountain_sheep_%28Ovis_aries%29.jpg/800px-A_curious_Welsh_Mountain_sheep_%28Ovis_aries%29.jpg",
+  goat: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hausziege_04.jpg/800px-Hausziege_04.jpg",
+};
+
 // Demo listings for initial UI (replaced by DB data later)
 const demoListings = [
   {
@@ -19,7 +35,7 @@ const demoListings = [
     village: "Ак-Суу",
     regionNameKy: "Ысык-Көл",
     regionNameRu: "Иссык-Кульская",
-    imageUrl: "",
+    imageUrl: PHOTO.sheepTurkmen,
     viewsCount: 234,
     favoritesCount: 18,
     isVerifiedBreeder: true,
@@ -36,7 +52,7 @@ const demoListings = [
     village: "Токмок",
     regionNameKy: "Чүй",
     regionNameRu: "Чуйская",
-    imageUrl: "",
+    imageUrl: PHOTO.horseField,
     viewsCount: 89,
     favoritesCount: 5,
     isVerifiedBreeder: false,
@@ -53,7 +69,7 @@ const demoListings = [
     village: "Кара-Балта",
     regionNameKy: "Чүй",
     regionNameRu: "Чуйская",
-    imageUrl: "",
+    imageUrl: PHOTO.cowHerd,
     viewsCount: 156,
     favoritesCount: 12,
     isVerifiedBreeder: false,
@@ -70,7 +86,7 @@ const demoListings = [
     village: "Чолпон-Ата",
     regionNameKy: "Ысык-Көл",
     regionNameRu: "Иссык-Кульская",
-    imageUrl: "",
+    imageUrl: PHOTO.horsePony,
     viewsCount: 312,
     favoritesCount: 28,
     isVerifiedBreeder: true,
@@ -132,10 +148,10 @@ export default async function HomePage({
   };
 
   const categories = [
-    { key: "horse", emoji: "🐎", labelKy: "Жылкы", labelRu: "Лошади", count: "1,240" },
-    { key: "cattle", emoji: "🐄", labelKy: "Бодо мал", labelRu: "КРС", count: "2,180" },
-    { key: "sheep", emoji: "🐑", labelKy: "Кой", labelRu: "Овцы", count: "3,450" },
-    { key: "arashan", emoji: "🐐", labelKy: "Арашан", labelRu: "Арашан", count: "890" },
+    { key: "horse", photo: PHOTO.horseMareFoal, labelKy: "Жылкы", labelRu: "Лошади", count: "1,240" },
+    { key: "cattle", photo: PHOTO.cowAngus, labelKy: "Бодо мал", labelRu: "КРС", count: "2,180" },
+    { key: "sheep", photo: PHOTO.sheepFlock, labelKy: "Кой", labelRu: "Овцы", count: "3,450" },
+    { key: "arashan", photo: PHOTO.goat, labelKy: "Арашан", labelRu: "Арашан", count: "890" },
   ];
 
   return (
@@ -196,30 +212,50 @@ export default async function HomePage({
             </div>
           </div>
 
-          {/* Hero visual — layered livestock cards */}
+          {/* Hero visual — layered livestock photo cards */}
           <div className="relative h-[380px] md:h-[460px]">
-            {/* Back card */}
-            <div className="absolute right-0 top-6 h-56 w-44 rotate-6 rounded-3xl bg-gradient-to-br from-malsat-green-light to-malsat-green shadow-xl md:h-72 md:w-56">
-              <div className="flex h-full items-center justify-center text-7xl md:text-8xl">🐎</div>
-              <div className="absolute bottom-3 left-3 right-3 rounded-xl bg-white/20 px-3 py-2 backdrop-blur">
-                <p className="text-[10px] font-medium text-white/80">{isKy ? "Жылкы" : "Лошади"}</p>
+            {/* Back card — horses */}
+            <div className="absolute right-0 top-6 h-56 w-44 overflow-hidden rotate-6 rounded-3xl shadow-xl ring-1 ring-black/5 md:h-72 md:w-56">
+              <Image
+                src={PHOTO.horseNokota}
+                alt="Horses on pasture"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 176px, 224px"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
+              <div className="absolute bottom-3 left-3 right-3 rounded-xl bg-white/15 px-3 py-2 backdrop-blur-sm">
+                <p className="text-[10px] font-medium text-white/90">{isKy ? "Жылкы" : "Лошади"}</p>
                 <p className="text-sm font-bold text-white">120 000 сом</p>
               </div>
             </div>
 
-            {/* Mid card */}
-            <div className="absolute left-4 top-20 h-56 w-44 -rotate-3 rounded-3xl bg-gradient-to-br from-malsat-gold-light to-malsat-gold shadow-xl md:h-72 md:w-56">
-              <div className="flex h-full items-center justify-center text-7xl md:text-8xl">🐄</div>
-              <div className="absolute bottom-3 left-3 right-3 rounded-xl bg-white/20 px-3 py-2 backdrop-blur">
-                <p className="text-[10px] font-medium text-white/80">{isKy ? "Бодо мал" : "КРС"}</p>
+            {/* Mid card — cattle */}
+            <div className="absolute left-4 top-20 h-56 w-44 overflow-hidden -rotate-3 rounded-3xl shadow-xl ring-1 ring-black/5 md:h-72 md:w-56">
+              <Image
+                src={PHOTO.cowFleckvieh}
+                alt="Cow in mountains"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 176px, 224px"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
+              <div className="absolute bottom-3 left-3 right-3 rounded-xl bg-white/15 px-3 py-2 backdrop-blur-sm">
+                <p className="text-[10px] font-medium text-white/90">{isKy ? "Бодо мал" : "КРС"}</p>
                 <p className="text-sm font-bold text-white">250 000 сом</p>
               </div>
             </div>
 
-            {/* Front card */}
+            {/* Front card — sheep */}
             <div className="absolute bottom-0 right-8 h-60 w-48 rotate-2 rounded-3xl bg-white p-3 shadow-2xl ring-1 ring-border md:h-80 md:w-60">
-              <div className="flex h-40 items-center justify-center rounded-2xl bg-gradient-to-br from-malsat-cream to-muted md:h-56">
-                <span className="text-8xl md:text-9xl">🐑</span>
+              <div className="relative h-40 overflow-hidden rounded-2xl md:h-56">
+                <Image
+                  src={PHOTO.sheepTurkmen}
+                  alt="Central Asian sheep"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 192px, 240px"
+                />
               </div>
               <div className="mt-3 flex items-start justify-between">
                 <div>
@@ -256,7 +292,7 @@ export default async function HomePage({
           <div className="grid grid-cols-2 gap-3">
             <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-muted shadow-lg ring-1 ring-border">
               <Image
-                src="/uploads/horse-naryn-1.jpg"
+                src={PHOTO.horseMountains}
                 alt="Black horse Naryn"
                 fill
                 className="object-cover"
@@ -270,7 +306,7 @@ export default async function HomePage({
             </div>
             <div className="relative mt-8 aspect-[3/4] overflow-hidden rounded-2xl bg-muted shadow-lg ring-1 ring-border">
               <Image
-                src="/uploads/horse-naryn-2.jpg"
+                src={PHOTO.horseMareFoal}
                 alt="Black horse Naryn"
                 fill
                 className="object-cover"
@@ -337,13 +373,19 @@ export default async function HomePage({
               <Link
                 key={cat.key}
                 href={`/${locale}/search?category=${cat.key}`}
-                className="group flex items-center gap-3 rounded-2xl border border-border bg-background p-4 transition-all hover:border-malsat-green hover:shadow-md"
+                className="group flex items-center gap-3 rounded-2xl border border-border bg-background p-3 transition-all hover:border-malsat-green hover:shadow-md"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-malsat-cream text-2xl transition-transform group-hover:scale-110">
-                  {cat.emoji}
+                <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl ring-1 ring-border">
+                  <Image
+                    src={cat.photo}
+                    alt={cat.labelRu}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-110"
+                    sizes="56px"
+                  />
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-foreground">
                     {isKy ? cat.labelKy : cat.labelRu}
                   </p>
                   <p className="text-xs text-muted-foreground">
