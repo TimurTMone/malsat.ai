@@ -19,7 +19,7 @@ export function Header({ locale, dict }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-14 max-w-lg items-center justify-between px-4">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href={`/${locale}`} className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-malsat-green">
             <span className="text-sm font-bold text-white">M</span>

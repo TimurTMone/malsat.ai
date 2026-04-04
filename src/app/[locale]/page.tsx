@@ -1,7 +1,8 @@
+import Link from "next/link";
+import { ArrowRight, ShieldCheck, MapPin, Zap, BadgeCheck, TrendingUp, Search } from "lucide-react";
 import { getDictionary } from "@/i18n/get-dictionary";
 import type { Locale } from "@/i18n/config";
 import { Header } from "@/components/layout/header";
-import { CategoryIcons } from "@/components/listing/category-icons";
 import { ListingCard } from "@/components/listing/listing-card";
 
 // Demo listings for initial UI (replaced by DB data later)
@@ -58,23 +59,6 @@ const demoListings = [
     createdAt: new Date(Date.now() - 86400000).toISOString(),
   },
   {
-    id: "4",
-    title: "Семиз кой, 10 баш",
-    priceKgs: 65000,
-    category: "SHEEP",
-    breed: null,
-    ageMonths: 18,
-    weightKg: 70,
-    village: "Нарын",
-    regionNameKy: "Нарын",
-    regionNameRu: "Нарынская",
-    imageUrl: "",
-    viewsCount: 45,
-    favoritesCount: 3,
-    isVerifiedBreeder: false,
-    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-  },
-  {
     id: "5",
     title: "Жарыш жылкы, тукумдуу",
     priceKgs: 450000,
@@ -91,23 +75,6 @@ const demoListings = [
     isVerifiedBreeder: true,
     createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
   },
-  {
-    id: "6",
-    title: "Арашан кой, 2 жаш",
-    priceKgs: 45000,
-    category: "ARASHAN",
-    breed: null,
-    ageMonths: 24,
-    weightKg: 45,
-    village: "Ош",
-    regionNameKy: "Ош",
-    regionNameRu: "Ош",
-    imageUrl: "",
-    viewsCount: 23,
-    favoritesCount: 1,
-    isVerifiedBreeder: false,
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-  },
 ];
 
 export default async function HomePage({
@@ -117,54 +84,308 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   const dict = await getDictionary(locale as Locale);
+  const isKy = locale === "ky";
+
+  const t = {
+    heroTag: isKy ? "Кыргызстандын №1 мал базары" : "Рынок скота №1 в Кыргызстане",
+    heroTitle: isKy ? "Мал сатуу жана сатып алуу — оңой, тез, ишенимдүү" : "Покупка и продажа скота — легко, быстро, надёжно",
+    heroSubtitle: isKy
+      ? "Миңдеген текшерилген малчылар. Бардык аймактардан жарыялар. Бир колуңда."
+      : "Тысячи проверенных фермеров. Объявления со всех регионов. В одном месте.",
+    ctaBrowse: isKy ? "Малды көрүү" : "Смотреть скот",
+    ctaSell: isKy ? "Жарыя берүү" : "Разместить объявление",
+    statFarmers: isKy ? "малчы" : "фермеров",
+    statListings: isKy ? "активдүү жарыя" : "активных объявлений",
+    statRegions: isKy ? "аймак" : "регионов",
+    featuredTitle: isKy ? "Жаңы жарыялар" : "Свежие объявления",
+    featuredSub: isKy ? "Бүгүн кошулган эң жакшы сунуштар" : "Лучшие предложения, добавленные сегодня",
+    benefitsTag: isKy ? "Эмне үчүн MalSat?" : "Почему MalSat?",
+    benefitsTitle: isKy ? "Базардагы эң жакшы шарттар" : "Лучшие условия на рынке",
+    b1Title: isKy ? "Текшерилген малчылар" : "Проверенные фермеры",
+    b1Desc: isKy ? "Ар бир малчы идентификациядан өтөт" : "Каждый продавец проходит верификацию",
+    b2Title: isKy ? "Бардык аймактар" : "Все регионы",
+    b2Desc: isKy ? "7 областтагы малчылар менен байланышыңыз" : "Связь с фермерами из 7 областей",
+    b3Title: isKy ? "Тез сатуу" : "Быстрая продажа",
+    b3Desc: isKy ? "Орточо 3 күндө сатылат" : "В среднем продаётся за 3 дня",
+    b4Title: isKy ? "Акысыз жарыя" : "Бесплатное размещение",
+    b4Desc: isKy ? "Биринчи 10 жарыя акысыз" : "Первые 10 объявлений бесплатно",
+    howTitle: isKy ? "3 кадамда сатуу" : "Продать за 3 шага",
+    step1: isKy ? "Сүрөт тарт" : "Сделай фото",
+    step1Desc: isKy ? "Малыңыздын сүрөтүн жүктөңүз" : "Загрузите фото вашего скота",
+    step2: isKy ? "Баа кой" : "Укажи цену",
+    step2Desc: isKy ? "Баа жана сыпаттама кошуңуз" : "Добавьте цену и описание",
+    step3: isKy ? "Сатуу" : "Получи звонок",
+    step3Desc: isKy ? "Сатып алуучулардан чалуу күтүңүз" : "Покупатели свяжутся с вами",
+    ctaFinalTitle: isKy ? "Бүгүн малыңызды сатыңыз" : "Продайте свой скот сегодня",
+    ctaFinalSub: isKy ? "Бекер катталыңыз жана миңдеген сатып алуучуларга жетиңиз" : "Бесплатная регистрация и доступ к тысячам покупателей",
+  };
+
+  const categories = [
+    { key: "horse", emoji: "🐎", labelKy: "Жылкы", labelRu: "Лошади", count: "1,240" },
+    { key: "cattle", emoji: "🐄", labelKy: "Бодо мал", labelRu: "КРС", count: "2,180" },
+    { key: "sheep", emoji: "🐑", labelKy: "Кой", labelRu: "Овцы", count: "3,450" },
+    { key: "arashan", emoji: "🐐", labelKy: "Арашан", labelRu: "Арашан", count: "890" },
+  ];
 
   return (
     <div className="flex flex-col">
       <Header locale={locale} dict={dict} />
 
-      {/* Hero banner */}
-      <div className="bg-gradient-to-br from-malsat-green to-malsat-green-dark px-4 py-6">
-        <h1 className="text-xl font-bold text-white">
-          {locale === "ky"
-            ? "Мал сатуу жана сатып алуу"
-            : "Купля-продажа скота"}
-        </h1>
-        <p className="mt-1 text-sm text-white/80">
-          {locale === "ky"
-            ? "Кыргызстандын биринчи мал базары онлайн"
-            : "Первый онлайн рынок скота в Кыргызстане"}
-        </p>
-      </div>
+      {/* ============== HERO ============== */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-malsat-cream via-background to-background">
+        {/* Decorative blobs */}
+        <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-malsat-green/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-24 top-32 h-96 w-96 rounded-full bg-malsat-gold/10 blur-3xl" />
 
-      {/* Categories */}
-      <div className="py-4">
-        <CategoryIcons locale={locale} dict={dict} />
-      </div>
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-2 md:gap-12 md:py-20 md:items-center">
+          {/* Copy */}
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-malsat-green/20 bg-malsat-green/5 px-3 py-1 text-xs font-semibold text-malsat-green">
+              <span className="h-1.5 w-1.5 rounded-full bg-malsat-green" />
+              {t.heroTag}
+            </span>
+            <h1 className="mt-4 text-3xl font-bold leading-[1.1] tracking-tight text-foreground md:text-5xl">
+              {t.heroTitle}
+            </h1>
+            <p className="mt-4 max-w-md text-base text-muted-foreground md:text-lg">
+              {t.heroSubtitle}
+            </p>
 
-      {/* Latest listings */}
-      <div className="px-4 pb-6">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-semibold">
-            {locale === "ky" ? "Жаңы жарыялар" : "Новые объявления"}
-          </h2>
-          <a
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href={`/${locale}/search`}
+                className="inline-flex items-center gap-2 rounded-xl bg-malsat-green px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-malsat-green-dark hover:shadow-md active:scale-[0.98]"
+              >
+                <Search className="h-4 w-4" />
+                {t.ctaBrowse}
+              </Link>
+              <Link
+                href={`/${locale}/sell`}
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-5 py-3 text-sm font-semibold text-foreground transition-all hover:border-malsat-green hover:text-malsat-green active:scale-[0.98]"
+              >
+                {t.ctaSell}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-8 grid max-w-md grid-cols-3 gap-4 border-t border-border pt-6">
+              <div>
+                <p className="text-2xl font-bold text-foreground">12K+</p>
+                <p className="text-xs text-muted-foreground">{t.statFarmers}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">7.7K</p>
+                <p className="text-xs text-muted-foreground">{t.statListings}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">7</p>
+                <p className="text-xs text-muted-foreground">{t.statRegions}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Hero visual — layered livestock cards */}
+          <div className="relative h-[380px] md:h-[460px]">
+            {/* Back card */}
+            <div className="absolute right-0 top-6 h-56 w-44 rotate-6 rounded-3xl bg-gradient-to-br from-malsat-green-light to-malsat-green shadow-xl md:h-72 md:w-56">
+              <div className="flex h-full items-center justify-center text-7xl md:text-8xl">🐎</div>
+              <div className="absolute bottom-3 left-3 right-3 rounded-xl bg-white/20 px-3 py-2 backdrop-blur">
+                <p className="text-[10px] font-medium text-white/80">{isKy ? "Жылкы" : "Лошади"}</p>
+                <p className="text-sm font-bold text-white">120 000 сом</p>
+              </div>
+            </div>
+
+            {/* Mid card */}
+            <div className="absolute left-4 top-20 h-56 w-44 -rotate-3 rounded-3xl bg-gradient-to-br from-malsat-gold-light to-malsat-gold shadow-xl md:h-72 md:w-56">
+              <div className="flex h-full items-center justify-center text-7xl md:text-8xl">🐄</div>
+              <div className="absolute bottom-3 left-3 right-3 rounded-xl bg-white/20 px-3 py-2 backdrop-blur">
+                <p className="text-[10px] font-medium text-white/80">{isKy ? "Бодо мал" : "КРС"}</p>
+                <p className="text-sm font-bold text-white">250 000 сом</p>
+              </div>
+            </div>
+
+            {/* Front card */}
+            <div className="absolute bottom-0 right-8 h-60 w-48 rotate-2 rounded-3xl bg-white p-3 shadow-2xl ring-1 ring-border md:h-80 md:w-60">
+              <div className="flex h-40 items-center justify-center rounded-2xl bg-gradient-to-br from-malsat-cream to-muted md:h-56">
+                <span className="text-8xl md:text-9xl">🐑</span>
+              </div>
+              <div className="mt-3 flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-malsat-green">
+                    <BadgeCheck className="mr-0.5 inline h-3 w-3" />
+                    {isKy ? "Текшерилген" : "Проверен"}
+                  </p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">850 000 сом</p>
+                </div>
+                <span className="rounded-full bg-malsat-green/10 px-2 py-0.5 text-[10px] font-semibold text-malsat-green">
+                  ⭐ 4.9
+                </span>
+              </div>
+            </div>
+
+            {/* Floating badge */}
+            <div className="absolute left-0 top-0 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 shadow-lg ring-1 ring-border">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-malsat-green/10">
+                <ShieldCheck className="h-4 w-4 text-malsat-green" />
+              </div>
+              <div>
+                <p className="text-[10px] font-medium text-muted-foreground">{isKy ? "Коопсуз бүтүм" : "Безопасная сделка"}</p>
+                <p className="text-xs font-bold text-foreground">{isKy ? "100% кепилдик" : "100% гарантия"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============== CATEGORY PILLS ============== */}
+      <section className="border-y border-border bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-6">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {categories.map((cat) => (
+              <Link
+                key={cat.key}
+                href={`/${locale}/search?category=${cat.key}`}
+                className="group flex items-center gap-3 rounded-2xl border border-border bg-background p-4 transition-all hover:border-malsat-green hover:shadow-md"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-malsat-cream text-2xl transition-transform group-hover:scale-110">
+                  {cat.emoji}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    {isKy ? cat.labelKy : cat.labelRu}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {cat.count} {isKy ? "жарыя" : "объявл."}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============== FEATURED LIVESTOCK ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-12">
+        <div className="mb-6 flex items-end justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground md:text-3xl">
+              {t.featuredTitle}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t.featuredSub}</p>
+          </div>
+          <Link
             href={`/${locale}/search`}
-            className="text-sm font-medium text-malsat-green"
+            className="hidden items-center gap-1 text-sm font-semibold text-malsat-green hover:text-malsat-green-dark md:flex"
           >
             {dict.common.seeAll}
-          </a>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
           {demoListings.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              locale={locale}
-              {...listing}
-            />
+            <ListingCard key={listing.id} locale={locale} {...listing} />
           ))}
         </div>
-      </div>
+
+        <Link
+          href={`/${locale}/search`}
+          className="mt-6 flex items-center justify-center gap-1 text-sm font-semibold text-malsat-green md:hidden"
+        >
+          {dict.common.seeAll}
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </section>
+
+      {/* ============== BENEFITS ============== */}
+      <section className="bg-gradient-to-b from-background to-malsat-cream/40">
+        <div className="mx-auto max-w-6xl px-4 py-14 md:py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="inline-block rounded-full bg-malsat-gold/10 px-3 py-1 text-xs font-semibold text-malsat-gold-light">
+              {t.benefitsTag}
+            </span>
+            <h2 className="mt-3 text-2xl font-bold text-foreground md:text-4xl">
+              {t.benefitsTitle}
+            </h2>
+          </div>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-4">
+            {[
+              { icon: ShieldCheck, title: t.b1Title, desc: t.b1Desc, bg: "bg-malsat-green/10", fg: "text-malsat-green" },
+              { icon: MapPin, title: t.b2Title, desc: t.b2Desc, bg: "bg-malsat-gold/10", fg: "text-malsat-gold-light" },
+              { icon: Zap, title: t.b3Title, desc: t.b3Desc, bg: "bg-malsat-green-light/10", fg: "text-malsat-green-light" },
+              { icon: TrendingUp, title: t.b4Title, desc: t.b4Desc, bg: "bg-malsat-brown/10", fg: "text-malsat-brown" },
+            ].map((b, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-border bg-white p-6 transition-all hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl ${b.bg}`}>
+                  <b.icon className={`h-6 w-6 ${b.fg}`} />
+                </div>
+                <h3 className="text-base font-bold text-foreground">{b.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{b.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* How it works diagram */}
+          <div className="mt-14 rounded-3xl border border-border bg-white p-6 md:p-10">
+            <h3 className="text-center text-xl font-bold text-foreground md:text-2xl">
+              {t.howTitle}
+            </h3>
+
+            <div className="mt-8 grid gap-6 md:grid-cols-3 md:gap-0">
+              {[
+                { num: "1", title: t.step1, desc: t.step1Desc, emoji: "📸" },
+                { num: "2", title: t.step2, desc: t.step2Desc, emoji: "💰" },
+                { num: "3", title: t.step3, desc: t.step3Desc, emoji: "📞" },
+              ].map((s, i, arr) => (
+                <div key={s.num} className="relative flex flex-col items-center text-center">
+                  {/* Connector */}
+                  {i < arr.length - 1 && (
+                    <div className="absolute left-1/2 top-8 hidden h-px w-full bg-gradient-to-r from-malsat-green/40 to-transparent md:block" />
+                  )}
+                  <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-malsat-green to-malsat-green-dark text-3xl shadow-lg">
+                    {s.emoji}
+                  </div>
+                  <div className="mt-3 flex h-6 w-6 items-center justify-center rounded-full bg-malsat-gold/20 text-xs font-bold text-malsat-gold-light">
+                    {s.num}
+                  </div>
+                  <h4 className="mt-2 text-base font-bold text-foreground">{s.title}</h4>
+                  <p className="mt-1 max-w-xs text-sm text-muted-foreground">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============== FINAL CTA ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-12 md:py-16">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-malsat-green to-malsat-green-dark p-8 md:p-12">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 h-56 w-56 rounded-full bg-malsat-gold/10 blur-2xl" />
+          <div className="relative flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-white md:text-3xl">
+                {t.ctaFinalTitle}
+              </h2>
+              <p className="mt-2 max-w-lg text-sm text-white/80 md:text-base">
+                {t.ctaFinalSub}
+              </p>
+            </div>
+            <Link
+              href={`/${locale}/sell`}
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-malsat-green shadow-lg transition-all hover:bg-malsat-cream active:scale-[0.98]"
+            >
+              {t.ctaSell}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
