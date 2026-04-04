@@ -38,8 +38,22 @@ In Vercel project settings → Environment Variables:
 |----------|----------|-------|
 | `DATABASE_URL` | ✅ Yes | Your Postgres connection string |
 | `JWT_SECRET` | ✅ Yes | Generate with `openssl rand -hex 32` |
+| `BLOB_READ_WRITE_TOKEN` | ✅ Yes | Auto-injected when you create a Vercel Blob store (see step 2.5 below) |
 | `ANTHROPIC_API_KEY` | Optional | From console.anthropic.com (for AI features) |
 | `NODE_ENV` | Optional | `production` (Vercel sets this automatically) |
+
+### 2.5 Create a Vercel Blob store (required for media uploads)
+
+Media uploads (listing photos/videos) are stored in Vercel Blob. Without this step,
+the `/api/upload` endpoint will fail on production.
+
+1. In the Vercel dashboard → your project → **Storage** → **Create Database** → **Blob**
+2. Name it (e.g. `malsat-media`) → Create
+3. Connect it to the project — `BLOB_READ_WRITE_TOKEN` is auto-injected as an env var
+4. For local development, pull the token: `vercel env pull .env.development.local`
+
+Uploaded files are served from `https://<store-id>.public.blob.vercel-storage.com`.
+This hostname is already allowed in `next.config.ts` → `images.remotePatterns`.
 
 ### 4. Run migrations after first deploy
 

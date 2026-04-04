@@ -1,13 +1,11 @@
 import { NextRequest } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
 import sharp from "sharp";
 import { requireAuth } from "@/lib/auth";
 import { ok, errorResponse, handleError } from "@/lib/response";
 import { prisma } from "@/lib/prisma";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = [
   "image/jpeg",
@@ -27,31 +25,37 @@ async function processImage(
   buffer: Buffer,
   id: string
 ): Promise<{ fullUrl: string; thumbUrl: string }> {
-  await mkdir(UPLOAD_DIR, { recursive: true });
-
-  const fullFilename = `${id}.webp`;
-  const thumbFilename = `${id}_thumb.webp`;
-
   // Full size — optimized for detail view
-  await sharp(buffer)
+  const fullBuffer = await sharp(buffer)
     .resize(IMAGE_SIZES.full.width, IMAGE_SIZES.full.height, {
       fit: "inside",
       withoutEnlargement: true,
     })
     .webp({ quality: IMAGE_SIZES.full.quality })
-    .toFile(path.join(UPLOAD_DIR, fullFilename));
+    .toBuffer();
 
   // Thumbnail — optimized for listing cards
-  await sharp(buffer)
+  const thumbBuffer = await sharp(buffer)
     .resize(IMAGE_SIZES.thumb.width, IMAGE_SIZES.thumb.height, {
       fit: "cover",
     })
     .webp({ quality: IMAGE_SIZES.thumb.quality })
-    .toFile(path.join(UPLOAD_DIR, thumbFilename));
+    .toBuffer();
+
+  const [full, thumb] = await Promise.all([
+    put(`listings/${id}.webp`, fullBuffer, {
+      access: "public",
+      contentType: "image/webp",
+    }),
+    put(`listings/${id}_thumb.webp`, thumbBuffer, {
+      access: "public",
+      contentType: "image/webp",
+    }),
+  ]);
 
   return {
-    fullUrl: `/uploads/${fullFilename}`,
-    thumbUrl: `/uploads/${thumbFilename}`,
+    fullUrl: full.url,
+    thumbUrl: thumb.url,
   };
 }
 
@@ -99,14 +103,15 @@ export async function POST(req: NextRequest) {
     let thumbUrl: string | null = null;
 
     if (isVideo) {
-      // Videos: save as-is (no compression for now)
-      await mkdir(UPLOAD_DIR, { recursive: true });
+      // Videos: upload as-is to Blob (no compression for now)
       const ext = file.name.split(".").pop() || "mp4";
-      const filename = `${id}.${ext}`;
-      await writeFile(path.join(UPLOAD_DIR, filename), buffer);
-      mediaUrl = `/uploads/${filename}`;
+      const blob = await put(`listings/${id}.${ext}`, buffer, {
+        access: "public",
+        contentType: file.type,
+      });
+      mediaUrl = blob.url;
     } else {
-      // Images: compress + generate thumbnail
+      // Images: compress in-memory + generate thumbnail, then upload both to Blob
       const processed = await processImage(buffer, id);
       mediaUrl = processed.fullUrl;
       thumbUrl = processed.thumbUrl;
