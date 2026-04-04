@@ -1,0 +1,1 @@
+-- Renamed enum value GOAT to ARASHAN (done directly via ALTER TYPE)

@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +40,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Prisma generated client (auto-generated from schema.prisma — run `npx prisma generate`)
+/src/generated/
+
+# User-uploaded media (dev-only local storage)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Flutter build artifacts
+/malsat_app/build/
+/malsat_app/.dart_tool/
+/malsat_app/.flutter-plugins
+/malsat_app/.flutter-plugins-dependencies

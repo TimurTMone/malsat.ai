@@ -1,36 +1,167 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MalSat — Livestock Marketplace for Kyrgyzstan
 
-## Getting Started
+A mobile-first marketplace for buying and selling livestock (horses, cattle, sheep, Arashan) in Kyrgyzstan. Features phone OTP auth, real-time messaging, AI-powered photo analysis, and a Flutter mobile app.
 
-First, run the development server:
+## Stack
+
+**Backend** (`/src/`)
+- Next.js 16 + React 19 + TypeScript
+- Prisma 7 + PostgreSQL
+- JWT auth with phone OTP
+- Claude Vision API for AI photo analysis
+- Sharp for server-side image compression
+
+**Mobile app** (`/malsat_app/`)
+- Flutter with Riverpod state management
+- GoRouter with StatefulShellRoute
+- Feature-first clean architecture
+- i18n (Kyrgyz + Russian)
+
+## Features
+
+- Phone OTP authentication (JWT access + refresh tokens)
+- Listings with filters (category, price, region, breed, gender)
+- Favorites (toggle + list)
+- Real-time messaging (polling every 3s)
+- AI photo analysis (auto-fill listing form from a single photo)
+- Image compression pipeline (WebP, full + thumbnail)
+- Premium/boost monetization model
+- Full i18n support (Kyrgyz/Russian)
+
+## Setup
+
+### Prerequisites
+
+- Node.js 20+
+- PostgreSQL 14+ (`brew install postgresql@17 && brew services start postgresql@17`)
+- Flutter 3.41+
+- An [Anthropic API key](https://console.anthropic.com) (optional, for AI features)
+
+### Backend
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Install dependencies
+npm install
+
+# Create database
+createdb malsat
+
+# Configure environment
+cp .env.example .env
+# Edit .env — set DATABASE_URL, JWT_SECRET, ANTHROPIC_API_KEY
+
+# Run migrations
+npx prisma migrate deploy
+npx prisma generate
+
+# Seed with real lalafo.kg market data (41 listings)
+npm run seed
+
+# Start dev server
+npx next dev --port 3003
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+API will be at `http://localhost:3003`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Mobile app
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cd malsat_app
 
-## Learn More
+# Install Flutter dependencies
+flutter pub get
 
-To learn more about Next.js, take a look at the following resources:
+# Configure environment
+cp .env.example .env
+# Edit .env if your backend runs on a different port
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Run on Chrome (web)
+flutter run -d chrome
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Or run on iOS/Android
+flutter run
+```
 
-## Deploy on Vercel
+## API endpoints
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Auth
+- `POST /api/auth/login` — send OTP to phone
+- `POST /api/auth/verify` — verify OTP, get JWT tokens
+- `POST /api/auth/refresh` — refresh access token
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Listings
+- `GET /api/listings` — list with filters + pagination
+- `GET /api/listings/[id]` — detail
+- `POST /api/listings` — create (auth required)
+- `PATCH /api/listings/[id]` — update (owner only)
+- `DELETE /api/listings/[id]` — delete (owner only)
+
+### Favorites
+- `GET /api/favorites` — list user's favorites
+- `POST /api/favorites` — toggle favorite
+
+### Messaging
+- `GET /api/conversations` — list user's conversations
+- `POST /api/conversations` — create or get existing conversation
+- `GET /api/conversations/[id]/messages` — fetch messages (polling supported via `?after=msgId`)
+- `POST /api/conversations/[id]/messages` — send message
+
+### Upload + AI
+- `POST /api/upload` — upload image (auto-compresses to WebP + thumbnail)
+- `POST /api/ai/analyze-photo` — Claude Vision auto-fill from photo
+- `POST /api/ai/remove-background` — photo quality analysis + enhancement
+
+### Users
+- `GET /api/users/[id]` — public user profile
+
+## Test accounts
+
+The seed creates 8 test users. OTP codes appear in the Next.js server console in dev mode.
+
+```
++996555100100  Айбек Маматов (verified breeder, horses)
++996555200200  Нурлан Токтосунов (verified, cattle)
++996555400400  Гульнара Сыдыкова (verified, Arashan premium)
++996555700700  Эрмек Байышов (verified, Arashan)
+# ...through +996555800800
+```
+
+## Database schema
+
+See [`prisma/schema.prisma`](prisma/schema.prisma). Core models:
+- **User** — phone, name, trust score, verified breeder flag
+- **Listing** — category, breed, price, age, weight, gender, premium flag
+- **ListingMedia** — photos/videos per listing
+- **Favorite, Review, Conversation, Message** — social + messaging
+
+Enums: `AnimalCategory` (HORSE/CATTLE/SHEEP/ARASHAN), `AnimalGender` (MALE/FEMALE), `ListingStatus` (ACTIVE/SOLD/EXPIRED).
+
+## Project structure
+
+```
+malsat-ai/
+├── src/
+│   ├── app/api/          — Next.js API routes
+│   ├── lib/              — auth, prisma, anthropic, sms helpers
+│   ├── i18n/             — Kyrgyz + Russian dictionaries
+│   └── middleware.ts     — CORS + locale routing
+├── prisma/
+│   ├── schema.prisma     — database schema
+│   └── seed.ts           — real lalafo.kg market data (41 listings)
+└── malsat_app/
+    └── lib/
+        ├── core/         — constants, network, storage, router, widgets, i18n
+        └── features/
+            ├── auth/         — phone OTP login
+            ├── home/         — main feed
+            ├── search/       — filters + pagination
+            ├── listing_detail/ — full detail + shared domain models
+            ├── sell/         — create listing + AI auto-fill
+            ├── favorites/    — toggle + list
+            ├── messages/     — chat list + chat screen
+            └── profile/      — user profile + public view
+```
+
+## License
+
+Private project. All rights reserved.
