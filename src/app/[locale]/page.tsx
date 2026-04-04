@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, MapPin, Zap, BadgeCheck, TrendingUp, Search } from "lucide-react";
+import { ArrowRight, ShieldCheck, MapPin, Zap, BadgeCheck, TrendingUp, Search, CheckCircle2 } from "lucide-react";
 import { getDictionary } from "@/i18n/get-dictionary";
 import type { Locale } from "@/i18n/config";
 import { Header } from "@/components/layout/header";
@@ -116,6 +117,16 @@ export default async function HomePage({
     step2Desc: isKy ? "Баа жана сыпаттама кошуңуз" : "Добавьте цену и описание",
     step3: isKy ? "Сатуу" : "Получи звонок",
     step3Desc: isKy ? "Сатып алуучулардан чалуу күтүңүз" : "Покупатели свяжутся с вами",
+    storyTag: isKy ? "Ийгилик окуясы" : "История успеха",
+    storyTitle: isKy ? "Жаңы эле MalSat аркылуу сатылды" : "Недавно продано через MalSat",
+    storySold: isKy ? "Сатылды" : "Продано",
+    storyHorseTitle: isKy ? "Кара жылкы, 1.5 жаш" : "Чёрный конь, 1.5 года",
+    storyBreed: isKy ? "Жергиликтүү тукум" : "Местная порода",
+    storyLocation: isKy ? "Нарын областы" : "Нарынская область",
+    storyPrice: isKy ? "Сатылган баасы" : "Продано за",
+    storyDays: isKy ? "5 күндө сатылды" : "Продано за 5 дней",
+    storyViews: isKy ? "247 көрүү" : "247 просмотров",
+    storyContacts: isKy ? "12 байланыш" : "12 контактов",
     ctaFinalTitle: isKy ? "Бүгүн малыңызды сатыңыз" : "Продайте свой скот сегодня",
     ctaFinalSub: isKy ? "Бекер катталыңыз жана миңдеген сатып алуучуларга жетиңиз" : "Бесплатная регистрация и доступ к тысячам покупателей",
   };
@@ -232,6 +243,86 @@ export default async function HomePage({
               <div>
                 <p className="text-[10px] font-medium text-muted-foreground">{isKy ? "Коопсуз бүтүм" : "Безопасная сделка"}</p>
                 <p className="text-xs font-bold text-foreground">{isKy ? "100% кепилдик" : "100% гарантия"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============== SUCCESS STORY / REAL CASE ============== */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-10 md:py-14">
+        <div className="grid gap-8 md:grid-cols-[1.1fr_1fr] md:items-center md:gap-12">
+          {/* Photo gallery */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-muted shadow-lg ring-1 ring-border">
+              <Image
+                src="/uploads/horse-naryn-1.jpg"
+                alt="Black horse Naryn"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 50vw, 25vw"
+              />
+              {/* SOLD overlay */}
+              <div className="absolute inset-0 bg-black/25" />
+              <div className="absolute left-3 top-3 rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                {t.storySold}
+              </div>
+            </div>
+            <div className="relative mt-8 aspect-[3/4] overflow-hidden rounded-2xl bg-muted shadow-lg ring-1 ring-border">
+              <Image
+                src="/uploads/horse-naryn-2.jpg"
+                alt="Black horse Naryn"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 50vw, 25vw"
+              />
+              <div className="absolute inset-0 bg-black/25" />
+            </div>
+          </div>
+
+          {/* Story copy */}
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {t.storyTag}
+            </span>
+            <h2 className="mt-3 text-2xl font-bold text-foreground md:text-3xl">
+              {t.storyTitle}
+            </h2>
+
+            <div className="mt-6 rounded-2xl border border-border bg-white p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-bold text-foreground">{t.storyHorseTitle}</h3>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{t.storyBreed}</p>
+                </div>
+                <span className="whitespace-nowrap rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+                  {t.storyPrice}
+                </span>
+              </div>
+
+              <p className="mt-3 text-3xl font-bold text-malsat-green">
+                160 000 <span className="text-lg font-normal">сом</span>
+              </p>
+
+              <div className="mt-4 flex items-center gap-1.5 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4 text-malsat-green" />
+                <span>{t.storyLocation}</span>
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">{isKy ? "Мөөнөтү" : "Срок"}</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">{t.storyDays}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">{isKy ? "Көрүүлөр" : "Просмотры"}</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">{t.storyViews}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">{isKy ? "Байланыштар" : "Контакты"}</p>
+                  <p className="mt-0.5 text-sm font-bold text-foreground">{t.storyContacts}</p>
+                </div>
               </div>
             </div>
           </div>
