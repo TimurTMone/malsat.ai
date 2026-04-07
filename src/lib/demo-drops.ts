@@ -8,10 +8,16 @@ const PHOTO = {
     "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flock_of_sheep.jpg/800px-Flock_of_sheep.jpg",
   beefCow:
     "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg/800px-Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg",
+  beefAngus:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Aberdeen_Angus_im_Gadental_2.JPG/800px-Aberdeen_Angus_im_Gadental_2.JPG",
   horseMeat:
     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Biandintz_eta_zaldiak_-_modified2.jpg/1200px-Biandintz_eta_zaldiak_-_modified2.jpg",
+  horseNokota:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Nokota_Horses_cropped.jpg/800px-Nokota_Horses_cropped.jpg",
   sheepMountain:
     "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/A_curious_Welsh_Mountain_sheep_%28Ovis_aries%29.jpg/800px-A_curious_Welsh_Mountain_sheep_%28Ovis_aries%29.jpg",
+  sheepTurkmen:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Turkmen_sheep.jpg/800px-Turkmen_sheep.jpg",
   goat:
     "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hausziege_04.jpg/800px-Hausziege_04.jpg",
 };
@@ -178,6 +184,90 @@ const demoDrops: DemoDrop[] = [
     photo: PHOTO.goat,
     viewsCount: 67,
     orderCount: 2,
+  },
+  // ── Extra beef drops ──
+  {
+    id: "demo-drop-6",
+    category: "CATTLE",
+    title: "Ангус уй эти — Нарын",
+    description:
+      "Ангус тукуму бука, 2.5 жашта, 320 кг тирүү салмак. Тоолук жайытта багылган, эт сапаты эң жогору.",
+    breed: "Aberdeen Angus",
+    totalWeightKg: 160,
+    remainingWeightKg: 110,
+    pricePerKg: 620,
+    minOrderKg: 5,
+    maxOrderKg: 40,
+    portionPresets: [5, 10, 20, 30],
+    butcherDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
+    pickupAddress: "Нарын, борбордук базар",
+    village: "Нарын",
+    regionNameKy: "Нарын",
+    regionNameRu: "Нарын",
+    sellerName: "Кубат Ж.",
+    sellerPhone: "+996555777888",
+    trustScore: 4.8,
+    isVerifiedBreeder: true,
+    status: "OPEN",
+    photo: PHOTO.beefAngus,
+    viewsCount: 178,
+    orderCount: 3,
+  },
+  // ── Extra horse meat drops ──
+  {
+    id: "demo-drop-7",
+    category: "HORSE",
+    title: "Жылкы эти — Ысык-Көл",
+    description:
+      "Кыргыз жылкысы, 4 жашта. Чучук, казы, жал, карта — бардыгы бар. Жайлоодо багылган.",
+    breed: "Кыргыз жылкысы",
+    totalWeightKg: 80,
+    remainingWeightKg: 55,
+    pricePerKg: 850,
+    minOrderKg: 3,
+    maxOrderKg: 25,
+    portionPresets: [5, 10, 15, 20],
+    butcherDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    pickupAddress: "Каракол, мал базар",
+    village: "Каракол",
+    regionNameKy: "Ысык-Көл",
+    regionNameRu: "Иссык-Куль",
+    sellerName: "Айдар Т.",
+    sellerPhone: "+996770222333",
+    trustScore: 4.6,
+    isVerifiedBreeder: true,
+    status: "OPEN",
+    photo: PHOTO.horseNokota,
+    viewsCount: 94,
+    orderCount: 2,
+  },
+  // ── Extra sheep meat drop ──
+  {
+    id: "demo-drop-8",
+    category: "SHEEP",
+    title: "Арашан кой эти — Чүй",
+    description:
+      "Арашан тукуму семиз кой, 1.5 жашта. Майлуу, жумшак эт. Курман айтка же тойго ылайыктуу.",
+    breed: "Арашан",
+    totalWeightKg: 50,
+    remainingWeightKg: 35,
+    pricePerKg: 680,
+    minOrderKg: 5,
+    maxOrderKg: 25,
+    portionPresets: [5, 10, 15, 25],
+    butcherDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    pickupAddress: "Бишкек, Ош базар жаны",
+    village: "Бишкек",
+    regionNameKy: "Чүй",
+    regionNameRu: "Чуй",
+    sellerName: "Марат С.",
+    sellerPhone: "+996500444555",
+    trustScore: 4.4,
+    isVerifiedBreeder: false,
+    status: "OPEN",
+    photo: PHOTO.sheepTurkmen,
+    viewsCount: 132,
+    orderCount: 5,
   },
 ];
 
