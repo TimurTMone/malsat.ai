@@ -15,6 +15,12 @@ const PHOTO = {
   cow1: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg/800px-Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg",
   cow2: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Aberdeen_Angus_im_Gadental_2.JPG/800px-Aberdeen_Angus_im_Gadental_2.JPG",
   caretaker1: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Biandintz_eta_zaldiak_-_modified2.jpg/300px-Biandintz_eta_zaldiak_-_modified2.jpg",
+  // Caretaker avatar photos — pastures & herders from Wikimedia Commons
+  caretakerPasture1: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Kyrgyz_man_on_horse.jpg/400px-Kyrgyz_man_on_horse.jpg",
+  caretakerPasture2: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Son-Kul_Lake%2C_Kyrgyzstan.jpg/400px-Son-Kul_Lake%2C_Kyrgyzstan.jpg",
+  caretakerPasture3: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Arslanbob%2C_Kyrgyzstan.jpg/400px-Arslanbob%2C_Kyrgyzstan.jpg",
+  caretakerPasture4: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Suusamyr_Valley%2C_Kyrgyzstan.jpg/400px-Suusamyr_Valley%2C_Kyrgyzstan.jpg",
+  caretakerPasture5: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Song_Kol_horses.jpg/400px-Song_Kol_horses.jpg",
 };
 
 export type OwnedAnimal = {
@@ -144,7 +150,7 @@ export const DEMO_CARETAKERS: Caretaker[] = [
   {
     id: "caretaker-1",
     name: "Асылбек Жолдошев",
-    photo: null,
+    photo: PHOTO.caretakerPasture1,
     village: "Ат-Башы",
     region: "Нарын",
     yearsExperience: 15,
@@ -160,7 +166,7 @@ export const DEMO_CARETAKERS: Caretaker[] = [
   {
     id: "caretaker-2",
     name: "Нурлан Осмонов",
-    photo: null,
+    photo: PHOTO.caretakerPasture2,
     village: "Ак-Суу",
     region: "Ысык-Көл",
     yearsExperience: 8,
@@ -176,7 +182,7 @@ export const DEMO_CARETAKERS: Caretaker[] = [
   {
     id: "caretaker-3",
     name: "Эркин Мамбетов",
-    photo: null,
+    photo: PHOTO.caretakerPasture3,
     village: "Токмок",
     region: "Чүй",
     yearsExperience: 22,
@@ -192,7 +198,7 @@ export const DEMO_CARETAKERS: Caretaker[] = [
   {
     id: "caretaker-4",
     name: "Самат Абдыев",
-    photo: null,
+    photo: PHOTO.caretakerPasture4,
     village: "Кочкор",
     region: "Нарын",
     yearsExperience: 6,
@@ -208,7 +214,7 @@ export const DEMO_CARETAKERS: Caretaker[] = [
   {
     id: "caretaker-5",
     name: "Мелис Токтогулов",
-    photo: null,
+    photo: PHOTO.caretakerPasture5,
     village: "Ак-Талаа",
     region: "Нарын",
     yearsExperience: 12,
