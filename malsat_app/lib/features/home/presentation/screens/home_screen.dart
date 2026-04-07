@@ -272,6 +272,65 @@ class _HomeContent extends ConsumerWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+
+              // ═══ MEAT DROPS BANNER — drives to the core feature ═══
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GestureDetector(
+                  onTap: () => context.go('/drops'),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF7F1D1D), Color(0xFFB91C1C)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(LucideIcons.beef,
+                              color: Colors.white, size: 24),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Эт базар — Жаңы союлган эт',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                '5кг, 10кг, 15кг — килограмм менен заказ кыл',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(LucideIcons.chevronRight,
+                            color: Colors.white70, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 20),
 
               // Listings grid

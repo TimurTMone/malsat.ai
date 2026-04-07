@@ -17,10 +17,17 @@ import '../../features/messages/presentation/screens/chat_screen.dart';
 import '../../features/herd/presentation/screens/herd_screen.dart';
 import '../../features/herd/presentation/screens/animal_detail_screen.dart';
 import '../../features/herd/presentation/screens/caretakers_screen.dart';
+import '../../features/drops/presentation/screens/drops_screen.dart';
+import '../../features/drops/presentation/screens/drop_detail_screen.dart';
+import '../../features/drops/presentation/screens/my_orders_screen.dart';
+import '../../features/drops/presentation/screens/order_detail_screen.dart';
+import '../../features/drops/presentation/screens/create_drop_screen.dart';
+import '../../features/drops/presentation/screens/seller_orders_screen.dart';
+import '../../features/drops/presentation/screens/payment_setup_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'home');
-final _shellNavigatorSearchKey = GlobalKey<NavigatorState>(debugLabel: 'search');
+final _shellNavigatorDropsKey = GlobalKey<NavigatorState>(debugLabel: 'drops');
 final _shellNavigatorSellKey = GlobalKey<NavigatorState>(debugLabel: 'sell');
 final _shellNavigatorMessagesKey =
     GlobalKey<NavigatorState>(debugLabel: 'messages');
@@ -47,16 +54,12 @@ final appRouter = GoRouter(
           ],
         ),
         StatefulShellBranch(
-          navigatorKey: _shellNavigatorSearchKey,
+          navigatorKey: _shellNavigatorDropsKey,
           routes: [
             GoRoute(
-              name: RouteNames.search,
-              path: '/search',
-              builder: (context, state) {
-                final category =
-                    state.uri.queryParameters['category'];
-                return SearchScreen(initialCategory: category);
-              },
+              name: RouteNames.drops,
+              path: '/drops',
+              builder: (context, state) => const DropsScreen(),
             ),
           ],
         ),
@@ -143,6 +146,55 @@ final appRouter = GoRouter(
       path: '/caretakers',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const CaretakersScreen(),
+    ),
+    GoRoute(
+      name: RouteNames.search,
+      path: '/search',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final category = state.uri.queryParameters['category'];
+        return SearchScreen(initialCategory: category);
+      },
+    ),
+    GoRoute(
+      name: RouteNames.dropDetail,
+      path: '/drop/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => DropDetailScreen(
+        dropId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
+      name: RouteNames.myOrders,
+      path: '/orders/me',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const MyOrdersScreen(),
+    ),
+    GoRoute(
+      name: 'order-detail',
+      path: '/order/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => OrderDetailScreen(
+        orderId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
+      name: 'create-drop',
+      path: '/create-drop',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const CreateDropScreen(),
+    ),
+    GoRoute(
+      name: 'seller-orders',
+      path: '/seller-orders',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const SellerOrdersScreen(),
+    ),
+    GoRoute(
+      name: 'payment-setup',
+      path: '/payment-setup',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const PaymentSetupScreen(),
     ),
   ],
 );

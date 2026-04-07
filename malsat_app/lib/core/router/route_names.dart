@@ -14,4 +14,7 @@ class RouteNames {
   static const String herd = 'herd';
   static const String animalDetail = 'animal-detail';
   static const String caretakers = 'caretakers';
+  static const String drops = 'drops';
+  static const String dropDetail = 'drop-detail';
+  static const String myOrders = 'my-orders';
 }

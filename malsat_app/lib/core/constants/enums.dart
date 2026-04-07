@@ -41,3 +41,36 @@ enum ListingSort {
   const ListingSort(this.value);
   final String value;
 }
+
+enum DropStatus {
+  upcoming('UPCOMING'),
+  open('OPEN'),
+  soldOut('SOLD_OUT'),
+  fulfilled('FULFILLED'),
+  cancelled('CANCELLED');
+
+  const DropStatus(this.value);
+  final String value;
+
+  static DropStatus fromValue(String value) {
+    return DropStatus.values.firstWhere((e) => e.value == value);
+  }
+}
+
+enum OrderStatus {
+  pending('PENDING'),
+  paid('PAID'),
+  confirmed('CONFIRMED'),
+  butchering('BUTCHERING'),
+  packaging('PACKAGING'),
+  delivering('DELIVERING'),
+  delivered('DELIVERED'),
+  cancelled('CANCELLED');
+
+  const OrderStatus(this.value);
+  final String value;
+
+  static OrderStatus fromValue(String value) {
+    return OrderStatus.values.firstWhere((e) => e.value == value);
+  }
+}

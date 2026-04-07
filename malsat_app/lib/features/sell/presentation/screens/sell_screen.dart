@@ -51,9 +51,221 @@ class SellScreen extends ConsumerWidget {
     }
 
     return dictAsync.when(
-      data: (dict) => _SellForm(dict: dict),
+      data: (dict) => _SellChooser(dict: dict),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, st) => const Center(child: Text('Error')),
+    );
+  }
+}
+
+class _SellChooser extends ConsumerWidget {
+  final Map<String, dynamic> dict;
+  const _SellChooser({required this.dict});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              t(dict, 'listing.create'),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Эмнени сатасыз?',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 20),
+
+            // Option 1: Sell live animal (existing listing)
+            _SellOption(
+              icon: LucideIcons.heart,
+              title: 'Тирүү мал сатуу',
+              subtitle: 'Жылкы, уй, кой — бүтүн мал сатуу',
+              color: AppColors.primary,
+              bgColor: AppColors.primary.withValues(alpha: 0.06),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(
+                      title: Text(t(dict, 'listing.create')),
+                      backgroundColor: AppColors.surface,
+                      elevation: 0,
+                    ),
+                    body: _SellForm(dict: dict),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Option 2: Sell meat (create a drop)
+            _SellOption(
+              icon: LucideIcons.beef,
+              title: 'Эт сатуу (Drop)',
+              subtitle: 'Союп, килограмм менен саттыруу',
+              color: const Color(0xFFB91C1C),
+              bgColor: const Color(0xFFFEE2E2),
+              onTap: () => context.push('/create-drop'),
+            ),
+            const SizedBox(height: 24),
+
+            // Seller tools section
+            const Text(
+              'Сатуучу куралдары',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _ToolTile(
+              icon: LucideIcons.inbox,
+              title: 'Келген заказдар',
+              subtitle: 'Сатып алуучулардын заказдарын башкаруу',
+              onTap: () => context.push('/seller-orders'),
+            ),
+            _ToolTile(
+              icon: LucideIcons.qrCode,
+              title: 'Төлөм QR коду',
+              subtitle: 'Банк QR кодуңузду жүктөңүз',
+              onTap: () => context.push('/payment-setup'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SellOption extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final Color bgColor;
+  final VoidCallback onTap;
+
+  const _SellOption({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.bgColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, size: 24, color: color),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: color,
+                      )),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      )),
+                ],
+              ),
+            ),
+            Icon(LucideIcons.chevronRight, size: 20, color: color),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ToolTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _ToolTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: AppColors.textSecondary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      )),
+                  Text(subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      )),
+                ],
+              ),
+            ),
+            const Icon(LucideIcons.chevronRight,
+                size: 18, color: AppColors.textMuted),
+          ],
+        ),
+      ),
     );
   }
 }

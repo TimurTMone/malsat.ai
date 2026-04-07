@@ -35,14 +35,14 @@ class BottomNavBar extends ConsumerWidget {
               _NavItem(
                 icon: LucideIcons.search,
                 label: t(dict, 'nav.search'),
-                isActive: currentIndex == 0 || currentIndex == 1,
+                isActive: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
               _NavItem(
-                icon: LucideIcons.heart,
-                label: t(dict, 'listing.favorites'),
-                isActive: false,
-                onTap: () => onTap(0),
+                icon: LucideIcons.beef,
+                label: 'Эт базар',
+                isActive: currentIndex == 1,
+                onTap: () => onTap(1),
               ),
               _NavItem(
                 icon: LucideIcons.plusCircle,
