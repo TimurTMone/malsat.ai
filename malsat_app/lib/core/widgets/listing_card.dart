@@ -32,16 +32,14 @@ class ListingCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 child: AspectRatio(
                   aspectRatio: 1,
-                  child: listing.primaryImageUrl != null
-                      ? CachedNetworkImage(
-                          imageUrl: listing.primaryImageUrl!,
-                          fit: BoxFit.cover,
-                          placeholder: (ctx, url) =>
-                              const _ImagePlaceholder(),
-                          errorWidget: (ctx, url, err) =>
-                              const _ImagePlaceholder(),
-                        )
-                      : const _ImagePlaceholder(),
+                  child: CachedNetworkImage(
+                    imageUrl: listing.primaryImageUrl ?? _categoryFallback(listing.category),
+                    fit: BoxFit.cover,
+                    placeholder: (ctx, url) =>
+                        const _ImagePlaceholder(),
+                    errorWidget: (ctx, url, err) =>
+                        const _ImagePlaceholder(),
+                  ),
                 ),
               ),
               // Favorite button -- top right
@@ -195,6 +193,19 @@ class ListingCard extends StatelessWidget {
       buffer.write(str[i]);
     }
     return '$buffer c';
+  }
+}
+
+String _categoryFallback(String? category) {
+  switch (category) {
+    case 'HORSE':
+      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Biandintz_eta_zaldiak_-_modified2.jpg/1200px-Biandintz_eta_zaldiak_-_modified2.jpg';
+    case 'SHEEP':
+      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flock_of_sheep.jpg/800px-Flock_of_sheep.jpg';
+    case 'ARASHAN':
+      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hausziege_04.jpg/800px-Hausziege_04.jpg';
+    default: // CATTLE or unknown
+      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg/800px-Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg';
   }
 }
 

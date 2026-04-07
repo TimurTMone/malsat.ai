@@ -315,27 +315,30 @@ model DropMedia {
 }
 
 model MeatOrder {
-  id              String      @id @default(cuid())
-  dropId          String
-  buyerId         String
-  weightKg        Float
-  totalPriceKgs   Int
-  deliveryMethod  String      @default("pickup") // "pickup" or "delivery"
-  deliveryAddress String? // buyer's delivery address
-  deliveryLat     Float?
-  deliveryLng     Float?
-  deliveryFee     Int         @default(0)
-  status          OrderStatus @default(PENDING)
-  buyerPhone      String?
-  buyerNote       String?
-  receiptUrl      String? // buyer uploads bank transfer screenshot
-  paidAt          DateTime? // when buyer uploaded receipt
-  confirmedAt     DateTime? // when seller verified payment
-  butcheringAt    DateTime?
-  packagingAt     DateTime?
-  deliveringAt    DateTime?
-  deliveredAt     DateTime?
-  createdAt       DateTime    @default(now())
+  id                 String      @id @default(cuid())
+  dropId             String
+  buyerId            String
+  weightKg           Float
+  totalPriceKgs      Int
+  deliveryMethod     String      @default("pickup") // "pickup" or "delivery"
+  deliveryAddress    String? // buyer's delivery address
+  deliveryLat        Float?
+  deliveryLng        Float?
+  deliveryFee        Int         @default(0)
+  status             OrderStatus @default(PENDING)
+  buyerPhone         String?
+  buyerNote          String?
+  receiptUrl         String? // buyer uploads bank transfer screenshot
+  butcheringPhotoUrl String? // seller documents: animal being butchered
+  packagingPhotoUrl  String? // seller documents: meat packaged for buyer
+  deliveringPhotoUrl String? // seller documents: package in transit / at door
+  paidAt             DateTime?
+  confirmedAt        DateTime?
+  butcheringAt       DateTime?
+  packagingAt        DateTime?
+  deliveringAt       DateTime?
+  deliveredAt        DateTime?
+  createdAt          DateTime    @default(now())
 
   drop  ButcherDrop @relation(fields: [dropId], references: [id], onDelete: Cascade)
   buyer User        @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)

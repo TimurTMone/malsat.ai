@@ -798,6 +798,15 @@ class _DeliveryTimeline extends StatelessWidget {
             final isCurrent = i == currentIdx;
             final isLast = i == steps.length - 1;
 
+            // Get stage photo if available
+            String? stagePhoto;
+            if (step.status == 'BUTCHERING') stagePhoto = order.butcheringPhotoUrl;
+            if (step.status == 'PACKAGING') stagePhoto = order.packagingPhotoUrl;
+            if (step.status == 'DELIVERING') stagePhoto = order.deliveringPhotoUrl;
+            if (step.status == 'PAID') stagePhoto = order.receiptUrl;
+
+            final lineHeight = (isComplete && stagePhoto != null) ? 90.0 : 28.0;
+
             return Column(
               children: [
                 Row(
@@ -836,7 +845,7 @@ class _DeliveryTimeline extends StatelessWidget {
                         if (!isLast)
                           Container(
                             width: 2,
-                            height: 28,
+                            height: lineHeight,
                             color: isComplete && i < currentIdx
                                 ? AppColors.primary
                                 : AppColors.border,
@@ -844,7 +853,7 @@ class _DeliveryTimeline extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(width: 14),
-                    // Text
+                    // Text + photo
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(top: 6),
@@ -871,6 +880,23 @@ class _DeliveryTimeline extends StatelessWidget {
                                   color: AppColors.textSecondary,
                                 ),
                               ),
+                            // Stage photo from seller
+                            if (isComplete && stagePhoto != null) ...[
+                              const SizedBox(height: 6),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: CachedNetworkImage(
+                                  imageUrl: stagePhoto,
+                                  height: 70,
+                                  width: 120,
+                                  fit: BoxFit.cover,
+                                  placeholder: (_, __) => Container(
+                                    height: 70, width: 120,
+                                    color: AppColors.backgroundSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

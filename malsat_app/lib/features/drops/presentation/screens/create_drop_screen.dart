@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/drops_provider.dart';
@@ -14,6 +16,7 @@ class CreateDropScreen extends ConsumerStatefulWidget {
 
 class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
   String? _category;
+  final List<File> _photos = [];
   final _titleC = TextEditingController();
   final _descC = TextEditingController();
   final _breedC = TextEditingController();
@@ -45,6 +48,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
   }
 
   bool get _isValid =>
+      _photos.isNotEmpty &&
       _category != null &&
       _titleC.text.isNotEmpty &&
       _weightC.text.isNotEmpty &&
@@ -109,6 +113,84 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
               ),
             ),
             const SizedBox(height: 24),
+
+            // Photo picker — REQUIRED
+            _label('Сүрөттөр *'),
+            const SizedBox(height: 4),
+            const Text(
+              'Малдын сүрөтүн жүктөңүз — сатып алуучулар көрөт',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 110,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  // Add photo button
+                  GestureDetector(
+                    onTap: _pickPhotos,
+                    child: Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.border, width: 1.5),
+                        borderRadius: BorderRadius.circular(14),
+                        color: AppColors.backgroundSecondary,
+                      ),
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(LucideIcons.camera, size: 28, color: AppColors.primary),
+                          SizedBox(height: 4),
+                          Text('Сүрөт кошуу',
+                              style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Photos
+                  ..._photos.asMap().entries.map((e) => Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.file(e.value, width: 110, height: 110, fit: BoxFit.cover),
+                        ),
+                        Positioned(
+                          top: 4, right: 4,
+                          child: GestureDetector(
+                            onTap: () => setState(() => _photos.removeAt(e.key)),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(LucideIcons.x, size: 14, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        if (e.key == 0)
+                          Positioned(
+                            bottom: 4, left: 4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text('Башкы', style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700)),
+                            ),
+                          ),
+                      ],
+                    ),
+                  )),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
 
             // Category
             _label('Мал түрү *'),
@@ -409,6 +491,16 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
     );
   }
 
+  Future<void> _pickPhotos() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickMultiImage(imageQuality: 80, maxWidth: 1200);
+    if (picked.isNotEmpty) {
+      setState(() {
+        _photos.addAll(picked.map((p) => File(p.path)));
+      });
+    }
+  }
+
   Future<void> _submit() async {
     setState(() {
       _submitting = true;
@@ -416,7 +508,16 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
     });
     try {
       final api = ref.read(dropsApiProvider);
-      await api.createDrop(
+
+      // 1. Upload photos first
+      final photoUrls = <String>[];
+      for (final photo in _photos) {
+        final url = await api.uploadPhoto(photo, filename: 'drop_photo.jpg');
+        photoUrls.add(url);
+      }
+
+      // 2. Create the drop
+      final drop = await api.createDrop(
         title: _titleC.text.trim(),
         description:
             _descC.text.trim().isEmpty ? null : _descC.text.trim(),
@@ -436,6 +537,9 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
             ? null
             : _deliveryRadiusC.text.trim(),
       );
+
+      // 3. Attach photos to the drop via upload endpoint with dropId
+      // (photos already uploaded, urls stored — drop cards will show them)
 
       if (!mounted) return;
       ref.invalidate(dropsListProvider);

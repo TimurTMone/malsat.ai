@@ -117,6 +117,14 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
       DELIVERED: "deliveredAt",
     };
 
+    // Stage photo fields from seller
+    const stagePhotoField: Record<string, string> = {
+      BUTCHERING: "butcheringPhotoUrl",
+      PACKAGING: "packagingPhotoUrl",
+      DELIVERING: "deliveringPhotoUrl",
+    };
+    const stagePhotoUrl: string | undefined = body.stagePhotoUrl;
+
     const updated = await prisma.meatOrder.update({
       where: { id },
       data: {
@@ -124,6 +132,9 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
         ...(receiptUrl && { receiptUrl }),
         ...(newStatus && timestampField[newStatus] && {
           [timestampField[newStatus]]: new Date(),
+        }),
+        ...(newStatus && stagePhotoField[newStatus] && stagePhotoUrl && {
+          [stagePhotoField[newStatus]]: stagePhotoUrl,
         }),
       },
       include: {

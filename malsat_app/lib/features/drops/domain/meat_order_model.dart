@@ -11,6 +11,9 @@ class MeatOrder {
   final String? buyerPhone;
   final String? buyerNote;
   final String? receiptUrl;
+  final String? butcheringPhotoUrl;
+  final String? packagingPhotoUrl;
+  final String? deliveringPhotoUrl;
   final DateTime? paidAt;
   final DateTime? confirmedAt;
   final DateTime? butcheringAt;
@@ -34,6 +37,9 @@ class MeatOrder {
     this.buyerPhone,
     this.buyerNote,
     this.receiptUrl,
+    this.butcheringPhotoUrl,
+    this.packagingPhotoUrl,
+    this.deliveringPhotoUrl,
     this.paidAt,
     this.confirmedAt,
     this.butcheringAt,
@@ -59,6 +65,9 @@ class MeatOrder {
       buyerPhone: j['buyerPhone'] as String?,
       buyerNote: j['buyerNote'] as String?,
       receiptUrl: j['receiptUrl'] as String?,
+      butcheringPhotoUrl: j['butcheringPhotoUrl'] as String?,
+      packagingPhotoUrl: j['packagingPhotoUrl'] as String?,
+      deliveringPhotoUrl: j['deliveringPhotoUrl'] as String?,
       paidAt: j['paidAt'] != null ? DateTime.parse(j['paidAt'] as String) : null,
       confirmedAt: j['confirmedAt'] != null
           ? DateTime.parse(j['confirmedAt'] as String)

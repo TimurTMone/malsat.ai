@@ -10,9 +10,18 @@ class DropCard extends StatelessWidget {
 
   const DropCard({super.key, required this.drop, required this.onTap});
 
+  static const _fallbackPhotos = {
+    'CATTLE': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg/800px-Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg',
+    'SHEEP': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flock_of_sheep.jpg/800px-Flock_of_sheep.jpg',
+    'HORSE': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Biandintz_eta_zaldiak_-_modified2.jpg/1200px-Biandintz_eta_zaldiak_-_modified2.jpg',
+    'ARASHAN': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hausziege_04.jpg/800px-Hausziege_04.jpg',
+  };
+
   @override
   Widget build(BuildContext context) {
-    final photo = drop.media.isNotEmpty ? drop.media.first.mediaUrl : null;
+    final photo = drop.media.isNotEmpty
+        ? drop.media.first.mediaUrl
+        : _fallbackPhotos[drop.category];
     final daysLeft = drop.daysUntilButcher;
 
     return GestureDetector(
@@ -41,24 +50,18 @@ class DropCard extends StatelessWidget {
                 children: [
                   AspectRatio(
                     aspectRatio: 16 / 10,
-                    child: photo != null
-                        ? CachedNetworkImage(
-                            imageUrl: photo,
-                            fit: BoxFit.cover,
-                            placeholder: (_, __) => Container(
-                              color: AppColors.backgroundSecondary,
-                            ),
-                            errorWidget: (_, __, ___) => Container(
-                              color: AppColors.backgroundSecondary,
-                              child: const Icon(LucideIcons.image,
-                                  color: AppColors.textMuted),
-                            ),
-                          )
-                        : Container(
-                            color: AppColors.backgroundSecondary,
-                            child: const Icon(LucideIcons.beef,
-                                size: 40, color: AppColors.textMuted),
-                          ),
+                    child: CachedNetworkImage(
+                      imageUrl: photo ?? _fallbackPhotos['CATTLE']!,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        color: AppColors.backgroundSecondary,
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        color: AppColors.backgroundSecondary,
+                        child: const Icon(LucideIcons.beef,
+                            size: 40, color: AppColors.textMuted),
+                      ),
+                    ),
                   ),
                   // Status badge
                   Positioned(

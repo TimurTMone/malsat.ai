@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/meat_order_model.dart';
@@ -333,16 +335,21 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
     }
   }
 
+  bool get _requiresPhoto =>
+      order.status == 'CONFIRMED' ||
+      order.status == 'BUTCHERING' ||
+      order.status == 'PACKAGING';
+
   String get _nextActionLabel {
     switch (order.status) {
       case 'PAID':
         return 'Төлөмдү ырастоо';
       case 'CONFIRMED':
-        return 'Союуну баштоо';
+        return 'Союуну баштоо + сүрөт';
       case 'BUTCHERING':
-        return 'Таңгактоого өтүү';
+        return 'Таңгактоо + сүрөт';
       case 'PACKAGING':
-        return 'Жеткирүүгө жиберүү';
+        return 'Жеткирүү + сүрөт';
       case 'DELIVERING':
         return 'Жеткирилди деп белгилөө';
       default:
@@ -431,21 +438,87 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
   }
 
   Future<void> _advanceStatus(String newStatus) async {
-    setState(() => _updating = true);
+    String? photoUrl;
+
+    // For butchering/packaging/delivering — require a photo
+    if (_requiresPhoto) {
+      final picker = ImagePicker();
+      final source = await showModalBottomSheet<ImageSource>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  _photoPrompt,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(LucideIcons.camera, color: AppColors.primary),
+                title: const Text('Камера менен тартуу'),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(LucideIcons.image, color: AppColors.primary),
+                title: const Text('Галереядан тандоо'),
+                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+              ),
+            ],
+          ),
+        ),
+      );
+      if (source == null) return; // cancelled
+
+      final picked = await picker.pickImage(source: source, imageQuality: 85);
+      if (picked == null) return; // cancelled
+
+      setState(() => _updating = true);
+      try {
+        final api = widget.ref.read(dropsApiProvider);
+        photoUrl = await api.uploadPhoto(File(picked.path), filename: 'stage_$newStatus.jpg');
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Сүрөт жүктөлбөдү: $e'), backgroundColor: AppColors.error),
+        );
+        setState(() => _updating = false);
+        return;
+      }
+    } else {
+      setState(() => _updating = true);
+    }
+
     try {
       final api = widget.ref.read(dropsApiProvider);
-      await api.updateOrderStatus(order.id, newStatus);
+      await api.updateOrderStatus(order.id, newStatus, stagePhotoUrl: photoUrl);
       widget.ref.invalidate(sellerOrdersProvider);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Ката: $e'),
-          backgroundColor: AppColors.error,
-        ),
+        SnackBar(content: Text('Ката: $e'), backgroundColor: AppColors.error),
       );
     } finally {
       if (mounted) setState(() => _updating = false);
+    }
+  }
+
+  String get _photoPrompt {
+    switch (order.status) {
+      case 'CONFIRMED':
+        return 'Союу процессин сүрөткө тартыңыз';
+      case 'BUTCHERING':
+        return 'Таңгакталган этти сүрөткө тартыңыз';
+      case 'PACKAGING':
+        return 'Жеткирүү сүрөтүн тартыңыз';
+      default:
+        return 'Сүрөт тартыңыз';
     }
   }
 }

@@ -70,12 +70,32 @@ class DropsApi {
     return MyOrdersResponse.fromJson(resp.data as Map<String, dynamic>);
   }
 
-  Future<MeatOrder> updateOrderStatus(String orderId, String status) async {
+  Future<MeatOrder> updateOrderStatus(
+    String orderId,
+    String status, {
+    String? stagePhotoUrl,
+  }) async {
     final resp = await _dio.patch(
       ApiEndpoints.order(orderId),
-      data: {'status': status},
+      data: {
+        'status': status,
+        if (stagePhotoUrl != null) 'stagePhotoUrl': stagePhotoUrl,
+      },
     );
     return MeatOrder.fromJson(resp.data as Map<String, dynamic>);
+  }
+
+  /// Upload a photo and return its URL (uses the existing upload endpoint)
+  Future<String> uploadPhoto(File imageFile, {String filename = 'photo.jpg'}) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(imageFile.path, filename: filename),
+    });
+    final resp = await _dio.post(
+      ApiEndpoints.upload,
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
+    return (resp.data as Map<String, dynamic>)['mediaUrl'] as String;
   }
 
   Future<ButcherDrop> createDrop({
