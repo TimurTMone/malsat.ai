@@ -252,11 +252,28 @@ class _AnimalCard extends StatelessWidget {
                   width: 84,
                   height: 84,
                   color: AppColors.backgroundSecondary,
+                  child: Center(
+                    child: Icon(
+                      _categoryIcon(animal.category),
+                      size: 32,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
                 ),
                 errorWidget: (_, __, ___) => Container(
                   width: 84,
                   height: 84,
-                  color: AppColors.backgroundSecondary,
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundSecondary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      _categoryIcon(animal.category),
+                      size: 32,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -355,6 +372,21 @@ class _AnimalCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+IconData _categoryIcon(String category) {
+  switch (category) {
+    case 'HORSE':
+      return LucideIcons.wind;
+    case 'CATTLE':
+      return LucideIcons.beef;
+    case 'SHEEP':
+      return LucideIcons.cloud;
+    case 'ARASHAN':
+      return LucideIcons.award;
+    default:
+      return LucideIcons.heart;
   }
 }
 
