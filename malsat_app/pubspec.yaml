@@ -1,7 +1,7 @@
 name: malsat_app
 description: "MalSat - Livestock marketplace for Kyrgyzstan"
 publish_to: 'none'
-version: 1.2.0+201
+version: 1.2.1+205
 
 environment:
   sdk: ^3.11.3
