@@ -427,6 +427,125 @@ class _SellForm extends ConsumerWidget {
                 ),
               ],
             ),
+
+            // Horse subcategory selector
+            if (form.category == 'HORSE') ...[
+              const SizedBox(height: 14),
+              const Text(
+                'Жылкы түрү',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => notifier.setSubcategory('MEAT'),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: form.subcategory == 'MEAT'
+                              ? const Color(0xFFB91C1C)
+                              : const Color(0xFFFEE2E2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: form.subcategory == 'MEAT'
+                                ? const Color(0xFFB91C1C)
+                                : const Color(0xFFFCA5A5),
+                            width: form.subcategory == 'MEAT' ? 2 : 1,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(LucideIcons.beef,
+                                size: 22,
+                                color: form.subcategory == 'MEAT'
+                                    ? Colors.white
+                                    : const Color(0xFFB91C1C)),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Эт жылкы',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: form.subcategory == 'MEAT'
+                                    ? Colors.white
+                                    : const Color(0xFFB91C1C),
+                              ),
+                            ),
+                            Text(
+                              'Союуга',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: form.subcategory == 'MEAT'
+                                    ? Colors.white70
+                                    : AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => notifier.setSubcategory('KOK_BORU'),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: form.subcategory == 'KOK_BORU'
+                              ? const Color(0xFF1565C0)
+                              : const Color(0xFFE3F2FD),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: form.subcategory == 'KOK_BORU'
+                                ? const Color(0xFF1565C0)
+                                : const Color(0xFF90CAF9),
+                            width: form.subcategory == 'KOK_BORU' ? 2 : 1,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(LucideIcons.trophy,
+                                size: 22,
+                                color: form.subcategory == 'KOK_BORU'
+                                    ? Colors.white
+                                    : const Color(0xFF1565C0)),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Көк бөрү',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: form.subcategory == 'KOK_BORU'
+                                    ? Colors.white
+                                    : const Color(0xFF1565C0),
+                              ),
+                            ),
+                            Text(
+                              'Спорт жылкы',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: form.subcategory == 'KOK_BORU'
+                                    ? Colors.white70
+                                    : AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 20),
 
             // Title

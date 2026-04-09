@@ -24,6 +24,7 @@ class PickedImage {
 /// Form state for creating a listing.
 class SellFormState {
   final String? category;
+  final String? subcategory;
   final String title;
   final String priceText;
   final String? breed;
@@ -37,6 +38,7 @@ class SellFormState {
 
   const SellFormState({
     this.category,
+    this.subcategory,
     this.title = '',
     this.priceText = '',
     this.breed,
@@ -51,6 +53,7 @@ class SellFormState {
 
   SellFormState copyWith({
     String? Function()? category,
+    String? Function()? subcategory,
     String? title,
     String? priceText,
     String? Function()? breed,
@@ -64,6 +67,7 @@ class SellFormState {
   }) {
     return SellFormState(
       category: category != null ? category() : this.category,
+      subcategory: subcategory != null ? subcategory() : this.subcategory,
       title: title ?? this.title,
       priceText: priceText ?? this.priceText,
       breed: breed != null ? breed() : this.breed,
@@ -97,7 +101,9 @@ class SellFormNotifier extends StateNotifier<SellFormState> {
   SellFormNotifier(this._ref) : super(const SellFormState());
 
   void setCategory(String? category) =>
-      state = state.copyWith(category: () => category);
+      state = state.copyWith(category: () => category, subcategory: () => null);
+  void setSubcategory(String? subcategory) =>
+      state = state.copyWith(subcategory: () => subcategory);
   void setTitle(String title) => state = state.copyWith(title: title);
   void setPrice(String price) => state = state.copyWith(priceText: price);
   void setBreed(String? breed) => state = state.copyWith(breed: () => breed);
@@ -185,6 +191,7 @@ class SellFormNotifier extends StateNotifier<SellFormState> {
       // 1. Create the listing
       final listingData = await api.createListing(
         category: state.category!,
+        subcategory: state.subcategory,
         title: state.title,
         priceKgs: state.priceKgs!,
         breed: state.breed,

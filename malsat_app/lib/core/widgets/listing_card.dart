@@ -81,6 +81,33 @@ class ListingCard extends StatelessWidget {
                     ),
                   ),
                 ),
+              // Horse subcategory badge
+              if (listing.category == 'HORSE' && listing.subcategory != null)
+                Positioned(
+                  top: 8,
+                  left: listing.isPremium ? 50 : 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 7, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: listing.subcategory == 'KOK_BORU'
+                          ? const Color(0xFF1565C0)
+                          : const Color(0xFFB91C1C),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text(
+                      listing.subcategory == 'KOK_BORU'
+                          ? 'КӨК БӨРҮ'
+                          : 'ЭТ',
+                      style: const TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
               // Mode B — investable pill (bottom-left)
               if (listing.modeBEligible)
                 Positioned(
