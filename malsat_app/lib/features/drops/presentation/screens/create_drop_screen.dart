@@ -341,7 +341,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                         value: _deliveryAvailable,
                         onChanged: (v) =>
                             setState(() => _deliveryAvailable = v),
-                        activeColor: AppColors.primary,
+                        activeTrackColor: AppColors.primary,
                       ),
                     ],
                   ),
@@ -517,7 +517,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
       }
 
       // 2. Create the drop
-      final drop = await api.createDrop(
+      await api.createDrop(
         title: _titleC.text.trim(),
         description:
             _descC.text.trim().isEmpty ? null : _descC.text.trim(),

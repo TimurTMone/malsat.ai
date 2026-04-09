@@ -9,7 +9,6 @@ import '../../../../core/i18n/app_localizations.dart';
 import '../../domain/listing_model.dart';
 import '../providers/listing_providers.dart';
 import '../../../favorites/presentation/widgets/favorite_button.dart';
-import '../../../messages/data/messages_api.dart';
 import '../../../messages/presentation/providers/messages_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 

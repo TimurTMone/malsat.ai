@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/i18n/app_localizations.dart';
 import '../providers/drops_provider.dart';
 import '../widgets/drop_card.dart';
 
