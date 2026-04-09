@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/drops_provider.dart';
 import '../../domain/drop_model.dart';
 
@@ -1011,6 +1012,26 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
   }
 
   Future<void> _placeOrder(ButcherDrop drop) async {
+    // Check auth first
+    final isAuth = ref.read(isAuthenticatedProvider);
+    if (!isAuth) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Заказ берүү үчүн кириңиз'),
+          backgroundColor: AppColors.accent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          action: SnackBarAction(
+            label: 'Кирүү',
+            textColor: Colors.white,
+            onPressed: () => context.push('/auth/login'),
+          ),
+        ),
+      );
+      return;
+    }
+
     setState(() => _ordering = true);
     try {
       final api = ref.read(dropsApiProvider);

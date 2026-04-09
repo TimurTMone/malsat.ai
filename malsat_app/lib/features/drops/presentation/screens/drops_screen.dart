@@ -79,23 +79,26 @@ class DropsScreen extends ConsumerWidget {
                         style: TextStyle(fontSize: 12, color: Colors.white70),
                       ),
                       const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          _InfoChip(
-                            icon: LucideIcons.beef,
-                            label: 'Жаңы союлган',
-                          ),
-                          const SizedBox(width: 8),
-                          _InfoChip(
-                            icon: LucideIcons.truck,
-                            label: 'Өзүң аласың',
-                          ),
-                          const SizedBox(width: 8),
-                          _InfoChip(
-                            icon: LucideIcons.shield,
-                            label: 'Текшерилген',
-                          ),
-                        ],
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _InfoChip(
+                              icon: LucideIcons.beef,
+                              label: 'Жаңы союлган',
+                            ),
+                            const SizedBox(width: 8),
+                            _InfoChip(
+                              icon: LucideIcons.truck,
+                              label: 'Өзүң аласың',
+                            ),
+                            const SizedBox(width: 8),
+                            _InfoChip(
+                              icon: LucideIcons.shield,
+                              label: 'Текшерилген',
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
