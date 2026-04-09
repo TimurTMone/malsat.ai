@@ -33,14 +33,14 @@ class BottomNavBar extends ConsumerWidget {
           child: Row(
             children: [
               _NavItem(
-                icon: LucideIcons.search,
-                label: t(dict, 'nav.search'),
+                icon: LucideIcons.beef,
+                label: 'Эт базар',
                 isActive: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
               _NavItem(
-                icon: LucideIcons.beef,
-                label: 'Эт базар',
+                icon: LucideIcons.search,
+                label: 'Мал базар',
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),

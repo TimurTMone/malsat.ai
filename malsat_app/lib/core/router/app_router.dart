@@ -43,26 +43,29 @@ final appRouter = GoRouter(
         return _ShellScreen(navigationShell: navigationShell);
       },
       branches: [
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorHomeKey,
-          routes: [
-            GoRoute(
-              name: RouteNames.home,
-              path: '/',
-              builder: (context, state) => const HomeScreen(),
-            ),
-          ],
-        ),
+        // Tab 0: Meat drops — primary tab, first thing users see
         StatefulShellBranch(
           navigatorKey: _shellNavigatorDropsKey,
           routes: [
             GoRoute(
               name: RouteNames.drops,
-              path: '/drops',
+              path: '/',
               builder: (context, state) => const DropsScreen(),
             ),
           ],
         ),
+        // Tab 1: Livestock market
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorHomeKey,
+          routes: [
+            GoRoute(
+              name: RouteNames.home,
+              path: '/mal-bazar',
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ],
+        ),
+        // Tab 2: Sell (create listing or drop)
         StatefulShellBranch(
           navigatorKey: _shellNavigatorSellKey,
           routes: [
@@ -73,6 +76,7 @@ final appRouter = GoRouter(
             ),
           ],
         ),
+        // Tab 3: Herd management
         StatefulShellBranch(
           navigatorKey: _shellNavigatorMessagesKey,
           routes: [
@@ -83,6 +87,7 @@ final appRouter = GoRouter(
             ),
           ],
         ),
+        // Tab 4: Profile
         StatefulShellBranch(
           navigatorKey: _shellNavigatorProfileKey,
           routes: [
