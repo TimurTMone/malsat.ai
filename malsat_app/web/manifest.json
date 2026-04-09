@@ -1,11 +1,11 @@
 {
-    "name": "malsat_app",
-    "short_name": "malsat_app",
+    "name": "MalSat",
+    "short_name": "MalSat",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1B5E20",
+    "theme_color": "#1B5E20",
+    "description": "MalSat — livestock marketplace for Kyrgyzstan",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

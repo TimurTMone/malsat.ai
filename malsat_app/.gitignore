@@ -43,3 +43,19 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Environment
+.env
+.env.local
+
+# Android signing
+android/key.properties
+*.jks
+*.keystore
+
+# Fastlane
+ios/fastlane/report.xml
+ios/fastlane/README.md
+
+# Build logs
+flutter_*.log

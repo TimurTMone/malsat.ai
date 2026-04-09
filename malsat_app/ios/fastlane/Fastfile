@@ -1,22 +1,26 @@
 default_platform(:ios)
 
 platform :ios do
-  desc "Build Flutter IPA and upload to TestFlight"
-  lane :beta do
-    api_key = app_store_connect_api_key(
-      key_id: ENV["ASC_KEY_ID"] || "Z7MGS5ZUZ5",
-      issuer_id: ENV["ASC_ISSUER_ID"] || "bba04448-ff86-400c-8a1c-9828ce554f07",
-      key_filepath: ENV["ASC_KEY_PATH"] || File.expand_path("~/.appstoreconnect/private_keys/AuthKey_Z7MGS5ZUZ5.p8"),
+  # Shared helper — reads ASC credentials from environment only.
+  # Set ASC_KEY_ID, ASC_ISSUER_ID, and ASC_KEY_PATH before running.
+  def asc_api_key
+    app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_PATH"),
       duration: 1200,
       in_house: false,
     )
+  end
 
+  desc "Build Flutter IPA and upload to TestFlight"
+  lane :beta do
     Dir.chdir("..") do
       sh("flutter", "build", "ipa", "--release", "--export-options-plist=ios/ExportOptions.plist")
     end
 
     upload_to_testflight(
-      api_key: api_key,
+      api_key: asc_api_key,
       ipa: "../build/ios/ipa/MalSat.ipa",
       skip_waiting_for_build_processing: true,
       changelog: "All categories: horse, cattle, cow, sheep, arashan + meat drops variety",
@@ -25,16 +29,8 @@ platform :ios do
 
   desc "Just upload existing IPA to TestFlight (skip build)"
   lane :upload do
-    api_key = app_store_connect_api_key(
-      key_id: ENV["ASC_KEY_ID"] || "Z7MGS5ZUZ5",
-      issuer_id: ENV["ASC_ISSUER_ID"] || "bba04448-ff86-400c-8a1c-9828ce554f07",
-      key_filepath: ENV["ASC_KEY_PATH"] || File.expand_path("~/.appstoreconnect/private_keys/AuthKey_Z7MGS5ZUZ5.p8"),
-      duration: 1200,
-      in_house: false,
-    )
-
     upload_to_testflight(
-      api_key: api_key,
+      api_key: asc_api_key,
       ipa: "../build/ios/ipa/MalSat.ipa",
       skip_waiting_for_build_processing: true,
       changelog: "Latest build from main branch",

@@ -30,11 +30,14 @@ Dio createDio() {
     ),
   );
 
-  dio.interceptors.add(LogInterceptor(
-    requestBody: true,
-    responseBody: true,
-    logPrint: (obj) => print('[DIO] $obj'),
-  ));
+  assert(() {
+    dio.interceptors.add(LogInterceptor(
+      requestBody: true,
+      responseBody: true,
+      logPrint: (obj) => print('[DIO] $obj'),
+    ));
+    return true;
+  }());
 
   return dio;
 }
