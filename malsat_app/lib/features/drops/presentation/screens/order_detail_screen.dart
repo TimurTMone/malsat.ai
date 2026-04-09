@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:dio/dio.dart';
+import 'package:gal/gal.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/meat_order_model.dart';
 import '../providers/drops_provider.dart';
@@ -244,6 +247,27 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                         child: Icon(LucideIcons.qrCode,
                             size: 80, color: AppColors.textMuted),
                       ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Save QR to Photos button
+          if (qrUrl != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Center(
+                child: TextButton.icon(
+                  onPressed: () => _saveQrToPhotos(qrUrl),
+                  icon: const Icon(LucideIcons.download,
+                      size: 16, color: Color(0xFF92400E)),
+                  label: const Text(
+                    'QR кодду сактоо',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF92400E),
                     ),
                   ),
                 ),
@@ -627,6 +651,35 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           ),
       ],
     );
+  }
+
+  Future<void> _saveQrToPhotos(String url) async {
+    try {
+      final response = await Dio().get<List<int>>(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      final bytes = Uint8List.fromList(response.data!);
+      await Gal.putImageBytes(bytes, name: 'malsat_qr_${DateTime.now().millisecondsSinceEpoch}');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('QR код сүрөттөргө сакталды!'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Сактоо ишке ашпады: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _pickAndUploadReceipt(MeatOrder order) async {

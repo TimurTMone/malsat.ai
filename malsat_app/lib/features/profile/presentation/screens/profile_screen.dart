@@ -181,6 +181,82 @@ class _LoggedInProfile extends ConsumerWidget {
 
               const SizedBox(height: 24),
 
+              // ═══ SELLER DASHBOARD SECTION ═══
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(LucideIcons.store, size: 20, color: Colors.white),
+                        SizedBox(width: 8),
+                        Text(
+                          'Сатуучу панели',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Эт сатуу, заказдарды башкаруу',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _SellerActionButton(
+                            icon: LucideIcons.plusCircle,
+                            label: 'Эт Drop\nжарыялоо',
+                            onTap: () => context.push('/create-drop'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _SellerActionButton(
+                            icon: LucideIcons.clipboardList,
+                            label: 'Келген\nзаказдар',
+                            onTap: () => context.push('/seller-orders'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _SellerActionButton(
+                            icon: LucideIcons.qrCode,
+                            label: 'Төлөм\nQR код',
+                            onTap: () => context.push('/payment-setup'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // ═══ BUYER SECTION ═══
+              _MenuItem(
+                icon: LucideIcons.shoppingBag,
+                label: 'Менин заказдарым',
+                onTap: () => context.push('/orders/me'),
+              ),
+
               // Menu items
               _MenuItem(
                 icon: LucideIcons.package,
@@ -354,6 +430,48 @@ class _StatItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SellerActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _SellerActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 24, color: Colors.white),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                height: 1.3,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
