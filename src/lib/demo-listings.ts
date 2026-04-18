@@ -5,31 +5,36 @@
  * Photos are from Wikimedia Commons (public domain / CC-licensed).
  */
 
+// High-quality real photos from Unsplash (free commercial use, no attribution required)
 const PHOTO = {
+  // HORSES — variety of breeds, traditional & modern
   horseBlackMountain:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Biandintz_eta_zaldiak_-_modified2.jpg/1200px-Biandintz_eta_zaldiak_-_modified2.jpg",
+    "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=800&q=85&fit=crop",
   horseNokotaHerd:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Nokota_Horses_cropped.jpg/800px-Nokota_Horses_cropped.jpg",
+    "https://images.unsplash.com/photo-1534773728080-33d31da27ae5?w=800&q=85&fit=crop",
   horseMareFoal:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Mare_foal_poland.jpg/800px-Mare_foal_poland.jpg",
+    "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&q=85&fit=crop",
   horseField:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Horsescd1l-095.jpg/800px-Horsescd1l-095.jpg",
+    "https://images.unsplash.com/photo-1518187304541-9bcb7d4d2c0d?w=800&q=85&fit=crop",
   horsePony:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Horse-and-pony.jpg/800px-Horse-and-pony.jpg",
+    "https://images.unsplash.com/photo-1598974357801-cbca100e65d3?w=800&q=85&fit=crop",
+  // CATTLE — beef & dairy
   cowFleckvieh:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg/800px-Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg",
+    "https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=800&q=85&fit=crop",
   cowHerd:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Cattle_Selwyn_Road_Boulia_Shire_Central_Western_Queensland_P1080822_%28cropped%29.jpg/800px-Cattle_Selwyn_Road_Boulia_Shire_Central_Western_Queensland_P1080822_%28cropped%29.jpg",
+    "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800&q=85&fit=crop",
   cowAngus:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Aberdeen_Angus_im_Gadental_2.JPG/800px-Aberdeen_Angus_im_Gadental_2.JPG",
+    "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=800&q=85&fit=crop",
+  // SHEEP — flocks & individual rams
   sheepFlock:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flock_of_sheep.jpg/800px-Flock_of_sheep.jpg",
+    "https://images.unsplash.com/photo-1484557985045-edf25e08da73?w=800&q=85&fit=crop",
   sheepTurkmen:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Turkmen_sheep.jpg/800px-Turkmen_sheep.jpg",
+    "https://images.unsplash.com/photo-1533318087102-b3ad366ed041?w=800&q=85&fit=crop",
   sheepMountain:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/A_curious_Welsh_Mountain_sheep_%28Ovis_aries%29.jpg/800px-A_curious_Welsh_Mountain_sheep_%28Ovis_aries%29.jpg",
+    "https://images.unsplash.com/photo-1593179357196-705d7578ff48?w=800&q=85&fit=crop",
+  // GOATS
   goat:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hausziege_04.jpg/800px-Hausziege_04.jpg",
+    "https://images.unsplash.com/photo-1524024973431-2ad916746881?w=800&q=85&fit=crop",
 };
 
 type Demo = {

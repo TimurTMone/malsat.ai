@@ -66,6 +66,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _handleDemoLogin() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      const demoPhone = '+996555000000';
+      await ref.read(authProvider.notifier).sendOtp(demoPhone);
+      // Auto-verify with magic OTP code
+      await ref.read(authProvider.notifier).verifyOtp(demoPhone, '000000');
+      if (mounted) {
+        context.go('/');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _error = e.toString());
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final dictAsync = ref.watch(dictionaryProvider);
@@ -175,6 +199,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         )
                       : Text(t(dict, 'auth.sendOtp')),
+                ),
+                const SizedBox(height: 12),
+                // Demo login — for App Store reviewers and quick demo
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _handleDemoLogin,
+                  icon: const Icon(Icons.bolt, size: 18),
+                  label: const Text('Демо режим — заматта кирүү'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary, width: 1.5),
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ],
             ),

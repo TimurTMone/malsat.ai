@@ -11,33 +11,41 @@ export async function POST(req: NextRequest) {
       return errorResponse("Phone and code are required", 400);
     }
 
-    // Find valid OTP
-    const otpRecord = await prisma.otpCode.findFirst({
-      where: {
-        phone,
-        code,
-        used: false,
-        expiresAt: { gt: new Date() },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    // DEMO MODE: code "000000" bypasses OTP verification (for App Store reviewers)
+    const isDemoCode = code === "000000";
 
-    if (!otpRecord) {
-      return errorResponse("Invalid or expired code", 401);
+    if (!isDemoCode) {
+      // Find valid OTP
+      const otpRecord = await prisma.otpCode.findFirst({
+        where: {
+          phone,
+          code,
+          used: false,
+          expiresAt: { gt: new Date() },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (!otpRecord) {
+        return errorResponse("Invalid or expired code", 401);
+      }
+
+      // Mark OTP as used
+      await prisma.otpCode.update({
+        where: { id: otpRecord.id },
+        data: { used: true },
+      });
     }
-
-    // Mark OTP as used
-    await prisma.otpCode.update({
-      where: { id: otpRecord.id },
-      data: { used: true },
-    });
 
     // Find or create user
     let user = await prisma.user.findUnique({ where: { phone } });
 
     if (!user) {
       user = await prisma.user.create({
-        data: { phone },
+        data: {
+          phone,
+          name: isDemoCode ? "Демо колдонуучу" : null,
+        },
       });
     }
 

@@ -52,8 +52,8 @@ class BottomNavBar extends ConsumerWidget {
                 isPrimary: true,
               ),
               _NavItem(
-                icon: LucideIcons.layers,
-                label: 'Менин мал',
+                icon: LucideIcons.gavel,
+                label: 'Аукцион',
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
               ),

@@ -24,6 +24,8 @@ import '../../features/drops/presentation/screens/order_detail_screen.dart';
 import '../../features/drops/presentation/screens/create_drop_screen.dart';
 import '../../features/drops/presentation/screens/seller_orders_screen.dart';
 import '../../features/drops/presentation/screens/payment_setup_screen.dart';
+import '../../features/auctions/presentation/screens/auctions_screen.dart';
+import '../../features/auctions/presentation/screens/auction_detail_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -76,14 +78,14 @@ final appRouter = GoRouter(
             ),
           ],
         ),
-        // Tab 3: Herd management
+        // Tab 3: Auctions (live bazaar bidding)
         StatefulShellBranch(
           navigatorKey: _shellNavigatorMessagesKey,
           routes: [
             GoRoute(
-              name: RouteNames.herd,
-              path: '/herd',
-              builder: (context, state) => const HerdScreen(),
+              name: 'auctions',
+              path: '/auctions',
+              builder: (context, state) => const AuctionsScreen(),
             ),
           ],
         ),
@@ -200,6 +202,21 @@ final appRouter = GoRouter(
       path: '/payment-setup',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const PaymentSetupScreen(),
+    ),
+    GoRoute(
+      name: 'auction-detail',
+      path: '/auction/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => AuctionDetailScreen(
+        auctionId: state.pathParameters['id']!,
+      ),
+    ),
+    // Herd kept as a secondary route — accessible from Profile, not the bottom nav
+    GoRoute(
+      name: RouteNames.herd,
+      path: '/herd',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const HerdScreen(),
     ),
   ],
 );

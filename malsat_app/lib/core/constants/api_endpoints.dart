@@ -35,6 +35,11 @@ class ApiEndpoints {
   // Caretakers
   static const String caretakers = '/api/caretakers';
 
+  // Auctions (live bazaar bidding)
+  static const String auctions = '/api/auctions';
+  static String auction(String id) => '/api/auctions/$id';
+  static String auctionBid(String id) => '/api/auctions/$id/bid';
+
   // Butcher Drops (meat ordering)
   static const String drops = '/api/drops';
   static String drop(String id) => '/api/drops/$id';

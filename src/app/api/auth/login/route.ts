@@ -14,6 +14,12 @@ export async function POST(req: NextRequest) {
     // Normalize phone
     const normalizedPhone = phone.replace(/\s/g, "").replace(/^0/, "+996");
 
+    // DEMO PHONES: skip SMS — accept code "000000" on verify
+    const isDemoPhone = normalizedPhone === "+996555000000" || normalizedPhone.startsWith("+996000");
+    if (isDemoPhone) {
+      return ok({ success: true, phone: normalizedPhone, demo: true });
+    }
+
     // Generate and store OTP
     const code = generateOtp();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes

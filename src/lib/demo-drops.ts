@@ -3,23 +3,25 @@
  * Replaced by real DB data once drops exist and migrations are applied.
  */
 
+// Real meat & livestock photos from Unsplash & Pexels (free commercial use)
 const PHOTO = {
-  lambFresh:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flock_of_sheep.jpg/800px-Flock_of_sheep.jpg",
-  beefCow:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg/800px-Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg",
-  beefAngus:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Aberdeen_Angus_im_Gadental_2.JPG/800px-Aberdeen_Angus_im_Gadental_2.JPG",
-  horseMeat:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Biandintz_eta_zaldiak_-_modified2.jpg/1200px-Biandintz_eta_zaldiak_-_modified2.jpg",
-  horseNokota:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Nokota_Horses_cropped.jpg/800px-Nokota_Horses_cropped.jpg",
-  sheepMountain:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/A_curious_Welsh_Mountain_sheep_%28Ovis_aries%29.jpg/800px-A_curious_Welsh_Mountain_sheep_%28Ovis_aries%29.jpg",
-  sheepTurkmen:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Turkmen_sheep.jpg/800px-Turkmen_sheep.jpg",
-  goat:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hausziege_04.jpg/800px-Hausziege_04.jpg",
+  // Meat-focused photos (cuts, butchered)
+  lambMeat:
+    "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&q=80&fit=crop",
+  beefMeat:
+    "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=800&q=80&fit=crop",
+  beefSteaks:
+    "https://images.unsplash.com/photo-1603048719539-9ecb4aa395e3?w=800&q=80&fit=crop",
+  horseMeatTraditional:
+    "https://images.unsplash.com/photo-1542528180-a1208c5169a5?w=800&q=80&fit=crop",
+  horseMeatCuts:
+    "https://images.unsplash.com/photo-1607623488497-b1c4f6d7d4a2?w=800&q=80&fit=crop",
+  sheepMountainKg:
+    "https://images.unsplash.com/photo-1612170153139-6f881ff067e0?w=800&q=80&fit=crop",
+  sheepFreshMeat:
+    "https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=800&q=80&fit=crop",
+  goatMeat:
+    "https://images.unsplash.com/photo-1558030006-450675393462?w=800&q=80&fit=crop",
 };
 
 type DemoDrop = {
@@ -73,7 +75,7 @@ const demoDrops: DemoDrop[] = [
     trustScore: 4.7,
     isVerifiedBreeder: true,
     status: "OPEN",
-    photo: PHOTO.lambFresh,
+    photo: PHOTO.lambMeat,
     viewsCount: 89,
     orderCount: 4,
   },
@@ -100,7 +102,7 @@ const demoDrops: DemoDrop[] = [
     trustScore: 4.2,
     isVerifiedBreeder: false,
     status: "OPEN",
-    photo: PHOTO.beefCow,
+    photo: PHOTO.beefMeat,
     viewsCount: 142,
     orderCount: 6,
   },
@@ -127,7 +129,7 @@ const demoDrops: DemoDrop[] = [
     trustScore: 4.9,
     isVerifiedBreeder: true,
     status: "UPCOMING",
-    photo: PHOTO.horseMeat,
+    photo: PHOTO.horseMeatTraditional,
     viewsCount: 56,
     orderCount: 0,
   },
@@ -154,7 +156,7 @@ const demoDrops: DemoDrop[] = [
     trustScore: 3.8,
     isVerifiedBreeder: false,
     status: "SOLD_OUT",
-    photo: PHOTO.sheepMountain,
+    photo: PHOTO.sheepMountainKg,
     viewsCount: 210,
     orderCount: 8,
   },
@@ -181,7 +183,7 @@ const demoDrops: DemoDrop[] = [
     trustScore: 4.5,
     isVerifiedBreeder: true,
     status: "OPEN",
-    photo: PHOTO.goat,
+    photo: PHOTO.goatMeat,
     viewsCount: 67,
     orderCount: 2,
   },
@@ -209,7 +211,7 @@ const demoDrops: DemoDrop[] = [
     trustScore: 4.8,
     isVerifiedBreeder: true,
     status: "OPEN",
-    photo: PHOTO.beefAngus,
+    photo: PHOTO.beefSteaks,
     viewsCount: 178,
     orderCount: 3,
   },
@@ -237,7 +239,7 @@ const demoDrops: DemoDrop[] = [
     trustScore: 4.6,
     isVerifiedBreeder: true,
     status: "OPEN",
-    photo: PHOTO.horseNokota,
+    photo: PHOTO.horseMeatCuts,
     viewsCount: 94,
     orderCount: 2,
   },
@@ -265,7 +267,7 @@ const demoDrops: DemoDrop[] = [
     trustScore: 4.4,
     isVerifiedBreeder: false,
     status: "OPEN",
-    photo: PHOTO.sheepTurkmen,
+    photo: PHOTO.sheepFreshMeat,
     viewsCount: 132,
     orderCount: 5,
   },
