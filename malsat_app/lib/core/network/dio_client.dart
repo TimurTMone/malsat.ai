@@ -11,7 +11,7 @@ const _compileTimeBaseUrl = String.fromEnvironment(
 );
 
 // Production fallback — used when neither --dart-define nor .env is set.
-const _productionBaseUrl = 'https://malsat-ai.vercel.app';
+const _productionBaseUrl = 'https://malsat.altailabs.club';
 
 Dio createDio() {
   final baseUrl = _compileTimeBaseUrl.isNotEmpty

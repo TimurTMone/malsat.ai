@@ -1,17 +1,10 @@
 import { NextRequest } from "next/server";
-import { ok, errorResponse, handleError } from "@/lib/response";
-import { getDemoAnimal } from "@/lib/demo-herd";
+import { errorResponse } from "@/lib/response";
 
+// Herd is not yet wired to DB.
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _ctx: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params;
-    const animal = getDemoAnimal(id);
-    if (!animal) return errorResponse("Animal not found", 404);
-    return ok(animal);
-  } catch (error) {
-    return handleError(error);
-  }
+  return errorResponse("Animal not found", 404);
 }

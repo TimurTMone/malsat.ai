@@ -1,13 +1,10 @@
 import { NextRequest } from "next/server";
-import { ok, handleError } from "@/lib/response";
-import { getDemoHerd } from "@/lib/demo-herd";
+import { ok } from "@/lib/response";
 
-// GET /api/herd — the authed user's owned animals + portfolio summary.
-// Demo: returns hardcoded portfolio regardless of auth.
+// Herd is not yet wired to DB — return an empty portfolio.
 export async function GET(_req: NextRequest) {
-  try {
-    return ok(getDemoHerd());
-  } catch (error) {
-    return handleError(error);
-  }
+  return ok({
+    animals: [],
+    summary: { totalAnimals: 0, totalValue: 0 },
+  });
 }

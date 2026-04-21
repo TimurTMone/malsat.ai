@@ -1,13 +1,15 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { authenticateRequest } from "@/lib/auth";
 import { ok, errorResponse, handleError } from "@/lib/response";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
+    const auth = authenticateRequest(req);
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -47,7 +49,12 @@ export async function GET(
       },
     });
 
-    if (!user) return errorResponse("User not found", 404);
+    if (!user) {
+      // Stale token — requester is asking for their own profile but DB row is gone
+      // (e.g. DB was reset). Force re-authentication via 401 so the client logs out.
+      if (auth?.userId === id) return errorResponse("Stale session", 401);
+      return errorResponse("User not found", 404);
+    }
     return ok(user);
   } catch (error) {
     return handleError(error);

@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { ok, handleError } from "@/lib/response";
 import { Prisma } from "@/generated/prisma/client";
-import { getDemoListings } from "@/lib/demo-listings";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -17,11 +16,6 @@ export async function GET(req: NextRequest) {
   const page = parseInt(url.searchParams.get("page") || "1");
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 50);
   const skip = (page - 1) * limit;
-
-  const demoFallback = () =>
-    ok(
-      getDemoListings({ category, minPrice, maxPrice, sort, page, limit })
-    );
 
   try {
     const where: Prisma.ListingWhereInput = {
@@ -69,9 +63,6 @@ export async function GET(req: NextRequest) {
       prisma.listing.count({ where }),
     ]);
 
-    // Empty DB → serve demo data so the app never shows a blank feed.
-    if (total === 0) return demoFallback();
-
     return ok({
       listings,
       pagination: {
@@ -82,9 +73,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    // DB unreachable or migrations not applied → serve demo data.
-    console.warn("[listings] demo fallback:", error);
-    return demoFallback();
+    return handleError(error);
   }
 }
 

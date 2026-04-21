@@ -26,8 +26,16 @@ import '../../features/drops/presentation/screens/seller_orders_screen.dart';
 import '../../features/drops/presentation/screens/payment_setup_screen.dart';
 import '../../features/auctions/presentation/screens/auctions_screen.dart';
 import '../../features/auctions/presentation/screens/auction_detail_screen.dart';
+import '../../features/favorites/presentation/screens/favorites_screen.dart';
+import '../../features/profile/presentation/screens/my_listings_screen.dart';
+import '../../features/profile/presentation/screens/reviews_screen.dart';
+import '../../features/profile/presentation/screens/settings_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
+
+/// Public accessor so non-widget code (e.g. auth interceptor) can navigate
+/// on auth expiry without needing a BuildContext.
+GlobalKey<NavigatorState> get rootNavigatorKey => _rootNavigatorKey;
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'home');
 final _shellNavigatorDropsKey = GlobalKey<NavigatorState>(debugLabel: 'drops');
 final _shellNavigatorSellKey = GlobalKey<NavigatorState>(debugLabel: 'sell');
@@ -176,6 +184,30 @@ final appRouter = GoRouter(
       path: '/orders/me',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const MyOrdersScreen(),
+    ),
+    GoRoute(
+      name: RouteNames.favorites,
+      path: '/favorites',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const FavoritesScreen(),
+    ),
+    GoRoute(
+      name: RouteNames.myListings,
+      path: '/my-listings',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const MyListingsScreen(),
+    ),
+    GoRoute(
+      name: RouteNames.reviews,
+      path: '/reviews',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const ReviewsScreen(),
+    ),
+    GoRoute(
+      name: RouteNames.settings,
+      path: '/settings',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const SettingsScreen(),
     ),
     GoRoute(
       name: 'order-detail',

@@ -2,20 +2,12 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, authenticateRequest } from "@/lib/auth";
 import { ok, errorResponse, handleError } from "@/lib/response";
-import { getDemoListings } from "@/lib/demo-listings";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-
-  // Serve demo listings directly when the id matches.
-  if (id.startsWith("demo-")) {
-    const demo = getDemoListings({ limit: 50 }).listings.find((l) => l.id === id);
-    if (demo) return ok({ ...demo, isFavorited: false });
-    return errorResponse("Listing not found", 404);
-  }
 
   try {
     const listing = await prisma.listing.findUnique({

@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { ok, handleError } from "@/lib/response";
 import { Prisma } from "@/generated/prisma/client";
-import { getDemoDrops } from "@/lib/demo-drops";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -14,9 +13,6 @@ export async function GET(req: NextRequest) {
   const page = parseInt(url.searchParams.get("page") || "1");
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 50);
   const skip = (page - 1) * limit;
-
-  const demoFallback = () =>
-    ok(getDemoDrops({ category, status, sort, page, limit }));
 
   try {
     const where: Prisma.ButcherDropWhereInput = {};
@@ -64,8 +60,6 @@ export async function GET(req: NextRequest) {
       prisma.butcherDrop.count({ where }),
     ]);
 
-    if (total === 0) return demoFallback();
-
     const formatted = drops.map((d) => ({
       ...d,
       portionPresets: JSON.parse(d.portionPresets),
@@ -82,8 +76,7 @@ export async function GET(req: NextRequest) {
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    console.warn("[drops] demo fallback:", error);
-    return demoFallback();
+    return handleError(error);
   }
 }
 
@@ -131,7 +124,13 @@ export async function POST(req: NextRequest) {
     });
 
     return ok(
-      { ...drop, portionPresets: JSON.parse(drop.portionPresets) },
+      {
+        ...drop,
+        portionPresets: JSON.parse(drop.portionPresets),
+        claimedWeightKg: 0,
+        progressPercent: 0,
+        orderCount: 0,
+      },
       201
     );
   } catch (error) {

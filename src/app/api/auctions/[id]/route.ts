@@ -1,13 +1,10 @@
 import { NextRequest } from "next/server";
-import { ok, errorResponse } from "@/lib/response";
-import { getDemoAuctionById } from "@/lib/demo-auctions";
+import { errorResponse } from "@/lib/response";
 
+// Auctions have no DB model yet.
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _ctx: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const auction = getDemoAuctionById(id);
-  if (!auction) return errorResponse("Auction not found", 404);
-  return ok(auction);
+  return errorResponse("Auction not found", 404);
 }

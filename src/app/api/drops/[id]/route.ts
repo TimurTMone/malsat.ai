@@ -2,19 +2,11 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { ok, errorResponse, handleError } from "@/lib/response";
-import { getDemoDropById } from "@/lib/demo-drops";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, ctx: Ctx) {
   const { id } = await ctx.params;
-
-  // Demo fallback
-  if (id.startsWith("demo-")) {
-    const demo = getDemoDropById(id);
-    if (!demo) return errorResponse("Drop not found", 404);
-    return ok(demo);
-  }
 
   try {
     const drop = await prisma.butcherDrop.update({

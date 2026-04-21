@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/network/auth_interceptor.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../data/auth_api.dart';
 import '../../data/auth_repository.dart';
@@ -43,7 +45,20 @@ final dioProvider = Provider<Dio>((ref) {
     AuthInterceptor(
       dio: dio,
       tokenStorage: tokenStorage,
-      onAuthExpired: () => ref.read(authProvider.notifier).logout(),
+      onAuthExpired: () {
+        ref.read(authProvider.notifier).logout();
+        // Defer navigation to the next microtask so we don't collide with
+        // an in-flight Navigator transition (keyReservation assertion).
+        Future.microtask(() {
+          final ctx = rootNavigatorKey.currentContext;
+          if (ctx == null) return;
+          // ignore: use_build_context_synchronously
+          final current = GoRouterState.of(ctx).uri.toString();
+          if (current.startsWith('/auth')) return;
+          // ignore: use_build_context_synchronously
+          ctx.go('/auth/login');
+        });
+      },
     ),
   );
 

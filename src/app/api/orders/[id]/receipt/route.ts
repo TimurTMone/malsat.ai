@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
-import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 import sharp from "sharp";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
@@ -10,6 +11,8 @@ type Ctx = { params: Promise<{ id: string }> };
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const RECEIPTS_DIR = path.join(process.cwd(), "public", "uploads", "receipts");
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL ?? "";
 
 export async function POST(req: NextRequest, ctx: Ctx) {
   try {
@@ -42,17 +45,16 @@ export async function POST(req: NextRequest, ctx: Ctx) {
       .webp({ quality: 80 })
       .toBuffer();
 
-    const filename = `receipts/${randomUUID()}.webp`;
-    const blob = await put(filename, compressed, {
-      access: "public",
-      contentType: "image/webp",
-    });
+    const filename = `${randomUUID()}.webp`;
+    await mkdir(RECEIPTS_DIR, { recursive: true });
+    await writeFile(path.join(RECEIPTS_DIR, filename), compressed);
+    const relPath = `/uploads/receipts/${filename}`;
+    const receiptUrl = PUBLIC_BASE_URL ? `${PUBLIC_BASE_URL}${relPath}` : relPath;
 
-    // Update order with receipt and mark as PAID
     const updated = await prisma.meatOrder.update({
       where: { id },
       data: {
-        receiptUrl: blob.url,
+        receiptUrl,
         status: "PAID",
         paidAt: new Date(),
       },
@@ -61,9 +63,22 @@ export async function POST(req: NextRequest, ctx: Ctx) {
           select: {
             id: true,
             title: true,
+            category: true,
+            breed: true,
             pricePerKg: true,
+            butcherDate: true,
+            pickupAddress: true,
+            village: true,
+            status: true,
             seller: {
-              select: { id: true, name: true, phone: true },
+              select: {
+                id: true,
+                name: true,
+                phone: true,
+                avatarUrl: true,
+                paymentQrUrl: true,
+                paymentInfo: true,
+              },
             },
           },
         },

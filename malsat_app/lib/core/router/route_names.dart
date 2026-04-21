@@ -17,4 +17,8 @@ class RouteNames {
   static const String drops = 'drops';
   static const String dropDetail = 'drop-detail';
   static const String myOrders = 'my-orders';
+  static const String favorites = 'favorites';
+  static const String myListings = 'my-listings';
+  static const String reviews = 'reviews';
+  static const String settings = 'settings';
 }

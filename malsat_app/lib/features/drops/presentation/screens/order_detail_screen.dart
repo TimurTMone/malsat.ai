@@ -123,19 +123,19 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
             children: [
               _SummaryChip(
                 icon: LucideIcons.scale,
                 label: '${order.weightKg.toStringAsFixed(0)} кг',
               ),
-              const SizedBox(width: 10),
               _SummaryChip(
                 icon: LucideIcons.banknote,
                 label: '${order.totalPriceKgs} сом',
                 isPrimary: true,
               ),
-              const SizedBox(width: 10),
               _SummaryChip(
                 icon: order.isDelivery
                     ? LucideIcons.truck

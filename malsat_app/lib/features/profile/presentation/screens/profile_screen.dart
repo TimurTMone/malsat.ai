@@ -261,17 +261,17 @@ class _LoggedInProfile extends ConsumerWidget {
               _MenuItem(
                 icon: LucideIcons.package,
                 label: t(dict, 'profile.myListings'),
-                onTap: () {},
+                onTap: () => context.push('/my-listings'),
               ),
               _MenuItem(
                 icon: LucideIcons.heart,
                 label: t(dict, 'listing.favorites'),
-                onTap: () {},
+                onTap: () => context.push('/favorites'),
               ),
               _MenuItem(
                 icon: LucideIcons.star,
                 label: t(dict, 'profile.reviews'),
-                onTap: () {},
+                onTap: () => context.push('/reviews'),
               ),
               _MenuItem(
                 icon: LucideIcons.globe,
@@ -292,7 +292,7 @@ class _LoggedInProfile extends ConsumerWidget {
               _MenuItem(
                 icon: LucideIcons.settings,
                 label: t(dict, 'profile.settings'),
-                onTap: () {},
+                onTap: () => context.push('/settings'),
               ),
               const SizedBox(height: 16),
               _MenuItem(

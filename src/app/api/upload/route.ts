@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
-import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 import sharp from "sharp";
 import { requireAuth } from "@/lib/auth";
 import { ok, errorResponse, handleError } from "@/lib/response";
@@ -15,17 +16,29 @@ const ALLOWED_TYPES = [
   "video/quicktime",
 ];
 
-// Image compression settings
 const IMAGE_SIZES = {
-  full: { width: 1200, height: 900, quality: 80 },    // Detail view
-  thumb: { width: 400, height: 300, quality: 70 },     // Card thumbnail
+  full: { width: 1200, height: 900, quality: 80 },
+  thumb: { width: 400, height: 300, quality: 70 },
 };
+
+const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads", "listings");
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL ?? "";
+
+function publicUrl(relPath: string): string {
+  const rel = `/uploads/listings/${relPath}`;
+  return PUBLIC_BASE_URL ? `${PUBLIC_BASE_URL}${rel}` : rel;
+}
+
+async function saveBuffer(filename: string, buffer: Buffer): Promise<string> {
+  await mkdir(UPLOADS_DIR, { recursive: true });
+  await writeFile(path.join(UPLOADS_DIR, filename), buffer);
+  return publicUrl(filename);
+}
 
 async function processImage(
   buffer: Buffer,
   id: string
 ): Promise<{ fullUrl: string; thumbUrl: string }> {
-  // Full size — optimized for detail view
   const fullBuffer = await sharp(buffer)
     .resize(IMAGE_SIZES.full.width, IMAGE_SIZES.full.height, {
       fit: "inside",
@@ -34,7 +47,6 @@ async function processImage(
     .webp({ quality: IMAGE_SIZES.full.quality })
     .toBuffer();
 
-  // Thumbnail — optimized for listing cards
   const thumbBuffer = await sharp(buffer)
     .resize(IMAGE_SIZES.thumb.width, IMAGE_SIZES.thumb.height, {
       fit: "cover",
@@ -42,21 +54,12 @@ async function processImage(
     .webp({ quality: IMAGE_SIZES.thumb.quality })
     .toBuffer();
 
-  const [full, thumb] = await Promise.all([
-    put(`listings/${id}.webp`, fullBuffer, {
-      access: "public",
-      contentType: "image/webp",
-    }),
-    put(`listings/${id}_thumb.webp`, thumbBuffer, {
-      access: "public",
-      contentType: "image/webp",
-    }),
+  const [fullUrl, thumbUrl] = await Promise.all([
+    saveBuffer(`${id}.webp`, fullBuffer),
+    saveBuffer(`${id}_thumb.webp`, thumbBuffer),
   ]);
 
-  return {
-    fullUrl: full.url,
-    thumbUrl: thumb.url,
-  };
+  return { fullUrl, thumbUrl };
 }
 
 export async function POST(req: NextRequest) {
@@ -103,15 +106,9 @@ export async function POST(req: NextRequest) {
     let thumbUrl: string | null = null;
 
     if (isVideo) {
-      // Videos: upload as-is to Blob (no compression for now)
       const ext = file.name.split(".").pop() || "mp4";
-      const blob = await put(`listings/${id}.${ext}`, buffer, {
-        access: "public",
-        contentType: file.type,
-      });
-      mediaUrl = blob.url;
+      mediaUrl = await saveBuffer(`${id}.${ext}`, buffer);
     } else {
-      // Images: compress in-memory + generate thumbnail, then upload both to Blob
       const processed = await processImage(buffer, id);
       mediaUrl = processed.fullUrl;
       thumbUrl = processed.thumbUrl;

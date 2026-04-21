@@ -22,6 +22,9 @@ final dropDetailProvider =
 });
 
 final myOrdersProvider = FutureProvider<List<MeatOrder>>((ref) async {
+  // Re-run when auth changes (login/logout) so we don't serve stale rows
+  // from a previous session.
+  ref.watch(currentUserProvider);
   final api = ref.read(dropsApiProvider);
   final resp = await api.getMyOrders();
   return resp.orders;
@@ -34,6 +37,7 @@ final orderDetailProvider =
 });
 
 final sellerOrdersProvider = FutureProvider<List<MeatOrder>>((ref) async {
+  ref.watch(currentUserProvider);
   final api = ref.read(dropsApiProvider);
   final resp = await api.getSellerOrders();
   return resp.orders;
