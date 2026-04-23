@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'route_names.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/malsat_header.dart';
-import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/sell/presentation/screens/sell_screen.dart';
 // ignore: unused_import
@@ -17,19 +16,20 @@ import '../../features/messages/presentation/screens/chat_screen.dart';
 import '../../features/herd/presentation/screens/herd_screen.dart';
 import '../../features/herd/presentation/screens/animal_detail_screen.dart';
 import '../../features/herd/presentation/screens/caretakers_screen.dart';
-import '../../features/drops/presentation/screens/drops_screen.dart';
 import '../../features/drops/presentation/screens/drop_detail_screen.dart';
 import '../../features/drops/presentation/screens/my_orders_screen.dart';
 import '../../features/drops/presentation/screens/order_detail_screen.dart';
 import '../../features/drops/presentation/screens/create_drop_screen.dart';
 import '../../features/drops/presentation/screens/seller_orders_screen.dart';
 import '../../features/drops/presentation/screens/payment_setup_screen.dart';
-import '../../features/auctions/presentation/screens/auctions_screen.dart';
 import '../../features/auctions/presentation/screens/auction_detail_screen.dart';
 import '../../features/favorites/presentation/screens/favorites_screen.dart';
 import '../../features/profile/presentation/screens/my_listings_screen.dart';
 import '../../features/profile/presentation/screens/reviews_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
+import '../../features/marketplace/presentation/screens/bazar_screen.dart';
+import '../../features/shop/presentation/screens/duken_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -53,29 +53,29 @@ final appRouter = GoRouter(
         return _ShellScreen(navigationShell: navigationShell);
       },
       branches: [
-        // Tab 0: Meat drops — primary tab, first thing users see
+        // Tab 0: Базар — unified marketplace (Эт / Мал / Аукцион via chips)
         StatefulShellBranch(
           navigatorKey: _shellNavigatorDropsKey,
           routes: [
             GoRoute(
-              name: RouteNames.drops,
+              name: 'bazar',
               path: '/',
-              builder: (context, state) => const DropsScreen(),
+              builder: (context, state) => const BazarScreen(),
             ),
           ],
         ),
-        // Tab 1: Livestock market
+        // Tab 1: Дүкөн — supply shop (vet medicine, feed, equipment) — placeholder
         StatefulShellBranch(
           navigatorKey: _shellNavigatorHomeKey,
           routes: [
             GoRoute(
-              name: RouteNames.home,
-              path: '/mal-bazar',
-              builder: (context, state) => const HomeScreen(),
+              name: 'duken',
+              path: '/duken',
+              builder: (context, state) => const DukenScreen(),
             ),
           ],
         ),
-        // Tab 2: Sell (create listing or drop)
+        // Tab 2: + Сатуу — create listing or drop
         StatefulShellBranch(
           navigatorKey: _shellNavigatorSellKey,
           routes: [
@@ -86,18 +86,18 @@ final appRouter = GoRouter(
             ),
           ],
         ),
-        // Tab 3: Auctions (live bazaar bidding)
+        // Tab 3: Чарбам — herd CRM (will evolve to include finance + reminders)
         StatefulShellBranch(
           navigatorKey: _shellNavigatorMessagesKey,
           routes: [
             GoRoute(
-              name: 'auctions',
-              path: '/auctions',
-              builder: (context, state) => const AuctionsScreen(),
+              name: RouteNames.herd,
+              path: '/herd',
+              builder: (context, state) => const HerdScreen(),
             ),
           ],
         ),
-        // Tab 4: Profile
+        // Tab 4: Профиль
         StatefulShellBranch(
           navigatorKey: _shellNavigatorProfileKey,
           routes: [
@@ -132,6 +132,12 @@ final appRouter = GoRouter(
       builder: (context, state) => OtpScreen(
         phone: state.uri.queryParameters['phone'] ?? '',
       ),
+    ),
+    GoRoute(
+      name: 'onboarding',
+      path: '/onboarding',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const OnboardingScreen(),
     ),
     GoRoute(
       name: RouteNames.publicProfile,
@@ -242,13 +248,6 @@ final appRouter = GoRouter(
       builder: (context, state) => AuctionDetailScreen(
         auctionId: state.pathParameters['id']!,
       ),
-    ),
-    // Herd kept as a secondary route — accessible from Profile, not the bottom nav
-    GoRoute(
-      name: RouteNames.herd,
-      path: '/herd',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const HerdScreen(),
     ),
   ],
 );

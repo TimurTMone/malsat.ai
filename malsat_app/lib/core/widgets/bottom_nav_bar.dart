@@ -33,14 +33,14 @@ class BottomNavBar extends ConsumerWidget {
           child: Row(
             children: [
               _NavItem(
-                icon: LucideIcons.beef,
-                label: 'Эт базар',
+                icon: LucideIcons.store,
+                label: 'Базар',
                 isActive: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
               _NavItem(
-                icon: LucideIcons.search,
-                label: 'Мал базар',
+                icon: LucideIcons.shoppingBag,
+                label: 'Дүкөн',
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
@@ -52,8 +52,8 @@ class BottomNavBar extends ConsumerWidget {
                 isPrimary: true,
               ),
               _NavItem(
-                icon: LucideIcons.gavel,
-                label: 'Аукцион',
+                icon: LucideIcons.layers,
+                label: 'Чарбам',
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
               ),

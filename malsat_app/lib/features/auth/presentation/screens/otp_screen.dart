@@ -61,7 +61,10 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     try {
       await ref.read(authProvider.notifier).verifyOtp(widget.phone, code);
       if (mounted) {
-        context.go('/');
+        // First-time login (no name set) → onboarding; otherwise → home
+        final user = ref.read(currentUserProvider);
+        final isFirstTime = user?.name == null || (user?.name?.isEmpty ?? true);
+        context.go(isFirstTime ? '/onboarding' : '/');
       }
     } catch (e) {
       if (mounted) {

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../promotion/presentation/widgets/boost_bottom_sheet.dart';
 import '../providers/drops_provider.dart';
 import '../../domain/drop_model.dart';
 
@@ -233,6 +234,78 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                   ),
                   const SizedBox(height: 20),
                 ],
+
+                // Owner-only: Promote / Boost CTA
+                Builder(
+                  builder: (context) {
+                    final me = ref.watch(currentUserProvider);
+                    if (me == null || me.id != drop.seller.id) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: InkWell(
+                        onTap: () => BoostBottomSheet.show(
+                          context,
+                          itemTitle: drop.title,
+                          isMeatDrop: true,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: const Color(0xFFFCD34D)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(LucideIcons.sparkles,
+                                    color: Color(0xFF92400E), size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Drop\'тун жарнамасын көтөрүңүз',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF92400E),
+                                      ),
+                                    ),
+                                    Text(
+                                      'Көбүрөөк заказ — тез сатылат',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFFB45309),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(LucideIcons.chevronRight,
+                                  size: 18, color: Color(0xFF92400E)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
 
                 // Seller info
                 _buildSellerRow(drop),
