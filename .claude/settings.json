@@ -10,7 +10,15 @@
       "Bash(ls /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/.env* /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/assets)",
       "Bash(grep -E \"^\\\\.env|\\\\.env$\" /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/.gitignore)",
       "Bash(plutil -lint /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/ios/Runner/Info.plist /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/ios/Runner/PrivacyInfo.xcprivacy)",
-      "Bash(xmllint --noout /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/ios/Runner/Base.lproj/LaunchScreen.storyboard)"
+      "Bash(xmllint --noout /Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app/ios/Runner/Base.lproj/LaunchScreen.storyboard)",
+      "Bash(curl -sI https://github.com/YurtahGroup/malsat.ai)",
+      "Bash(curl -sI https://github.com/YurtahGroup/MalSat)",
+      "Bash(git fetch *)",
+      "Bash(git merge *)",
+      "Bash(git ls-remote *)"
+    ],
+    "additionalDirectories": [
+      "/Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app"
     ]
   }
 }
