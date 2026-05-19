@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:dio/dio.dart';
 import 'package:gal/gal.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../domain/meat_order_model.dart';
 import '../providers/drops_provider.dart';
 
@@ -22,17 +24,51 @@ class OrderDetailScreen extends ConsumerStatefulWidget {
 
 class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   bool _uploading = false;
+  Timer? _pollTimer;
+
+  // Statuses beyond which the order can't progress, so polling can stop.
+  static const _terminalStatuses = {'DELIVERED', 'CANCELLED'};
+
+  @override
+  void initState() {
+    super.initState();
+    // Poll the order every 4s so the buyer sees the seller's stage
+    // updates live (receipt → confirmed → butchering → … → delivered).
+    _pollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted) return;
+      final snapshot = ref.read(orderDetailProvider(widget.orderId));
+      final status = snapshot.valueOrNull?.status;
+      if (status != null && _terminalStatuses.contains(status)) {
+        _pollTimer?.cancel();
+        return;
+      }
+      ref.invalidate(orderDetailProvider(widget.orderId));
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _refresh() async {
+    await ref.refresh(orderDetailProvider(widget.orderId).future);
+  }
+
+  Map<String, dynamic>? get _d => ref.read(dictionaryProvider).valueOrNull;
 
   @override
   Widget build(BuildContext context) {
     final orderAsync = ref.watch(orderDetailProvider(widget.orderId));
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Заказ',
-          style: TextStyle(
+        title: Text(
+          t(dict, 'order.title'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
@@ -42,18 +78,26 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
-      body: orderAsync.when(
-        data: (order) => _buildContent(order),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: _refresh,
+        child: orderAsync.when(
+          data: (order) => _buildContent(order),
+          loading: () => ListView(
+            children: const [
+              SizedBox(height: 200),
+              Center(child: CircularProgressIndicator()),
+            ],
+          ),
+          error: (e, st) => ListView(
             children: [
-              const Text('Маалымат жүктөлбөдү'),
-              TextButton(
-                onPressed: () =>
-                    ref.refresh(orderDetailProvider(widget.orderId).future),
-                child: const Text('Кайра аракет'),
+              const SizedBox(height: 160),
+              Center(child: Text(t(dict, 'common.loadFailed'))),
+              Center(
+                child: TextButton(
+                  onPressed: _refresh,
+                  child: Text(t(dict, 'common.retry')),
+                ),
               ),
             ],
           ),
@@ -64,6 +108,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
   Widget _buildContent(MeatOrder order) {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +160,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            order.drop?.title ?? 'Заказ',
+            order.drop?.title ?? t(_d, 'order.fallbackTitle'),
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
@@ -129,18 +174,20 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
             children: [
               _SummaryChip(
                 icon: LucideIcons.scale,
-                label: '${order.weightKg.toStringAsFixed(0)} кг',
+                label: '${order.weightKg.toStringAsFixed(0)} ${t(_d, 'common.kg')}',
               ),
               _SummaryChip(
                 icon: LucideIcons.banknote,
-                label: '${order.totalPriceKgs} сом',
+                label: '${order.totalPriceKgs} ${t(_d, 'common.som')}',
                 isPrimary: true,
               ),
               _SummaryChip(
                 icon: order.isDelivery
                     ? LucideIcons.truck
                     : LucideIcons.store,
-                label: order.isDelivery ? 'Жеткирүү' : 'Өзүм алам',
+                label: order.isDelivery
+                    ? t(_d, 'order.deliveryCourier')
+                    : t(_d, 'order.summarySelfPickup'),
               ),
             ],
           ),
@@ -188,13 +235,13 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(LucideIcons.qrCode, size: 22, color: Color(0xFF92400E)),
-              SizedBox(width: 8),
+              const Icon(LucideIcons.qrCode, size: 22, color: Color(0xFF92400E)),
+              const SizedBox(width: 8),
               Text(
-                'Төлөм жасаңыз',
-                style: TextStyle(
+                t(_d, 'order.paymentTitle'),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF92400E),
@@ -204,7 +251,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            '${order.totalPriceKgs} сом — банк тиркемеңизден которуңуз',
+            t(_d, 'order.paymentSubtitle', {'amount': '${order.totalPriceKgs}'}),
             style: const TextStyle(
               fontSize: 13,
               color: Color(0xFFB45309),
@@ -262,9 +309,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                   onPressed: () => _saveQrToPhotos(qrUrl),
                   icon: const Icon(LucideIcons.download,
                       size: 16, color: Color(0xFF92400E)),
-                  label: const Text(
-                    'QR кодду сактоо',
-                    style: TextStyle(
+                  label: Text(
+                    t(_d, 'order.saveQrButton'),
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF92400E),
@@ -282,13 +329,13 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Column(
+              child: Column(
                 children: [
-                  Icon(LucideIcons.qrCode, size: 60, color: AppColors.textMuted),
-                  SizedBox(height: 8),
+                  const Icon(LucideIcons.qrCode, size: 60, color: AppColors.textMuted),
+                  const SizedBox(height: 8),
                   Text(
-                    'QR код жок — сатуучу менен байланышыңыз',
-                    style: TextStyle(
+                    t(_d, 'order.noQrTitle'),
+                    style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
                     ),
@@ -328,9 +375,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: paymentInfo));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Көчүрүлдү!'),
-                          duration: Duration(seconds: 1),
+                        SnackBar(
+                          content: Text(t(_d, 'common.copied')),
+                          duration: const Duration(seconds: 1),
                         ),
                       );
                     },
@@ -370,9 +417,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: seller.phone!));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Көчүрүлдү!'),
-                          duration: Duration(seconds: 1),
+                        SnackBar(
+                          content: Text(t(_d, 'common.copied')),
+                          duration: const Duration(seconds: 1),
                         ),
                       );
                     },
@@ -386,9 +433,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           const SizedBox(height: 20),
 
           // Upload receipt button
-          const Text(
-            'Төлөгөндөн кийин чекти жүктөңүз:',
-            style: TextStyle(
+          Text(
+            t(_d, 'order.afterPayment'),
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: Color(0xFF92400E),
@@ -409,7 +456,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                     )
                   : const Icon(LucideIcons.upload),
               label: Text(
-                _uploading ? 'Жүктөлүүдө...' : 'Чек жүктөө (скриншот)',
+                _uploading ? t(_d, 'order.uploading') : t(_d, 'order.uploadReceiptFull'),
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -441,13 +488,13 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(LucideIcons.checkCircle, size: 18, color: AppColors.success),
-              SizedBox(width: 8),
+              const Icon(LucideIcons.checkCircle, size: 18, color: AppColors.success),
+              const SizedBox(width: 8),
               Text(
-                'Чек жүктөлдү',
-                style: TextStyle(
+                t(_d, 'order.receiptUploadedHeader'),
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: AppColors.success,
@@ -486,16 +533,16 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Сатуучу',
-                  style: TextStyle(
+                Text(
+                  t(_d, 'order.seller'),
+                  style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.textMuted,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  seller.name ?? 'Белгисиз',
+                  seller.name ?? t(_d, 'order.sellerUnknown'),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -553,9 +600,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                     children: [
                       Row(
                         children: [
-                          const Text(
-                            'Жеткирүү дареги',
-                            style: TextStyle(
+                          Text(
+                            t(_d, 'order.deliveryAddress'),
+                            style: const TextStyle(
                               fontSize: 11,
                               color: AppColors.textMuted,
                               fontWeight: FontWeight.w600,
@@ -564,7 +611,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                           if (order.deliveryFee > 0) ...[
                             const Spacer(),
                             Text(
-                              '+${order.deliveryFee} сом',
+                              t(_d, 'order.deliveryFeePlus', {'fee': '${order.deliveryFee}'}),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
@@ -574,9 +621,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                           ],
                           if (order.deliveryFee == 0) ...[
                             const Spacer(),
-                            const Text(
-                              'Акысыз',
-                              style: TextStyle(
+                            Text(
+                              t(_d, 'common.free'),
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.success,
                                 fontWeight: FontWeight.w700,
@@ -626,9 +673,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Алуу жери',
-                        style: TextStyle(
+                      Text(
+                        t(_d, 'order.pickupLocation'),
+                        style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textMuted,
                           fontWeight: FontWeight.w600,
@@ -664,7 +711,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('QR код сүрөттөргө сакталды!'),
+          content: Text(t(_d, 'order.qrSavedFull')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -674,7 +721,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Сактоо ишке ашпады: $e'),
+          content: Text(t(_d, 'order.qrSaveFailed', {'error': '$e'})),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -691,12 +738,12 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           children: [
             ListTile(
               leading: const Icon(LucideIcons.camera),
-              title: const Text('Камера'),
+              title: Text(t(_d, 'common.selectFromCamera')),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(LucideIcons.image),
-              title: const Text('Галерея'),
+              title: Text(t(_d, 'common.selectFromGallery')),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
           ],
@@ -718,9 +765,10 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       ref.invalidate(orderDetailProvider(order.id));
       ref.invalidate(myOrdersProvider);
 
+      final dict = ref.read(dictionaryProvider).valueOrNull;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Чек жүктөлдү! Сатуучу текшерет.'),
+          content: Text(t(dict, 'order.receiptUploaded')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -728,9 +776,10 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      final dict = ref.read(dictionaryProvider).valueOrNull;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ката: $e'),
+          content: Text('${t(dict, 'order.receiptError')}: $e'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -784,12 +833,13 @@ class _SummaryChip extends StatelessWidget {
 }
 
 /// Full delivery tracking timeline — the core tracking UX
-class _DeliveryTimeline extends StatelessWidget {
+class _DeliveryTimeline extends ConsumerWidget {
   final MeatOrder order;
   const _DeliveryTimeline({required this.order});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     if (order.isCancelled) {
       return Container(
         padding: const EdgeInsets.all(14),
@@ -797,13 +847,13 @@ class _DeliveryTimeline extends StatelessWidget {
           color: AppColors.error.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(LucideIcons.xCircle, size: 20, color: AppColors.error),
-            SizedBox(width: 10),
+            const Icon(LucideIcons.xCircle, size: 20, color: AppColors.error),
+            const SizedBox(width: 10),
             Text(
-              'Заказ жокко чыгарылды',
-              style: TextStyle(
+              t(dict, 'order.cancelledNote'),
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.error,
@@ -815,13 +865,13 @@ class _DeliveryTimeline extends StatelessWidget {
     }
 
     final steps = [
-      _Step('PENDING', 'Заказ берилди', LucideIcons.shoppingCart, 'Төлөм күтүлүүдө'),
-      _Step('PAID', 'Чек жүктөлдү', LucideIcons.receipt, 'Сатуучу текшерүүдө'),
-      _Step('CONFIRMED', 'Төлөм кабыл алынды', LucideIcons.checkCircle, 'Союуга даярдануу'),
-      _Step('BUTCHERING', 'Союлууда', LucideIcons.axe, 'Мал союлууда...'),
-      _Step('PACKAGING', 'Таңгакталууда', LucideIcons.package, 'Эт бөлүнүп жатат'),
-      _Step('DELIVERING', 'Жеткирилүүдө', LucideIcons.truck, 'Жолдо...'),
-      _Step('DELIVERED', 'Жеткирилди!', LucideIcons.partyPopper, 'Тамак болсун!'),
+      _Step('PENDING', LucideIcons.shoppingCart),
+      _Step('PAID', LucideIcons.receipt),
+      _Step('CONFIRMED', LucideIcons.checkCircle),
+      _Step('BUTCHERING', LucideIcons.axe),
+      _Step('PACKAGING', LucideIcons.package),
+      _Step('DELIVERING', LucideIcons.truck),
+      _Step('DELIVERED', LucideIcons.partyPopper),
     ];
 
     final currentIdx = steps.indexWhere((s) => s.status == order.status);
@@ -836,9 +886,9 @@ class _DeliveryTimeline extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Заказ абалы',
-            style: TextStyle(
+          Text(
+            t(dict, 'order.statusHeader'),
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
@@ -914,7 +964,7 @@ class _DeliveryTimeline extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              step.label,
+                              t(dict, 'orderStatus.${step.status}.label'),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: isCurrent
@@ -927,7 +977,7 @@ class _DeliveryTimeline extends StatelessWidget {
                             ),
                             if (isCurrent)
                               Text(
-                                step.subtitle,
+                                t(dict, 'orderStatus.${step.status}.subtitle'),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textSecondary,
@@ -974,8 +1024,6 @@ class _DeliveryTimeline extends StatelessWidget {
 
 class _Step {
   final String status;
-  final String label;
   final IconData icon;
-  final String subtitle;
-  _Step(this.status, this.label, this.icon, this.subtitle);
+  _Step(this.status, this.icon);
 }

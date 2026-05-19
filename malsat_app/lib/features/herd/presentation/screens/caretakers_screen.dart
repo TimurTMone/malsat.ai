@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../domain/caretaker_model.dart';
 import '../providers/herd_provider.dart';
 
@@ -17,6 +18,7 @@ class _CaretakersScreenState extends ConsumerState<CaretakersScreen> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(caretakersProvider(_category));
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       appBar: AppBar(
@@ -27,9 +29,9 @@ class _CaretakersScreenState extends ConsumerState<CaretakersScreen> {
           icon: const Icon(LucideIcons.chevronLeft, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Малчыларды табуу',
-          style: TextStyle(
+        title: Text(
+          t(dict, 'caretakers.appBarTitle'),
+          style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
@@ -45,23 +47,23 @@ class _CaretakersScreenState extends ConsumerState<CaretakersScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               children: [
-                _FilterChip(label: 'Баары', active: _category == null, onTap: () => setState(() => _category = null)),
-                _FilterChip(label: 'Жылкы', active: _category == 'HORSE', onTap: () => setState(() => _category = 'HORSE')),
-                _FilterChip(label: 'Бодо мал', active: _category == 'CATTLE', onTap: () => setState(() => _category = 'CATTLE')),
-                _FilterChip(label: 'Кой', active: _category == 'SHEEP', onTap: () => setState(() => _category = 'SHEEP')),
-                _FilterChip(label: 'Арашан', active: _category == 'ARASHAN', onTap: () => setState(() => _category = 'ARASHAN')),
+                _FilterChip(label: t(dict, 'common.all'), active: _category == null, onTap: () => setState(() => _category = null)),
+                _FilterChip(label: t(dict, 'categories.horse'), active: _category == 'HORSE', onTap: () => setState(() => _category = 'HORSE')),
+                _FilterChip(label: t(dict, 'categories.cattle'), active: _category == 'CATTLE', onTap: () => setState(() => _category = 'CATTLE')),
+                _FilterChip(label: t(dict, 'categories.sheep'), active: _category == 'SHEEP', onTap: () => setState(() => _category = 'SHEEP')),
+                _FilterChip(label: t(dict, 'categories.arashan'), active: _category == 'ARASHAN', onTap: () => setState(() => _category = 'ARASHAN')),
               ],
             ),
           ),
           Expanded(
             child: async.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Ката: $e')),
+              error: (e, _) => Center(child: Text(t(dict, 'common.errorPrefix', {'message': '$e'}))),
               data: (list) => ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 itemCount: list.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (_, i) => _CaretakerCard(caretaker: list[i]),
+                itemBuilder: (_, i) => _CaretakerCard(caretaker: list[i], dict: dict),
               ),
             ),
           ),
@@ -106,7 +108,8 @@ class _FilterChip extends StatelessWidget {
 
 class _CaretakerCard extends StatelessWidget {
   final Caretaker caretaker;
-  const _CaretakerCard({required this.caretaker});
+  final Map<String, dynamic>? dict;
+  const _CaretakerCard({required this.caretaker, required this.dict});
 
   @override
   Widget build(BuildContext context) {
@@ -163,14 +166,14 @@ class _CaretakerCard extends StatelessWidget {
                         ),
                         if (caretaker.isVerified) ...[
                           const SizedBox(width: 4),
-                          Icon(LucideIcons.badgeCheck, size: 16, color: AppColors.primary),
+                          const Icon(LucideIcons.badgeCheck, size: 16, color: AppColors.primary),
                         ],
                       ],
                     ),
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Icon(LucideIcons.star, size: 12, color: AppColors.premiumGold),
+                        const Icon(LucideIcons.star, size: 12, color: AppColors.premiumGold),
                         const SizedBox(width: 3),
                         Text(
                           '${caretaker.rating} (${caretaker.reviewCount})',
@@ -178,7 +181,7 @@ class _CaretakerCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          '${caretaker.yearsExperience}+ жыл тажрыйба',
+                          t(dict, 'caretakers.yearsExperience', {'n': '${caretaker.yearsExperience}'}),
                           style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                         ),
                       ],
@@ -186,7 +189,7 @@ class _CaretakerCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Row(
                       children: [
-                        Icon(LucideIcons.mapPin, size: 11, color: AppColors.textMuted),
+                        const Icon(LucideIcons.mapPin, size: 11, color: AppColors.textMuted),
                         const SizedBox(width: 3),
                         Text(
                           '${caretaker.village}, ${caretaker.region}',
@@ -214,13 +217,13 @@ class _CaretakerCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Айлык акысы',
-                    style: TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600, letterSpacing: 0.3),
+                  Text(
+                    t(dict, 'caretakers.monthlyFeeLabel'),
+                    style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600, letterSpacing: 0.3),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${_fmt(caretaker.monthlyFeeKgs)}с/бир баш',
+                    t(dict, 'caretakers.monthlyFeeValue', {'price': _fmt(caretaker.monthlyFeeKgs)}),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                 ],
@@ -232,9 +235,9 @@ class _CaretakerCard extends StatelessWidget {
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text(
-                  'Жалдоо',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white),
+                child: Text(
+                  t(dict, 'caretakers.hireBtn'),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white),
                 ),
               ),
             ],

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../../drops/presentation/screens/drops_screen.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../auctions/presentation/screens/auctions_screen.dart';
@@ -35,6 +37,8 @@ class _BazarScreenState extends ConsumerState<BazarScreen> {
   }
 
   Widget _buildChipsRow() {
+    final dictAsync = ref.watch(dictionaryProvider);
+    final dict = dictAsync.valueOrNull;
     return Container(
       color: AppColors.surface,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -44,26 +48,26 @@ class _BazarScreenState extends ConsumerState<BazarScreen> {
           children: [
             _SectionChip(
               icon: LucideIcons.beef,
-              label: 'Эт',
+              label: t(dict, 'bazar.meat'),
               isActive: _section == _BazarSection.meat,
               activeColor: const Color(0xFFB91C1C),
-              onTap: () => setState(() => _section = _BazarSection.meat),
+              onTap: () => _onSectionTap(_BazarSection.meat),
             ),
             const SizedBox(width: 8),
             _SectionChip(
               icon: LucideIcons.layers,
-              label: 'Мал',
+              label: t(dict, 'bazar.livestock'),
               isActive: _section == _BazarSection.livestock,
               activeColor: AppColors.primary,
-              onTap: () => setState(() => _section = _BazarSection.livestock),
+              onTap: () => _onSectionTap(_BazarSection.livestock),
             ),
             const SizedBox(width: 8),
             _SectionChip(
               icon: LucideIcons.gavel,
-              label: 'Аукцион',
+              label: t(dict, 'bazar.auction'),
               isActive: _section == _BazarSection.auction,
               activeColor: const Color(0xFF7C2D12),
-              onTap: () => setState(() => _section = _BazarSection.auction),
+              onTap: () => _onSectionTap(_BazarSection.auction),
             ),
           ],
         ),
@@ -72,14 +76,35 @@ class _BazarScreenState extends ConsumerState<BazarScreen> {
   }
 
   Widget _buildBody() {
-    switch (_section) {
-      case _BazarSection.meat:
-        return const DropsScreen();
-      case _BazarSection.livestock:
-        return const HomeScreen();
-      case _BazarSection.auction:
-        return const AuctionsScreen();
-    }
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 240),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, anim) => FadeTransition(
+        opacity: anim,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.015),
+            end: Offset.zero,
+          ).animate(anim),
+          child: child,
+        ),
+      ),
+      child: KeyedSubtree(
+        key: ValueKey(_section),
+        child: switch (_section) {
+          _BazarSection.meat => const DropsScreen(),
+          _BazarSection.livestock => const HomeScreen(),
+          _BazarSection.auction => const AuctionsScreen(),
+        },
+      ),
+    );
+  }
+
+  void _onSectionTap(_BazarSection section) {
+    if (_section == section) return;
+    HapticFeedback.selectionClick();
+    setState(() => _section = section);
   }
 }
 

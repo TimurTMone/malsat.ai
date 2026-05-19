@@ -3,8 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
+import '../../../../core/state/view_mode.dart';
+import '../../../../core/widgets/shimmer.dart';
+import '../../../../core/widgets/view_mode_toggle.dart';
 import '../providers/drops_provider.dart';
 import '../widgets/drop_card.dart';
+import '../widgets/drop_card_compact.dart';
+import '../widgets/drop_card_row.dart';
 
 class DropsScreen extends ConsumerWidget {
   const DropsScreen({super.key});
@@ -12,6 +18,8 @@ class DropsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dropsAsync = ref.watch(dropsListProvider);
+    final viewMode = ref.watch(listingViewModeProvider);
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
 
     return SafeArea(
       child: RefreshIndicator(
@@ -53,9 +61,9 @@ class DropsScreen extends ConsumerWidget {
                           color: const Color(0xFFFCA5A5),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
-                          'ЭТ БАЗАР • MEAT DROPS',
-                          style: TextStyle(
+                        child: Text(
+                          t(dict, 'drops.heroBadge'),
+                          style: const TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF7F1D1D),
@@ -64,9 +72,9 @@ class DropsScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Жаңы эт — килограмм менен заказ кыл',
-                        style: TextStyle(
+                      Text(
+                        t(dict, 'drops.heroTitle'),
+                        style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -74,9 +82,10 @@ class DropsScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        '5кг, 10кг, 15кг — канча керек, ошончо ал',
-                        style: TextStyle(fontSize: 12, color: Colors.white70),
+                      Text(
+                        t(dict, 'drops.heroSubtitle'),
+                        style: const TextStyle(
+                            fontSize: 12, color: Colors.white70),
                       ),
                       const SizedBox(height: 14),
                       SingleChildScrollView(
@@ -85,17 +94,17 @@ class DropsScreen extends ConsumerWidget {
                           children: [
                             _InfoChip(
                               icon: LucideIcons.beef,
-                              label: 'Жаңы союлган',
+                              label: t(dict, 'drops.chipFresh'),
                             ),
                             const SizedBox(width: 8),
                             _InfoChip(
                               icon: LucideIcons.truck,
-                              label: 'Өзүң аласың',
+                              label: t(dict, 'drops.chipPickup'),
                             ),
                             const SizedBox(width: 8),
                             _InfoChip(
                               icon: LucideIcons.shield,
-                              label: 'Текшерилген',
+                              label: t(dict, 'drops.chipVerified'),
                             ),
                           ],
                         ),
@@ -106,40 +115,42 @@ class DropsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 20),
 
-              // Section title
+              // Section title + actions row
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
                 child: Row(
                   children: [
-                    const Text(
-                      'Ачык заказдар',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                    Expanded(
+                      child: Text(
+                        t(dict, 'drops.sectionOpen'),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.4,
+                        ),
                       ),
                     ),
-                    const Spacer(),
                     GestureDetector(
                       onTap: () => context.push('/orders/me'),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                            horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: AppColors.backgroundSecondary,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(LucideIcons.shoppingBag,
-                                size: 14, color: AppColors.textSecondary),
-                            SizedBox(width: 4),
+                            const Icon(LucideIcons.shoppingBag,
+                                size: 13, color: AppColors.textSecondary),
+                            const SizedBox(width: 4),
                             Text(
-                              'Заказдарым',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                              t(dict, 'drops.myOrdersBtn'),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
                                 color: AppColors.textSecondary,
                               ),
                             ),
@@ -150,18 +161,27 @@ class DropsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
+
+              // View-mode toggle row — right-aligned, Unaa-style
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [ViewModeToggle()],
+                ),
+              ),
 
               // Drops list
               dropsAsync.when(
                 data: (drops) {
                   if (drops.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.all(40),
+                    return Padding(
+                      padding: const EdgeInsets.all(40),
                       child: Center(
                         child: Text(
-                          'Азырынча эт заказ жок',
-                          style: TextStyle(
+                          t(dict, 'drops.noOrders'),
+                          style: const TextStyle(
                             color: AppColors.textMuted,
                             fontSize: 15,
                           ),
@@ -169,35 +189,54 @@ class DropsScreen extends ConsumerWidget {
                       ),
                     );
                   }
-                  return ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                  return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: drops.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) => DropCard(
-                      drop: drops[index],
-                      onTap: () => context.push('/drop/${drops[index].id}'),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 280),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, anim) => FadeTransition(
+                        opacity: anim,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.02),
+                            end: Offset.zero,
+                          ).animate(anim),
+                          child: child,
+                        ),
+                      ),
+                      child: KeyedSubtree(
+                        key: ValueKey(viewMode),
+                        child: LayoutBuilder(
+                          builder: (ctx, c) =>
+                              _buildDrops(context, drops, viewMode, c.maxWidth),
+                        ),
+                      ),
                     ),
                   );
                 },
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(40),
-                  child: Center(child: CircularProgressIndicator()),
+                loading: () => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: List.generate(
+                      3,
+                      (_) => const ShimmerCard(height: 200),
+                    ),
+                  ),
                 ),
                 error: (e, st) => Padding(
                   padding: const EdgeInsets.all(40),
                   child: Center(
                     child: Column(
                       children: [
-                        const Text('Ката кетти',
-                            style:
-                                TextStyle(color: AppColors.textSecondary)),
+                        Text(t(dict, 'common.error'),
+                            style: const TextStyle(
+                                color: AppColors.textSecondary)),
                         const SizedBox(height: 8),
                         TextButton(
                           onPressed: () =>
                               ref.refresh(dropsListProvider.future),
-                          child: const Text('Кайра аракет'),
+                          child: Text(t(dict, 'common.retry')),
                         ),
                       ],
                     ),
@@ -209,6 +248,58 @@ class DropsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+Widget _buildDrops(
+  BuildContext context,
+  List drops,
+  ListingViewMode mode,
+  double maxWidth,
+) {
+  switch (mode) {
+    case ListingViewMode.large:
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: drops.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        itemBuilder: (ctx, index) => DropCard(
+          drop: drops[index],
+          onTap: () => context.push('/drop/${drops[index].id}'),
+        ),
+      );
+    case ListingViewMode.grid:
+      final cols = maxWidth >= 900
+          ? 4
+          : maxWidth >= 600
+              ? 3
+              : 2;
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: cols,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 14,
+          childAspectRatio: 0.66,
+        ),
+        itemCount: drops.length,
+        itemBuilder: (ctx, index) => DropCardCompact(
+          drop: drops[index],
+          onTap: () => context.push('/drop/${drops[index].id}'),
+        ),
+      );
+    case ListingViewMode.list:
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: drops.length,
+        itemBuilder: (ctx, index) => DropCardRow(
+          drop: drops[index],
+          onTap: () => context.push('/drop/${drops[index].id}'),
+        ),
+      );
   }
 }
 

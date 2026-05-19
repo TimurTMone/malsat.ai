@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 
 /// Дүкөн (Supply Shop) — placeholder.
 /// Coming in Sprint 2: vet medicine, feed, equipment, vet booking.
-class DukenScreen extends StatelessWidget {
+class DukenScreen extends ConsumerWidget {
   const DukenScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -43,21 +46,21 @@ class DukenScreen extends StatelessWidget {
                               color: Colors.white, size: 22),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Дүкөн',
-                                style: TextStyle(
+                                t(dict, 'duken.title'),
+                                style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white,
                                 ),
                               ),
                               Text(
-                                'Чарбага керектүү бардыгы',
-                                style: TextStyle(
+                                t(dict, 'duken.subtitle'),
+                                style: const TextStyle(
                                   fontSize: 13,
                                   color: Colors.white70,
                                 ),
@@ -75,15 +78,15 @@ class DukenScreen extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(LucideIcons.zap,
+                          const Icon(LucideIcons.zap,
                               size: 14, color: Colors.white),
-                          SizedBox(width: 6),
+                          const SizedBox(width: 6),
                           Text(
-                            'Жакында ачылат',
-                            style: TextStyle(
+                            t(dict, 'duken.comingSoonBadge'),
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
@@ -96,9 +99,9 @@ class DukenScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Категориялар',
-                style: TextStyle(
+              Text(
+                t(dict, 'duken.categoriesHeader'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -112,30 +115,30 @@ class DukenScreen extends StatelessWidget {
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
                 childAspectRatio: 1.05,
-                children: const [
+                children: [
                   _CategoryTile(
                     icon: LucideIcons.pill,
-                    label: 'Дары',
-                    sub: 'Ветеринардык',
-                    color: Color(0xFFB91C1C),
+                    label: t(dict, 'duken.catMedicine'),
+                    sub: t(dict, 'duken.catMedicineSub'),
+                    color: const Color(0xFFB91C1C),
                   ),
                   _CategoryTile(
                     icon: LucideIcons.wheat,
-                    label: 'Тоют',
-                    sub: 'Чөп, дан, туз',
-                    color: Color(0xFF92400E),
+                    label: t(dict, 'duken.catFeed'),
+                    sub: t(dict, 'duken.catFeedSub'),
+                    color: const Color(0xFF92400E),
                   ),
                   _CategoryTile(
                     icon: LucideIcons.wrench,
-                    label: 'Жабдуу',
-                    sub: 'Кайчы, жасоо',
-                    color: Color(0xFF1E40AF),
+                    label: t(dict, 'duken.catTools'),
+                    sub: t(dict, 'duken.catToolsSub'),
+                    color: const Color(0xFF1E40AF),
                   ),
                   _CategoryTile(
                     icon: LucideIcons.stethoscope,
-                    label: 'Ветеринар',
-                    sub: 'Заказ кылуу',
-                    color: Color(0xFF1B5E20),
+                    label: t(dict, 'duken.catVet'),
+                    sub: t(dict, 'duken.catVetSub'),
+                    color: const Color(0xFF1B5E20),
                   ),
                 ],
               ),
@@ -154,19 +157,19 @@ class DukenScreen extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
-                            'Биринчилерден болуңуз',
-                            style: TextStyle(
+                            t(dict, 'duken.notifyTitle'),
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
                               color: AppColors.textPrimary,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            'Дүкөн ачылганда сизге кабарлайбыз',
-                            style: TextStyle(
+                            t(dict, 'duken.notifySub'),
+                            style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
                             ),

@@ -1,25 +1,52 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../domain/meat_order_model.dart';
 import '../providers/drops_provider.dart';
 
-class SellerOrdersScreen extends ConsumerWidget {
+class SellerOrdersScreen extends ConsumerStatefulWidget {
   const SellerOrdersScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SellerOrdersScreen> createState() => _SellerOrdersScreenState();
+}
+
+class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> {
+  Timer? _pollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Poll every 6s so the seller sees new buyer orders + receipt uploads
+    // without manually pulling down to refresh.
+    _pollTimer = Timer.periodic(const Duration(seconds: 6), (_) {
+      if (!mounted) return;
+      ref.invalidate(sellerOrdersProvider);
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final ordersAsync = ref.watch(sellerOrdersProvider);
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Келген заказдар',
-          style: TextStyle(
+        title: Text(
+          t(dict, 'sellerOrders.title'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
@@ -35,21 +62,21 @@ class SellerOrdersScreen extends ConsumerWidget {
         child: ordersAsync.when(
           data: (orders) {
             if (orders.isEmpty) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(LucideIcons.inbox,
+                    const Icon(LucideIcons.inbox,
                         size: 48, color: AppColors.textMuted),
-                    SizedBox(height: 12),
-                    Text('Заказдар жок',
-                        style: TextStyle(
+                    const SizedBox(height: 12),
+                    Text(t(dict, 'sellerOrders.noOrders'),
+                        style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textMuted)),
-                    SizedBox(height: 4),
-                    Text('Эт Drop жарыялаганда заказдар келет',
-                        style: TextStyle(
+                    const SizedBox(height: 4),
+                    Text(t(dict, 'sellerOrders.noOrdersSub'),
+                        style: const TextStyle(
                             fontSize: 13, color: AppColors.textMuted)),
                   ],
                 ),
@@ -60,7 +87,7 @@ class SellerOrdersScreen extends ConsumerWidget {
               itemCount: orders.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (_, i) =>
-                  _SellerOrderCard(order: orders[i], ref: ref),
+                  _SellerOrderCard(order: orders[i], ref: ref, dict: dict),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -68,11 +95,11 @@ class SellerOrdersScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Ката кетти'),
+                Text(t(dict, 'common.error')),
                 TextButton(
                   onPressed: () =>
                       ref.refresh(sellerOrdersProvider.future),
-                  child: const Text('Кайра аракет'),
+                  child: Text(t(dict, 'common.retry')),
                 ),
               ],
             ),
@@ -86,7 +113,8 @@ class SellerOrdersScreen extends ConsumerWidget {
 class _SellerOrderCard extends StatefulWidget {
   final MeatOrder order;
   final WidgetRef ref;
-  const _SellerOrderCard({required this.order, required this.ref});
+  final Map<String, dynamic>? dict;
+  const _SellerOrderCard({required this.order, required this.ref, required this.dict});
 
   @override
   State<_SellerOrderCard> createState() => _SellerOrderCardState();
@@ -96,6 +124,7 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
   bool _updating = false;
 
   MeatOrder get order => widget.order;
+  Map<String, dynamic>? get dict => widget.dict;
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +161,7 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      order.buyer?.name ?? 'Сатып алуучу',
+                      order.buyer?.name ?? t(dict, 'sellerOrders.buyerFallback'),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -156,7 +185,7 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  _statusLabel,
+                  t(dict, 'sellerOrderStatus.${order.status}'),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -172,12 +201,12 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
           Row(
             children: [
               _chip(LucideIcons.scale,
-                  '${order.weightKg.toStringAsFixed(0)} кг'),
+                  '${order.weightKg.toStringAsFixed(0)} ${t(dict, 'common.kg')}'),
               const SizedBox(width: 8),
-              _chip(LucideIcons.banknote, '${order.totalPriceKgs} сом'),
+              _chip(LucideIcons.banknote, '${order.totalPriceKgs} ${t(dict, 'common.som')}'),
               if (order.isDelivery) ...[
                 const SizedBox(width: 8),
-                _chip(LucideIcons.truck, 'Жеткирүү'),
+                _chip(LucideIcons.truck, t(dict, 'sellerOrders.deliveryChip')),
               ],
             ],
           ),
@@ -239,10 +268,10 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
                   const Icon(LucideIcons.receipt,
                       size: 16, color: Color(0xFF92400E)),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Чек жүктөлдү — текшериңиз',
-                      style: TextStyle(
+                      t(dict, 'sellerOrders.receiptCame'),
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF92400E),
@@ -343,15 +372,15 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
   String get _nextActionLabel {
     switch (order.status) {
       case 'PAID':
-        return 'Төлөмдү ырастоо';
+        return t(dict, 'sellerOrders.actionConfirmPayment');
       case 'CONFIRMED':
-        return 'Союуну баштоо + сүрөт';
+        return t(dict, 'sellerOrders.actionStartButchering');
       case 'BUTCHERING':
-        return 'Таңгактоо + сүрөт';
+        return t(dict, 'sellerOrders.actionPackaging');
       case 'PACKAGING':
-        return 'Жеткирүү + сүрөт';
+        return t(dict, 'sellerOrders.actionDelivery');
       case 'DELIVERING':
-        return 'Жеткирилди деп белгилөө';
+        return t(dict, 'sellerOrders.actionMarkDelivered');
       default:
         return '';
     }
@@ -414,29 +443,6 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
     }
   }
 
-  String get _statusLabel {
-    switch (order.status) {
-      case 'PENDING':
-        return 'ТӨЛӨМ КҮТҮҮДӨ';
-      case 'PAID':
-        return 'ЧЕК КЕЛДИ';
-      case 'CONFIRMED':
-        return 'ЫРАСТАЛДЫ';
-      case 'BUTCHERING':
-        return 'СОЮЛУУДА';
-      case 'PACKAGING':
-        return 'ТАҢГАКТАЛУУДА';
-      case 'DELIVERING':
-        return 'ЖОЛДО';
-      case 'DELIVERED':
-        return 'ЖЕТКИРИЛДИ';
-      case 'CANCELLED':
-        return 'ЖОККО ЧЫГДЫ';
-      default:
-        return order.status;
-    }
-  }
-
   Future<void> _advanceStatus(String newStatus) async {
     String? photoUrl;
 
@@ -462,12 +468,12 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
               ),
               ListTile(
                 leading: const Icon(LucideIcons.camera, color: AppColors.primary),
-                title: const Text('Камера менен тартуу'),
+                title: Text(t(dict, 'common.selectFromCameraLong')),
                 onTap: () => Navigator.pop(ctx, ImageSource.camera),
               ),
               ListTile(
                 leading: const Icon(LucideIcons.image, color: AppColors.primary),
-                title: const Text('Галереядан тандоо'),
+                title: Text(t(dict, 'common.selectFromGalleryLong')),
                 onTap: () => Navigator.pop(ctx, ImageSource.gallery),
               ),
             ],
@@ -486,7 +492,7 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Сүрөт жүктөлбөдү: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text(t(dict, 'sellerOrders.photoUploadFailed', {'error': '$e'})), backgroundColor: AppColors.error),
         );
         setState(() => _updating = false);
         return;
@@ -502,7 +508,7 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ката: $e'), backgroundColor: AppColors.error),
+        SnackBar(content: Text(t(dict, 'common.errorPrefix', {'message': '$e'})), backgroundColor: AppColors.error),
       );
     } finally {
       if (mounted) setState(() => _updating = false);
@@ -512,13 +518,13 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
   String get _photoPrompt {
     switch (order.status) {
       case 'CONFIRMED':
-        return 'Союу процессин сүрөткө тартыңыз';
+        return t(dict, 'sellerOrders.photoPromptButcher');
       case 'BUTCHERING':
-        return 'Таңгакталган этти сүрөткө тартыңыз';
+        return t(dict, 'sellerOrders.photoPromptPackage');
       case 'PACKAGING':
-        return 'Жеткирүү сүрөтүн тартыңыз';
+        return t(dict, 'sellerOrders.photoPromptDelivery');
       default:
-        return 'Сүрөт тартыңыз';
+        return t(dict, 'sellerOrders.photoPromptDefault');
     }
   }
 }

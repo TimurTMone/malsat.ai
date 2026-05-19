@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../constants/app_colors.dart';
-import '../i18n/app_localizations.dart';
+import 'notifications_sheet.dart';
 
 class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
   const MalsatHeader({super.key});
@@ -12,10 +12,6 @@ class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(localeProvider);
-    final otherLocale = locale.languageCode == 'ky' ? 'ru' : 'ky';
-    final otherLocaleName = otherLocale == 'ru' ? 'Рус' : 'Кыр';
-
     return AppBar(
       toolbarHeight: 52,
       title: const Text(
@@ -28,31 +24,23 @@ class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
-        GestureDetector(
-          onTap: () {
-            ref.read(localeProvider.notifier).state = Locale(otherLocale);
-          },
-          child: Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.borderStrong),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(LucideIcons.globe, size: 14, color: AppColors.textPrimary),
-                const SizedBox(width: 4),
-                Text(
-                  otherLocaleName,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: IconButton(
+            tooltip: 'Notifications',
+            onPressed: () => NotificationsSheet.show(context),
+            icon: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundSecondary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                LucideIcons.bell,
+                size: 20,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
         ),

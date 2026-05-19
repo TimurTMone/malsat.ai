@@ -79,17 +79,17 @@ class _SellChooser extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Эмнени сатасыз?',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            Text(
+              t(dict, 'sellForm.subtitle'),
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 20),
 
             // Option 1: Sell live animal (existing listing)
             _SellOption(
               icon: LucideIcons.heart,
-              title: 'Тирүү мал сатуу',
-              subtitle: 'Жылкы, уй, кой — бүтүн мал сатуу',
+              title: t(dict, 'sellForm.sellLiveTitle'),
+              subtitle: t(dict, 'sellForm.sellLiveSub'),
               color: AppColors.primary,
               bgColor: AppColors.primary.withValues(alpha: 0.06),
               onTap: () => Navigator.of(context).push(
@@ -110,8 +110,8 @@ class _SellChooser extends ConsumerWidget {
             // Option 2: Sell meat (create a drop)
             _SellOption(
               icon: LucideIcons.beef,
-              title: 'Эт сатуу (Drop)',
-              subtitle: 'Союп, килограмм менен саттыруу',
+              title: t(dict, 'sellForm.sellMeatTitle'),
+              subtitle: t(dict, 'sellForm.sellMeatSub'),
               color: const Color(0xFFB91C1C),
               bgColor: const Color(0xFFFEE2E2),
               onTap: () => context.push('/create-drop'),
@@ -119,9 +119,9 @@ class _SellChooser extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Seller tools section
-            const Text(
-              'Сатуучу куралдары',
-              style: TextStyle(
+            Text(
+              t(dict, 'sellForm.sellerTools'),
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
@@ -130,14 +130,14 @@ class _SellChooser extends ConsumerWidget {
             const SizedBox(height: 12),
             _ToolTile(
               icon: LucideIcons.inbox,
-              title: 'Келген заказдар',
-              subtitle: 'Сатып алуучулардын заказдарын башкаруу',
+              title: t(dict, 'sellForm.toolOrdersTitle'),
+              subtitle: t(dict, 'sellForm.toolOrdersSub'),
               onTap: () => context.push('/seller-orders'),
             ),
             _ToolTile(
               icon: LucideIcons.qrCode,
-              title: 'Төлөм QR коду',
-              subtitle: 'Банк QR кодуңузду жүктөңүз',
+              title: t(dict, 'sellForm.toolQrTitle'),
+              subtitle: t(dict, 'sellForm.toolQrSub'),
               onTap: () => context.push('/payment-setup'),
             ),
           ],
@@ -342,8 +342,8 @@ class _SellForm extends ConsumerWidget {
                                 SnackBar(
                                   content: Text(
                                     result.confidence == 'high'
-                                        ? 'AI: Form auto-filled'
-                                        : 'AI: Check the details',
+                                        ? t(dict, 'sellForm.aiSuccess')
+                                        : t(dict, 'sellForm.aiCheck'),
                                   ),
                                   backgroundColor: AppColors.primary,
                                   behavior: SnackBarBehavior.floating,
@@ -359,8 +359,8 @@ class _SellForm extends ConsumerWidget {
                           )
                         : const Icon(LucideIcons.sparkles, size: 18),
                     label: Text(form.isSubmitting
-                        ? 'AI analyzing...'
-                        : 'Auto-fill with AI'),
+                        ? t(dict, 'sellForm.aiAnalyzing')
+                        : t(dict, 'sellForm.aiAutoFill')),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.boostBlue,
                       side: const BorderSide(color: AppColors.boostBlue),
@@ -431,9 +431,9 @@ class _SellForm extends ConsumerWidget {
             // Horse subcategory selector
             if (form.category == 'HORSE') ...[
               const SizedBox(height: 14),
-              const Text(
-                'Жылкы түрү',
-                style: TextStyle(
+              Text(
+                t(dict, 'sellForm.horseTypeLabel'),
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -469,7 +469,7 @@ class _SellForm extends ConsumerWidget {
                                     : const Color(0xFFB91C1C)),
                             const SizedBox(height: 4),
                             Text(
-                              'Эт жылкы',
+                              t(dict, 'sellForm.horseMeatTitle'),
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -479,7 +479,7 @@ class _SellForm extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              'Союуга',
+                              t(dict, 'sellForm.horseMeatSub'),
                               style: TextStyle(
                                 fontSize: 10,
                                 color: form.subcategory == 'MEAT'
@@ -520,7 +520,7 @@ class _SellForm extends ConsumerWidget {
                                     : const Color(0xFF1565C0)),
                             const SizedBox(height: 4),
                             Text(
-                              'Көк бөрү',
+                              t(dict, 'sellForm.horseKokBoruTitle'),
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -530,7 +530,7 @@ class _SellForm extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              'Спорт жылкы',
+                              t(dict, 'sellForm.horseKokBoruSub'),
                               style: TextStyle(
                                 fontSize: 10,
                                 color: form.subcategory == 'KOK_BORU'
@@ -628,7 +628,7 @@ class _SellForm extends ConsumerWidget {
             const SizedBox(height: 16),
 
             // Gender
-            _FieldLabel(t(dict, 'common.all')),
+            _FieldLabel(t(dict, 'gender.label')),
             const SizedBox(height: 6),
             Row(
               children: [
@@ -820,6 +820,7 @@ class _PhotoPickerGrid extends StatelessWidget {
                       fontSize: 11,
                       color: AppColors.textMuted,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -870,9 +871,9 @@ class _PhotoPickerGrid extends StatelessWidget {
                           color: AppColors.primary,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
-                          'Main',
-                          style: TextStyle(
+                        child: Text(
+                          t(dict, 'sellForm.mainPhoto'),
+                          style: const TextStyle(
                             fontSize: 9,
                             color: Colors.white,
                             fontWeight: FontWeight.w600,

@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/api_endpoints.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 class PaymentSetupScreen extends ConsumerStatefulWidget {
@@ -47,12 +48,13 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Төлөм жөндөөлөрү',
-          style: TextStyle(
+        title: Text(
+          t(dict, 'paymentSetup.appBarTitle'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
@@ -76,15 +78,15 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
                       color: const Color(0xFFFEF3C7),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(LucideIcons.info,
+                        const Icon(LucideIcons.info,
                             size: 20, color: Color(0xFF92400E)),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Сатып алуучулар сиздин QR кодуңузду көрүп, банк тиркемеси аркылуу төлөм жасашат.',
-                            style: TextStyle(
+                            t(dict, 'paymentSetup.explainer'),
+                            style: const TextStyle(
                               fontSize: 13,
                               color: Color(0xFF92400E),
                             ),
@@ -96,18 +98,18 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
                   const SizedBox(height: 24),
 
                   // QR Code section
-                  const Text(
-                    'QR код (банк тиркемеңизден)',
-                    style: TextStyle(
+                  Text(
+                    t(dict, 'paymentSetup.qrSectionTitle'),
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Mbank, O!Деньги, Optima — QR кодуңуздун скриншотун жүктөңүз',
-                    style: TextStyle(
+                  Text(
+                    t(dict, 'paymentSetup.qrSectionSub'),
+                    style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
@@ -151,15 +153,15 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(LucideIcons.camera,
+                                            const Icon(LucideIcons.camera,
                                                 size: 14,
                                                 color: Colors.white),
-                                            SizedBox(width: 4),
-                                            Text('Алмаштыруу',
-                                                style: TextStyle(
+                                            const SizedBox(width: 4),
+                                            Text(t(dict, 'paymentSetup.replaceQr'),
+                                                style: const TextStyle(
                                                     fontSize: 12,
                                                     color: Colors.white)),
                                           ],
@@ -168,24 +170,24 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
                                     ),
                                   ],
                                 )
-                              : const Column(
+                              : Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(LucideIcons.qrCode,
+                                    const Icon(LucideIcons.qrCode,
                                         size: 48, color: AppColors.textMuted),
-                                    SizedBox(height: 8),
+                                    const SizedBox(height: 8),
                                     Text(
-                                      'QR код жүктөө',
-                                      style: TextStyle(
+                                      t(dict, 'paymentSetup.qrEmptyTitle'),
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.textSecondary,
                                       ),
                                     ),
-                                    SizedBox(height: 2),
+                                    const SizedBox(height: 2),
                                     Text(
-                                      'Сүрөтүңүздү тандаңыз',
-                                      style: TextStyle(
+                                      t(dict, 'paymentSetup.qrEmptySub'),
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         color: AppColors.textMuted,
                                       ),
@@ -197,18 +199,18 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
                   const SizedBox(height: 24),
 
                   // Payment info text
-                  const Text(
-                    'Төлөм маалыматы',
-                    style: TextStyle(
+                  Text(
+                    t(dict, 'paymentSetup.paymentInfoTitle'),
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Банк аталышы жана номериңиз (мис: "Mbank: +996555123456")',
-                    style: TextStyle(
+                  Text(
+                    t(dict, 'paymentSetup.paymentInfoSub'),
+                    style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
@@ -217,7 +219,7 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
                   TextField(
                     controller: _paymentInfoC,
                     decoration: InputDecoration(
-                      hintText: 'Mbank: +996555123456',
+                      hintText: t(dict, 'paymentSetup.paymentInfoHint2'),
                       hintStyle: const TextStyle(
                           color: AppColors.textMuted, fontSize: 14),
                       filled: true,
@@ -251,9 +253,9 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
                               height: 20,
                               child: CircularProgressIndicator(
                                   strokeWidth: 2, color: Colors.white))
-                          : const Text(
-                              'Сактоо',
-                              style: TextStyle(
+                          : Text(
+                              t(dict, 'common.save'),
+                              style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.w700),
                             ),
                     ),
@@ -290,9 +292,10 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
       setState(() => _qrUrl = url);
 
       if (!mounted) return;
+      final dict = ref.read(dictionaryProvider).valueOrNull;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('QR код жүктөлдү!'),
+          content: Text(t(dict, 'paymentSetup.qrUploaded')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -300,8 +303,9 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      final dict = ref.read(dictionaryProvider).valueOrNull;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ката: $e'), backgroundColor: AppColors.error),
+        SnackBar(content: Text(t(dict, 'common.errorPrefix', {'message': '$e'})), backgroundColor: AppColors.error),
       );
     } finally {
       if (mounted) setState(() => _uploadingQr = false);
@@ -317,9 +321,10 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
       });
 
       if (!mounted) return;
+      final dict = ref.read(dictionaryProvider).valueOrNull;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Сакталды!'),
+          content: Text(t(dict, 'paymentSetup.savedMsg')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -327,8 +332,9 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      final dict = ref.read(dictionaryProvider).valueOrNull;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ката: $e'), backgroundColor: AppColors.error),
+        SnackBar(content: Text(t(dict, 'common.errorPrefix', {'message': '$e'})), backgroundColor: AppColors.error),
       );
     } finally {
       if (mounted) setState(() => _saving = false);

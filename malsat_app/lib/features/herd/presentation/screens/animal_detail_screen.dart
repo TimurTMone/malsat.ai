@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../domain/owned_animal_model.dart';
 import '../providers/herd_provider.dart';
 import '../widgets/qr_token_card.dart';
@@ -14,12 +15,13 @@ class AnimalDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(animalDetailProvider(id));
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Ката: $e')),
-        data: (animal) => _Body(animal: animal),
+        error: (e, _) => Center(child: Text(t(dict, 'herd.loadErrorPrefix', {'error': '$e'}))),
+        data: (animal) => _Body(animal: animal, dict: dict),
       ),
     );
   }
@@ -27,7 +29,8 @@ class AnimalDetailScreen extends ConsumerWidget {
 
 class _Body extends StatelessWidget {
   final OwnedAnimal animal;
-  const _Body({required this.animal});
+  final Map<String, dynamic>? dict;
+  const _Body({required this.animal, required this.dict});
 
   @override
   Widget build(BuildContext context) {
@@ -106,11 +109,11 @@ class _Body extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Азыркы баасы',
-                        style: TextStyle(fontSize: 11, color: AppColors.textMuted, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
+                    Text(t(dict, 'animal.currentValue'),
+                        style: const TextStyle(fontSize: 11, color: AppColors.textMuted, letterSpacing: 0.5, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     Text(
-                      '${_fmt(animal.currentValueKgs)} сом',
+                      '${_fmt(animal.currentValueKgs)} ${t(dict, 'common.som')}',
                       style: const TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w800,
@@ -127,7 +130,7 @@ class _Body extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${isProfit ? '+' : ''}${_fmt(animal.profitKgs)} сом (${isProfit ? '+' : ''}${animal.profitPercent.toStringAsFixed(1)}%)',
+                          '${isProfit ? '+' : ''}${_fmt(animal.profitKgs)} ${t(dict, 'common.som')} (${isProfit ? '+' : ''}${animal.profitPercent.toStringAsFixed(1)}%)',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -136,7 +139,7 @@ class _Body extends StatelessWidget {
                         ),
                         const Spacer(),
                         Text(
-                          'Алынды: ${_fmt(animal.purchasePriceKgs)}с',
+                          t(dict, 'animal.purchasedAt', {'price': _fmt(animal.purchasePriceKgs)}),
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppColors.textMuted,
@@ -153,17 +156,17 @@ class _Body extends StatelessWidget {
               // Stats grid
               Row(
                 children: [
-                  _StatBox(icon: LucideIcons.heart, label: 'Ден соолук', value: '${animal.healthScore}/100', color: AppColors.success),
+                  _StatBox(icon: LucideIcons.heart, label: t(dict, 'animal.statHealth'), value: '${animal.healthScore}/100', color: AppColors.success),
                   const SizedBox(width: 12),
-                  _StatBox(icon: LucideIcons.scale, label: 'Салмак +', value: '+${animal.weightGainKg}кг', color: AppColors.primary),
+                  _StatBox(icon: LucideIcons.scale, label: t(dict, 'animal.statWeight'), value: '+${animal.weightGainKg}${t(dict, 'common.kg')}', color: AppColors.primary),
                 ],
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _StatBox(icon: LucideIcons.stethoscope, label: 'Ветеринар', value: '${animal.vetVisits} жолу', color: AppColors.boostBlue),
+                  _StatBox(icon: LucideIcons.stethoscope, label: t(dict, 'animal.statVet'), value: t(dict, 'animal.statVetTimes', {'n': '${animal.vetVisits}'}), color: AppColors.boostBlue),
                   const SizedBox(width: 12),
-                  _StatBox(icon: LucideIcons.gift, label: 'Пайыз', value: '${animal.loyaltyPoints}', color: AppColors.premiumGold),
+                  _StatBox(icon: LucideIcons.gift, label: t(dict, 'animal.statPoints'), value: '${animal.loyaltyPoints}', color: AppColors.premiumGold),
                 ],
               ),
 
@@ -180,8 +183,8 @@ class _Body extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('МАЛЧЫ',
-                          style: TextStyle(fontSize: 10, color: AppColors.textMuted, letterSpacing: 0.8, fontWeight: FontWeight.w800)),
+                      Text(t(dict, 'animal.caretakerHeader'),
+                          style: const TextStyle(fontSize: 10, color: AppColors.textMuted, letterSpacing: 0.8, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 10),
                       Row(
                         children: [
@@ -217,7 +220,7 @@ class _Body extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  '${animal.locationRegion} • карап турат',
+                                  t(dict, 'animal.caretakerWatching', {'region': animal.locationRegion}),
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.textSecondary,
@@ -250,8 +253,8 @@ class _Body extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Кийинки этап',
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.premiumGold, letterSpacing: 0.5)),
+                          Text(t(dict, 'animal.nextMilestone'),
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.premiumGold, letterSpacing: 0.5)),
                           const SizedBox(height: 2),
                           Text(
                             animal.nextMilestone,
@@ -275,7 +278,7 @@ class _Body extends StatelessWidget {
                   Expanded(
                     child: _ActionButton(
                       icon: LucideIcons.tag,
-                      label: 'Сатуу',
+                      label: t(dict, 'animal.actionSell'),
                       color: AppColors.primary,
                     ),
                   ),
@@ -283,7 +286,7 @@ class _Body extends StatelessWidget {
                   Expanded(
                     child: _ActionButton(
                       icon: LucideIcons.utensils,
-                      label: 'Союу',
+                      label: t(dict, 'animal.actionButcher'),
                       color: AppColors.error,
                     ),
                   ),

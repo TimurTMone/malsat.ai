@@ -39,7 +39,9 @@ class MyListingsScreen extends ConsumerWidget {
             icon: const Icon(LucideIcons.plus),
             color: AppColors.primary,
             onPressed: () => context.push('/sell'),
-            tooltip: 'Жаңы жарыя',
+            tooltip: dictAsync.valueOrNull != null
+                ? t(dictAsync.valueOrNull, 'listing.create')
+                : null,
           ),
         ],
       ),
@@ -50,7 +52,7 @@ class MyListingsScreen extends ConsumerWidget {
           child: profileAsync.when(
             data: (profile) {
               if (profile == null || profile.listings.isEmpty) {
-                return const _EmptyState();
+                return _EmptyState(dict: dict);
               }
               return GridView.builder(
                 padding: const EdgeInsets.all(16),
@@ -81,31 +83,32 @@ class MyListingsScreen extends ConsumerWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  final Map<String, dynamic> dict;
+  const _EmptyState({required this.dict});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      children: const [
-        SizedBox(height: 120),
-        Icon(LucideIcons.package, size: 48, color: AppColors.textMuted),
-        SizedBox(height: 12),
+      children: [
+        const SizedBox(height: 120),
+        const Icon(LucideIcons.package, size: 48, color: AppColors.textMuted),
+        const SizedBox(height: 12),
         Center(
           child: Text(
-            'Жарыяларыңыз жок',
-            style: TextStyle(
+            t(dict, 'myListings.empty'),
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppColors.textMuted,
             ),
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Center(
           child: Text(
-            'Биринчи жарыяңызды түзүңүз',
-            style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+            t(dict, 'myListings.emptySub'),
+            style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
           ),
         ),
       ],

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 
 /// Bottom sheet that lets a seller "promote" (boost) their listing or drop.
 /// 3 tiers; payment integration is the next step — for now, tapping a package
 /// shows a "coming soon" snackbar so the demo flow is honest about state.
-class BoostBottomSheet extends StatelessWidget {
+class BoostBottomSheet extends ConsumerWidget {
   /// Title of the listing/drop being promoted (shown in the header).
   final String itemTitle;
 
@@ -36,7 +38,8 @@ class BoostBottomSheet extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       decoration: const BoxDecoration(
@@ -73,21 +76,21 @@ class BoostBottomSheet extends StatelessWidget {
                     color: Color(0xFF92400E), size: 22),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Жарнаманы көтөрүү',
-                      style: TextStyle(
+                      t(dict, 'boost.sheetTitle'),
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
                         color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
-                      '5–10 эсе көп көрүлүш',
-                      style: TextStyle(
+                      t(dict, 'boost.sheetSubtitle'),
+                      style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary,
                       ),
@@ -112,28 +115,31 @@ class BoostBottomSheet extends StatelessWidget {
 
           // Packages
           _PackageTile(
-            label: 'Топ-3 күн',
-            sub: 'Категориянын башында 3 күн',
+            label: t(dict, 'boost.pkgTop3Day'),
+            sub: t(dict, 'boost.pkgTop3DaySub'),
             priceKgs: 200,
             badge: null,
-            onTap: () => _comingSoon(context),
+            somLabel: t(dict, 'common.som'),
+            onTap: () => _comingSoon(context, ref),
           ),
           const SizedBox(height: 10),
           _PackageTile(
-            label: 'Премиум 30 күн',
-            sub: 'TOP белгиси + биринчи орундар',
+            label: t(dict, 'boost.pkgPremium'),
+            sub: t(dict, 'boost.pkgPremiumSub'),
             priceKgs: 1000,
-            badge: 'POPULAR',
+            badge: t(dict, 'boost.pkgPremiumBadge'),
             highlighted: true,
-            onTap: () => _comingSoon(context),
+            somLabel: t(dict, 'common.som'),
+            onTap: () => _comingSoon(context, ref),
           ),
           const SizedBox(height: 10),
           _PackageTile(
-            label: isMeatDrop ? 'Featured drop' : 'Featured аукцион',
-            sub: 'Башкы баракчадагы көрсөтүлгөн орун',
+            label: isMeatDrop ? t(dict, 'boost.pkgFeaturedDrop') : t(dict, 'boost.pkgFeaturedAuction'),
+            sub: t(dict, 'boost.pkgFeaturedSub'),
             priceKgs: 500,
             badge: null,
-            onTap: () => _comingSoon(context),
+            somLabel: t(dict, 'common.som'),
+            onTap: () => _comingSoon(context, ref),
           ),
 
           const SizedBox(height: 16),
@@ -150,8 +156,8 @@ class BoostBottomSheet extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Төлөм системасы жакында кошулат',
-                    style: TextStyle(
+                    t(dict, 'boost.paymentSoon'),
+                    style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                     ),
@@ -165,11 +171,12 @@ class BoostBottomSheet extends StatelessWidget {
     );
   }
 
-  void _comingSoon(BuildContext context) {
+  void _comingSoon(BuildContext context, WidgetRef ref) {
+    final dict = ref.read(dictionaryProvider).valueOrNull;
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Төлөм системасы жакында ачылат'),
+        content: Text(t(dict, 'boost.paymentSoonToast')),
         backgroundColor: const Color(0xFF92400E),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -184,6 +191,7 @@ class _PackageTile extends StatelessWidget {
   final int priceKgs;
   final String? badge;
   final bool highlighted;
+  final String somLabel;
   final VoidCallback onTap;
 
   const _PackageTile({
@@ -192,6 +200,7 @@ class _PackageTile extends StatelessWidget {
     required this.priceKgs,
     required this.badge,
     this.highlighted = false,
+    required this.somLabel,
     required this.onTap,
   });
 
@@ -275,9 +284,9 @@ class _PackageTile extends StatelessWidget {
                         : AppColors.textPrimary,
                   ),
                 ),
-                const Text(
-                  'сом',
-                  style: TextStyle(
+                Text(
+                  somLabel,
+                  style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.textMuted,
                     fontWeight: FontWeight.w600,

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/i18n/app_localizations.dart';
+import '../../../../core/widgets/language_sheet.dart';
 import '../../../../core/widgets/listing_card.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/domain/auth_state.dart';
@@ -26,7 +27,7 @@ class ProfileScreen extends ConsumerWidget {
         return _LoggedOutProfile(dict: dict);
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => const Center(child: Text('Error')),
+      error: (e, st) => Center(child: Text(t(null, 'common.error'))),
     );
   }
 }
@@ -152,15 +153,15 @@ class _LoggedInProfile extends ConsumerWidget {
                       children: [
                         _StatItem(
                           value: '${profile.listingsCount}',
-                          label: t(dict, 'profile.myListings'),
+                          label: t(dict, 'profile.statsListings'),
                         ),
                         _StatItem(
                           value: '${profile.reviewsCount}',
-                          label: t(dict, 'profile.reviews'),
+                          label: t(dict, 'profile.statsReviews'),
                         ),
                         _StatItem(
                           value: profile.trustScore.toStringAsFixed(1),
-                          label: t(dict, 'profile.trustScore'),
+                          label: t(dict, 'profile.statsTrust'),
                           icon: Icons.star,
                           iconColor: Colors.amber,
                         ),
@@ -196,13 +197,13 @@ class _LoggedInProfile extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(LucideIcons.store, size: 20, color: Colors.white),
-                        SizedBox(width: 8),
+                        const Icon(LucideIcons.store, size: 20, color: Colors.white),
+                        const SizedBox(width: 8),
                         Text(
-                          'Сатуучу панели',
-                          style: TextStyle(
+                          t(dict, 'profile.sellerPanelTitle'),
+                          style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
@@ -211,9 +212,9 @@ class _LoggedInProfile extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Эт сатуу, заказдарды башкаруу',
-                      style: TextStyle(
+                    Text(
+                      t(dict, 'profile.sellerPanelSubtitle'),
+                      style: const TextStyle(
                         fontSize: 13,
                         color: Colors.white70,
                       ),
@@ -224,7 +225,7 @@ class _LoggedInProfile extends ConsumerWidget {
                         Expanded(
                           child: _SellerActionButton(
                             icon: LucideIcons.plusCircle,
-                            label: 'Эт Drop\nжарыялоо',
+                            label: t(dict, 'profile.createDrop'),
                             onTap: () => context.push('/create-drop'),
                           ),
                         ),
@@ -232,7 +233,7 @@ class _LoggedInProfile extends ConsumerWidget {
                         Expanded(
                           child: _SellerActionButton(
                             icon: LucideIcons.clipboardList,
-                            label: 'Келген\nзаказдар',
+                            label: t(dict, 'profile.incomingOrders'),
                             onTap: () => context.push('/seller-orders'),
                           ),
                         ),
@@ -240,7 +241,7 @@ class _LoggedInProfile extends ConsumerWidget {
                         Expanded(
                           child: _SellerActionButton(
                             icon: LucideIcons.qrCode,
-                            label: 'Төлөм\nQR код',
+                            label: t(dict, 'profile.paymentQr'),
                             onTap: () => context.push('/payment-setup'),
                           ),
                         ),
@@ -253,7 +254,7 @@ class _LoggedInProfile extends ConsumerWidget {
               // ═══ BUYER SECTION ═══
               _MenuItem(
                 icon: LucideIcons.shoppingBag,
-                label: 'Менин заказдарым',
+                label: t(dict, 'profile.myOrders'),
                 onTap: () => context.push('/orders/me'),
               ),
 
@@ -277,17 +278,14 @@ class _LoggedInProfile extends ConsumerWidget {
                 icon: LucideIcons.globe,
                 label: t(dict, 'profile.language'),
                 trailing: Text(
-                  locale.languageCode == 'ky' ? 'Кыргызча' : 'Русский',
+                  _languageLabel(locale.languageCode),
                   style: const TextStyle(
                     fontSize: 13,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textSecondary,
                   ),
                 ),
-                onTap: () {
-                  final other =
-                      locale.languageCode == 'ky' ? 'ru' : 'ky';
-                  ref.read(localeProvider.notifier).state = Locale(other);
-                },
+                onTap: () => LanguageSheet.show(context),
               ),
               _MenuItem(
                 icon: LucideIcons.settings,
@@ -352,6 +350,17 @@ class _LoggedInProfile extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  String _languageLabel(String code) {
+    switch (code) {
+      case 'ru':
+        return 'Русский';
+      case 'en':
+        return 'English';
+      default:
+        return 'Кыргызча';
+    }
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/auction_model.dart';
 import '../providers/auctions_provider.dart';
@@ -23,21 +24,22 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final auctionAsync = ref.watch(auctionDetailProvider(widget.auctionId));
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: auctionAsync.when(
-        data: (auction) => _buildContent(auction),
+        data: (auction) => _buildContent(auction, dict),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Аукцион жүктөлбөдү'),
+              Text(t(dict, 'auctionDetail.loadError')),
               TextButton(
                 onPressed: () => ref
                     .refresh(auctionDetailProvider(widget.auctionId).future),
-                child: const Text('Кайра аракет'),
+                child: Text(t(dict, 'common.retry')),
               ),
             ],
           ),
@@ -46,7 +48,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
     );
   }
 
-  Widget _buildContent(Auction auction) {
+  Widget _buildContent(Auction auction, Map<String, dynamic>? dict) {
     final photo =
         auction.media.isNotEmpty ? auction.media.first.mediaUrl : null;
     return CustomScrollView(
@@ -105,8 +107,8 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                           const SizedBox(width: 5),
                           Text(
                             auction.isEndingSoon
-                                ? 'АЯКТАП КАЛДЫ'
-                                : 'ТИРҮҮ АУКЦИОН',
+                                ? t(dict, 'auctionDetail.endingBadge')
+                                : t(dict, 'auctionDetail.liveBadge'),
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
@@ -122,7 +124,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                         size: 14, color: AppColors.textSecondary),
                     const SizedBox(width: 4),
                     Text(
-                      'Калды: ${auction.timeLeftText}',
+                      t(dict, 'auctionDetail.timeLeft', {'time': auction.timeLeftText}),
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary,
@@ -156,9 +158,9 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Учурдагы эң жогорку баа',
-                        style: TextStyle(
+                      Text(
+                        t(dict, 'auctionDetail.currentHighestBid'),
+                        style: const TextStyle(
                           fontSize: 13,
                           color: Colors.white70,
                           fontWeight: FontWeight.w600,
@@ -166,7 +168,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '${_formatPrice(auction.currentBid)} сом',
+                        '${_formatPrice(auction.currentBid)} ${t(dict, 'common.som')}',
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w900,
@@ -181,7 +183,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                               size: 14, color: Colors.white70),
                           const SizedBox(width: 4),
                           Text(
-                            '${auction.bidCount} баа коюлду',
+                            t(dict, 'auctionDetail.bidsPlaced', {'n': '${auction.bidCount}'}),
                             style: const TextStyle(
                               fontSize: 13,
                               color: Colors.white70,
@@ -193,7 +195,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                               size: 14, color: Colors.white70),
                           const SizedBox(width: 4),
                           Text(
-                            '${auction.viewsCount} көрүү',
+                            t(dict, 'auctionDetail.viewsCount', {'n': '${auction.viewsCount}'}),
                             style: const TextStyle(
                               fontSize: 13,
                               color: Colors.white70,
@@ -216,18 +218,18 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                   child: Column(
                     children: [
                       _InfoRow(
-                        label: 'Башталыш баасы',
-                        value: '${_formatPrice(auction.startingPrice)} сом',
+                        label: t(dict, 'auctionDetail.startingPriceLabel'),
+                        value: '${_formatPrice(auction.startingPrice)} ${t(dict, 'common.som')}',
                       ),
                       const SizedBox(height: 8),
                       _InfoRow(
-                        label: 'Минималдуу кошуу',
-                        value: '+${_formatPrice(auction.bidIncrement)} сом',
+                        label: t(dict, 'auctionDetail.minIncrementLabel'),
+                        value: '+${_formatPrice(auction.bidIncrement)} ${t(dict, 'common.som')}',
                       ),
                       const SizedBox(height: 8),
                       _InfoRow(
-                        label: 'Кийинки минималдуу',
-                        value: '${_formatPrice(auction.nextMinBid)} сом',
+                        label: t(dict, 'auctionDetail.nextMinLabel'),
+                        value: '${_formatPrice(auction.nextMinBid)} ${t(dict, 'common.som')}',
                         isHighlight: true,
                       ),
                     ],
@@ -260,9 +262,9 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Базар',
-                              style: TextStyle(
+                            Text(
+                              t(dict, 'auctionDetail.bazaarLabel'),
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: AppColors.textMuted,
                                 fontWeight: FontWeight.w600,
@@ -293,9 +295,9 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                 // Description
                 if (auction.description != null) ...[
                   const SizedBox(height: 20),
-                  const Text(
-                    'Баяндама',
-                    style: TextStyle(
+                  Text(
+                    t(dict, 'auctionDetail.descriptionLabel'),
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
@@ -333,8 +335,8 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                           : const Icon(LucideIcons.gavel, size: 20),
                       label: Text(
                         _bidding
-                            ? 'Жөнөтүлүүдө...'
-                            : 'Баа коюу — ${_formatPrice(auction.nextMinBid)} сом',
+                            ? t(dict, 'auctionDetail.bidSendingBtn')
+                            : t(dict, 'auctionDetail.placeBidWithAmount', {'amount': _formatPrice(auction.nextMinBid)}),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
@@ -358,10 +360,10 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                       color: AppColors.backgroundSecondary,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Аукцион аяктады',
-                        style: TextStyle(
+                        t(dict, 'auctionDetail.endedNote'),
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textMuted,
@@ -380,15 +382,16 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
 
   Future<void> _placeBid(Auction auction) async {
     final isAuth = ref.read(isAuthenticatedProvider);
+    final dict = ref.read(dictionaryProvider).valueOrNull;
     if (!isAuth) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Баа коюу үчүн кириңиз'),
+          content: Text(t(dict, 'auctionDetail.loginToBid')),
           backgroundColor: AppColors.accent,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           action: SnackBarAction(
-            label: 'Кирүү',
+            label: t(dict, 'common.login'),
             textColor: Colors.white,
             onPressed: () => context.push('/auth/login'),
           ),
@@ -407,7 +410,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              'Баа коюлду: ${_formatPrice(auction.nextMinBid)} сом'),
+              t(dict, 'auctionDetail.bidPlacedToast', {'amount': _formatPrice(auction.nextMinBid)})),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -417,7 +420,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ката: $e'),
+          content: Text(t(dict, 'common.errorPrefix', {'message': '$e'})),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),

@@ -34,13 +34,13 @@ class BottomNavBar extends ConsumerWidget {
             children: [
               _NavItem(
                 icon: LucideIcons.store,
-                label: 'Базар',
+                label: t(dict, 'nav.bazar'),
                 isActive: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
               _NavItem(
                 icon: LucideIcons.shoppingBag,
-                label: 'Дүкөн',
+                label: t(dict, 'nav.duken'),
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
@@ -53,7 +53,7 @@ class BottomNavBar extends ConsumerWidget {
               ),
               _NavItem(
                 icon: LucideIcons.layers,
-                label: 'Чарбам',
+                label: t(dict, 'nav.herd'),
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
               ),

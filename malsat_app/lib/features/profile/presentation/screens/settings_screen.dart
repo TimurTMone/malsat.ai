@@ -40,25 +40,32 @@ class SettingsScreen extends ConsumerWidget {
             _SectionHeader(label: t(dict, 'profile.language')),
             _SettingsItem(
               icon: LucideIcons.globe,
-              label: 'Кыргызча',
+              label: t(dict, 'settings.languageKy'),
               selected: locale.languageCode == 'ky',
               onTap: () =>
                   ref.read(localeProvider.notifier).state = const Locale('ky'),
             ),
             _SettingsItem(
               icon: LucideIcons.globe,
-              label: 'Русский',
+              label: t(dict, 'settings.languageRu'),
               selected: locale.languageCode == 'ru',
               onTap: () =>
                   ref.read(localeProvider.notifier).state = const Locale('ru'),
             ),
+            _SettingsItem(
+              icon: LucideIcons.globe,
+              label: t(dict, 'settings.languageEn'),
+              selected: locale.languageCode == 'en',
+              onTap: () =>
+                  ref.read(localeProvider.notifier).state = const Locale('en'),
+            ),
             const SizedBox(height: 16),
-            _SectionHeader(label: 'Программа'),
-            const _SettingsItem(
+            _SectionHeader(label: t(dict, 'settings.appSection')),
+            _SettingsItem(
               icon: LucideIcons.info,
-              label: 'Версия',
-              trailing: Text(
-                '1.4.0',
+              label: t(dict, 'settings.version'),
+              trailing: const Text(
+                '1.5.0',
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -67,7 +74,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             _SettingsItem(
               icon: LucideIcons.fileText,
-              label: 'Колдонуу шарттары',
+              label: t(dict, 'settings.terms'),
               onTap: () => _showUrlSnack(
                 context,
                 'https://malsat.altailabs.club/terms',
@@ -75,7 +82,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             _SettingsItem(
               icon: LucideIcons.shield,
-              label: 'Купуялык саясаты',
+              label: t(dict, 'settings.privacy'),
               onTap: () => _showUrlSnack(
                 context,
                 'https://malsat.altailabs.club/privacy',

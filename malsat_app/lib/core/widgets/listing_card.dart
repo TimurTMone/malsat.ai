@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../constants/app_colors.dart';
+import '../i18n/app_localizations.dart';
 import '../../features/listing_detail/domain/listing_model.dart';
 import '../../features/favorites/presentation/widgets/favorite_button.dart';
 
@@ -70,9 +71,9 @@ class ListingCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Text(
-                      'TOP',
-                      style: TextStyle(
+                    child: Text(
+                      t(dict, 'listing.topBadge'),
+                      style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textPrimary,
@@ -97,8 +98,8 @@ class ListingCard extends StatelessWidget {
                     ),
                     child: Text(
                       listing.subcategory == 'KOK_BORU'
-                          ? 'КӨК БӨРҮ'
-                          : 'ЭТ',
+                          ? t(dict, 'listing.kokBoruBadge')
+                          : t(dict, 'listing.meatBadge'),
                       style: const TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
@@ -134,8 +135,8 @@ class ListingCard extends StatelessWidget {
                         const SizedBox(width: 3),
                         Text(
                           listing.modeBExpectedReturnPercent != null
-                              ? 'Жалдаса +${listing.modeBExpectedReturnPercent}%'
-                              : 'Жалдаса болот',
+                              ? t(dict, 'listing.rentBadge', {'p': '${listing.modeBExpectedReturnPercent}'})
+                              : t(dict, 'listing.rentAvailable'),
                           style: const TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
@@ -219,7 +220,7 @@ class ListingCard extends StatelessWidget {
       if (i > 0 && (str.length - i) % 3 == 0) buffer.write(' ');
       buffer.write(str[i]);
     }
-    return '$buffer c';
+    return '$buffer ${t(dict, 'common.som')}';
   }
 }
 

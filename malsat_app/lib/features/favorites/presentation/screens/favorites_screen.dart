@@ -20,7 +20,7 @@ class FavoritesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: dictAsync.when(
           data: (dict) => Text(
-            t(dict, 'listing.favorites'),
+            t(dict, 'favorites.title'),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
@@ -41,7 +41,7 @@ class FavoritesScreen extends ConsumerWidget {
           child: favoritesAsync.when(
             data: (listings) {
               if (listings.isEmpty) {
-                return const _EmptyState();
+                return _EmptyState(dict: dict);
               }
               return GridView.builder(
                 padding: const EdgeInsets.all(16),
@@ -63,6 +63,7 @@ class FavoritesScreen extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => _ErrorState(
               message: e.toString(),
+              dict: dict,
               onRetry: () => ref.refresh(favoritesListProvider.future),
             ),
           ),
@@ -75,31 +76,32 @@ class FavoritesScreen extends ConsumerWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  final Map<String, dynamic> dict;
+  const _EmptyState({required this.dict});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      children: const [
-        SizedBox(height: 120),
-        Icon(LucideIcons.heart, size: 48, color: AppColors.textMuted),
-        SizedBox(height: 12),
+      children: [
+        const SizedBox(height: 120),
+        const Icon(LucideIcons.heart, size: 48, color: AppColors.textMuted),
+        const SizedBox(height: 12),
         Center(
           child: Text(
-            'Сүйүктүүлөр жок',
-            style: TextStyle(
+            t(dict, 'favorites.empty'),
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppColors.textMuted,
             ),
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Center(
           child: Text(
-            'Жарыяларга жүрөктү басыңыз',
-            style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+            t(dict, 'favorites.emptySub'),
+            style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
           ),
         ),
       ],
@@ -109,8 +111,9 @@ class _EmptyState extends StatelessWidget {
 
 class _ErrorState extends StatelessWidget {
   final String message;
+  final Map<String, dynamic> dict;
   final VoidCallback onRetry;
-  const _ErrorState({required this.message, required this.onRetry});
+  const _ErrorState({required this.message, required this.dict, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +138,7 @@ class _ErrorState extends StatelessWidget {
         Center(
           child: TextButton(
             onPressed: onRetry,
-            child: const Text('Кайталоо'),
+            child: Text(t(dict, 'common.retry')),
           ),
         ),
       ],

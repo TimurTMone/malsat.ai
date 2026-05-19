@@ -317,7 +317,7 @@ class _DetailContent extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: () => _makeCall(listing.seller!.phone),
                         icon: const Icon(LucideIcons.phone, size: 18),
-                        label: const Text('Өзүм алам'),
+                        label: Text(t(dict, 'listingDetail.myselfBuy')),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.textPrimary,
                           foregroundColor: Colors.white,
@@ -339,7 +339,7 @@ class _DetailContent extends StatelessWidget {
                 // Mode B — invest (Малчы жалдайм) — only when eligible
                 if (listing.modeBEligible) ...[
                   const SizedBox(height: 10),
-                  _InvestButton(listing: listing),
+                  _InvestButton(listing: listing, dict: dict),
                 ],
               ],
             ),
@@ -368,7 +368,7 @@ class _DetailContent extends StatelessWidget {
       if (i > 0 && (str.length - i) % 3 == 0) buffer.write(' ');
       buffer.write(str[i]);
     }
-    return '$buffer сом';
+    return '$buffer ${t(dict, 'common.som')}';
   }
 }
 
@@ -501,7 +501,7 @@ class _DetailsGrid extends StatelessWidget {
       final genderKey =
           listing.gender == 'MALE' ? 'gender.male' : 'gender.female';
       items.add(_DetailItem(
-        label: t(dict, 'common.all'), // Gender label
+        label: t(dict, 'gender.label'),
         value: t(dict, genderKey),
       ));
     }
@@ -689,8 +689,9 @@ class _ChatButton extends ConsumerWidget {
           }
         } catch (e) {
           if (context.mounted) {
+            final dict = ref.read(dictionaryProvider).valueOrNull;
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: $e')),
+              SnackBar(content: Text(t(dict, 'common.errorPrefix', {'message': '$e'}))),
             );
           }
         }
@@ -706,7 +707,8 @@ class _ChatButton extends ConsumerWidget {
 
 class _InvestButton extends StatelessWidget {
   final ListingModel listing;
-  const _InvestButton({required this.listing});
+  final Map<String, dynamic> dict;
+  const _InvestButton({required this.listing, required this.dict});
 
   @override
   Widget build(BuildContext context) {
@@ -734,24 +736,24 @@ class _InvestButton extends StatelessWidget {
           children: [
             const Icon(LucideIcons.trendingUp, size: 18, color: Colors.white),
             const SizedBox(width: 10),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Малчы жалдайм',
-                    style: TextStyle(
+                    t(dict, 'listingDetail.hireCaretaker'),
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                       height: 1.1,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
-                    'Малчы карайт → пайда ал',
-                    style: TextStyle(
+                    t(dict, 'listingDetail.hireCaretakerSub'),
+                    style: const TextStyle(
                       fontSize: 11,
                       color: Colors.white70,
                     ),
@@ -786,14 +788,15 @@ class _InvestButton extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _InvestSheet(listing: listing),
+      builder: (_) => _InvestSheet(listing: listing, dict: dict),
     );
   }
 }
 
 class _InvestSheet extends StatelessWidget {
   final ListingModel listing;
-  const _InvestSheet({required this.listing});
+  final Map<String, dynamic> dict;
+  const _InvestSheet({required this.listing, required this.dict});
 
   @override
   Widget build(BuildContext context) {
@@ -824,9 +827,9 @@ class _InvestSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Малчы жалдайсың — кантип иштейт',
-                style: TextStyle(
+              Text(
+                t(dict, 'listingDetail.investSheetTitle'),
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -834,7 +837,7 @@ class _InvestSheet extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Сиз акча салыңыз. Малчы карайт. Сатылганда пайда сизге.',
+                t(dict, 'listingDetail.investSheetSubtitle'),
                 style: TextStyle(
                   fontSize: 14,
                   color: AppColors.textSecondary.withValues(alpha: 0.9),
@@ -852,23 +855,23 @@ class _InvestSheet extends StatelessWidget {
                 child: Column(
                   children: [
                     _TermRow(
-                      label: 'Эң аз инвестиция',
-                      value: '${_fmt(listing.modeBMinInvestmentKgs ?? 0)} сом',
+                      label: t(dict, 'listingDetail.investMin'),
+                      value: '${_fmt(listing.modeBMinInvestmentKgs ?? 0)} ${t(dict, 'common.som')}',
                     ),
                     const Divider(height: 20),
                     _TermRow(
-                      label: 'Күтүлгөн пайда',
+                      label: t(dict, 'listingDetail.investReturn'),
                       value: '+${listing.modeBExpectedReturnPercent ?? 0}%',
                       highlight: true,
                     ),
                     const Divider(height: 20),
                     _TermRow(
-                      label: 'Мөөнөтү',
-                      value: '${listing.modeBDurationMonths ?? 0} ай',
+                      label: t(dict, 'listingDetail.investDuration'),
+                      value: '${listing.modeBDurationMonths ?? 0} ${t(dict, 'listingDetail.monthsUnit')}',
                     ),
                     const Divider(height: 20),
                     _TermRow(
-                      label: 'Малчы',
+                      label: t(dict, 'listingDetail.investCaretaker'),
                       value: listing.modeBCaretakerName ?? '-',
                     ),
                   ],
@@ -878,22 +881,22 @@ class _InvestSheet extends StatelessWidget {
               const SizedBox(height: 20),
 
               // 3 steps
-              const _StepRow(
+              _StepRow(
                 num: '1',
-                title: 'Акча салыңыз',
-                desc: 'Эң аз сумманы QR аркылуу жөнөтөсүз',
+                title: t(dict, 'listingDetail.investStep1Title'),
+                desc: t(dict, 'listingDetail.investStep1Desc'),
               ),
               const SizedBox(height: 12),
-              const _StepRow(
+              _StepRow(
                 num: '2',
-                title: 'Малчы карайт',
-                desc: 'Апта сайын видео-отчёт алып турасыз',
+                title: t(dict, 'listingDetail.investStep2Title'),
+                desc: t(dict, 'listingDetail.investStep2Desc'),
               ),
               const SizedBox(height: 12),
-              const _StepRow(
+              _StepRow(
                 num: '3',
-                title: 'Пайда алыңыз',
-                desc: 'Сатылганда акчаңыз кайра банкка түшөт',
+                title: t(dict, 'listingDetail.investStep3Title'),
+                desc: t(dict, 'listingDetail.investStep3Desc'),
               ),
 
               const SizedBox(height: 24),
@@ -906,9 +909,9 @@ class _InvestSheet extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Жакында — Beta да ачылат'),
-                        duration: Duration(seconds: 2),
+                      SnackBar(
+                        content: Text(t(dict, 'listingDetail.investSoon')),
+                        duration: const Duration(seconds: 2),
                       ),
                     );
                   },
@@ -920,16 +923,16 @@ class _InvestSheet extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
-                    'Инвестиция кылуу',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  child: Text(
+                    t(dict, 'listingDetail.investCta'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                   ),
                 ),
               ),
               const SizedBox(height: 12),
               Center(
                 child: Text(
-                  'Курман айт / той / экспорт сатуудан пайда',
+                  t(dict, 'listingDetail.investFootnote'),
                   style: TextStyle(
                     fontSize: 11,
                     color: AppColors.textMuted,
@@ -1079,26 +1082,31 @@ class _PromoteBanner extends StatelessWidget {
                   color: Color(0xFF92400E), size: 20),
             ),
             const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Жарнаманы көтөрүңүз',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF92400E),
-                    ),
-                  ),
-                  Text(
-                    'Көбүрөөк көрүлүш — тез сатылат',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFFB45309),
-                    ),
-                  ),
-                ],
+            Expanded(
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final dict = ref.watch(dictionaryProvider).valueOrNull;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t(dict, 'listingDetail.boostBannerTitle'),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF92400E),
+                        ),
+                      ),
+                      Text(
+                        t(dict, 'listingDetail.boostBannerSubtitle'),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFB45309),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             const Icon(LucideIcons.chevronRight,

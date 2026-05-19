@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const kDefaultLocale = Locale('ky');
-const kSupportedLocales = [Locale('ky'), Locale('ru')];
+const kSupportedLocales = [Locale('ky'), Locale('ru'), Locale('en')];
 
 final localeProvider = StateProvider<Locale>((ref) => kDefaultLocale);
 

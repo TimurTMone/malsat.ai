@@ -3,6 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { signAccessToken, signRefreshToken } from "@/lib/auth";
 import { ok, errorResponse, handleError } from "@/lib/response";
 
+// Mirrors the flag in /api/auth/login. While open, any 4-6 digit code unlocks
+// the supplied phone; the user is still upserted with their real phone number
+// so all downstream data is real. Disable with DEMO_AUTH_OPEN=false.
+const DEMO_AUTH_OPEN = process.env.DEMO_AUTH_OPEN !== "false";
+
 export async function POST(req: NextRequest) {
   try {
     const { phone, code } = await req.json();
@@ -11,14 +16,21 @@ export async function POST(req: NextRequest) {
       return errorResponse("Phone and code are required", 400);
     }
 
-    // DEMO MODE: code "000000" bypasses OTP verification (for App Store reviewers)
-    const isDemoCode = code === "000000";
+    // Normalize phone to match how /login stores it.
+    const normalizedPhone =
+      typeof phone === "string"
+        ? phone.replace(/\s/g, "").replace(/^0/, "+996")
+        : phone;
 
-    if (!isDemoCode) {
-      // Find valid OTP
+    const isDemoCode = code === "000000";
+    const isOpenDemoCode =
+      DEMO_AUTH_OPEN && typeof code === "string" && /^\d{4,6}$/.test(code);
+
+    if (!isDemoCode && !isOpenDemoCode) {
+      // Real OTP path — verify the code stored at /login time.
       const otpRecord = await prisma.otpCode.findFirst({
         where: {
-          phone,
+          phone: normalizedPhone,
           code,
           used: false,
           expiresAt: { gt: new Date() },
@@ -30,26 +42,26 @@ export async function POST(req: NextRequest) {
         return errorResponse("Invalid or expired code", 401);
       }
 
-      // Mark OTP as used
       await prisma.otpCode.update({
         where: { id: otpRecord.id },
         data: { used: true },
       });
     }
 
-    // Find or create user
-    let user = await prisma.user.findUnique({ where: { phone } });
+    // Find or create user with the real phone — same record on subsequent logins.
+    let user = await prisma.user.findUnique({ where: { phone: normalizedPhone } });
 
     if (!user) {
       user = await prisma.user.create({
         data: {
-          phone,
-          name: isDemoCode ? "Демо колдонуучу" : null,
+          phone: normalizedPhone,
+          // Only the legacy hardcoded demo phone gets a placeholder name;
+          // open-demo users are anonymous until they set a name themselves.
+          name: normalizedPhone === "+996555000000" ? "Демо колдонуучу" : null,
         },
       });
     }
 
-    // Generate tokens
     const payload = { userId: user.id, phone: user.phone };
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);

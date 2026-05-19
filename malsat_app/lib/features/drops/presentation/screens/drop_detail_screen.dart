@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../promotion/presentation/widgets/boost_bottom_sheet.dart';
 import '../providers/drops_provider.dart';
@@ -35,22 +36,23 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final dropAsync = ref.watch(dropDetailProvider(widget.dropId));
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: dropAsync.when(
-        data: (drop) => _buildContent(context, drop),
+        data: (drop) => _buildContent(context, drop, dict),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Маалымат жүктөлбөдү'),
+              Text(t(dict, 'common.loadFailed')),
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () =>
                     ref.refresh(dropDetailProvider(widget.dropId).future),
-                child: const Text('Кайра аракет'),
+                child: Text(t(dict, 'common.retry')),
               ),
             ],
           ),
@@ -59,7 +61,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
     );
   }
 
-  Widget _buildContent(BuildContext context, ButcherDrop drop) {
+  Widget _buildContent(BuildContext context, ButcherDrop drop, Map<String, dynamic>? dict) {
     final photo = drop.media.isNotEmpty ? drop.media.first.mediaUrl : null;
     final daysLeft = drop.daysUntilButcher;
 
@@ -122,7 +124,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        _statusLabel(drop.status),
+                        t(dict, 'dropStatus.${drop.status}'),
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -137,10 +139,10 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                       const SizedBox(width: 4),
                       Text(
                         daysLeft == 0
-                            ? 'Бүгүн союлат'
+                            ? t(dict, 'dropDetail.butcherToday')
                             : daysLeft == 1
-                                ? 'Эртең союлат'
-                                : '$daysLeft күндөн кийин',
+                                ? t(dict, 'dropDetail.butcherTomorrow')
+                                : t(dict, 'dropDetail.butcherInDays', {'n': '$daysLeft'}),
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
@@ -184,20 +186,20 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'сом',
-                            style: TextStyle(
+                            t(dict, 'common.som'),
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: AppColors.primary,
                             ),
                           ),
                           Text(
-                            'за 1 кг',
-                            style: TextStyle(
+                            t(dict, 'dropDetail.per1Kg'),
+                            style: const TextStyle(
                               fontSize: 11,
                               color: AppColors.textSecondary,
                             ),
@@ -210,14 +212,14 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                 const SizedBox(height: 20),
 
                 // Progress section
-                _buildProgressSection(drop),
+                _buildProgressSection(drop, dict),
                 const SizedBox(height: 24),
 
                 // Description
                 if (drop.description != null) ...[
-                  const Text(
-                    'Маалымат',
-                    style: TextStyle(
+                  Text(
+                    t(dict, 'dropDetail.infoSection'),
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -275,21 +277,21 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                     color: Color(0xFF92400E), size: 20),
                               ),
                               const SizedBox(width: 12),
-                              const Expanded(
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Drop\'тун жарнамасын көтөрүңүз',
-                                      style: TextStyle(
+                                      t(dict, 'dropDetail.boostOwnerTitle'),
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF92400E),
                                       ),
                                     ),
                                     Text(
-                                      'Көбүрөөк заказ — тез сатылат',
-                                      style: TextStyle(
+                                      t(dict, 'dropDetail.boostOwnerSubtitle'),
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         color: Color(0xFFB45309),
                                       ),
@@ -308,7 +310,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                 ),
 
                 // Seller info
-                _buildSellerRow(drop),
+                _buildSellerRow(drop, dict),
                 const SizedBox(height: 20),
 
                 // Pickup location
@@ -327,9 +329,9 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Алуу жери',
-                              style: TextStyle(
+                            Text(
+                              t(dict, 'dropDetail.pickupLocation'),
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: AppColors.textMuted,
                                 fontWeight: FontWeight.w600,
@@ -353,9 +355,9 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
 
                 // ═══ PORTION SELECTOR — THE MAIN EVENT ═══
                 if (drop.isOpen) ...[
-                  const Text(
-                    'Канча кг заказ берасыз?',
-                    style: TextStyle(
+                  Text(
+                    t(dict, 'dropDetail.kgQuestion'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
@@ -363,7 +365,10 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Мин. ${drop.minOrderKg.toStringAsFixed(0)} кг • Калды: ${drop.remainingWeightKg.toStringAsFixed(0)} кг',
+                    t(dict, 'dropDetail.minRemainingHint', {
+                      'min': drop.minOrderKg.toStringAsFixed(0),
+                      'remaining': drop.remainingWeightKg.toStringAsFixed(0),
+                    }),
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
@@ -431,7 +436,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                   ),
                                 ),
                                 Text(
-                                  'кг',
+                                  t(dict, 'dropDetail.kgUnit'),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -481,7 +486,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Башка',
+                                t(dict, 'dropDetail.otherAmount'),
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -503,7 +508,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                     Row(
                       children: [
                         Text(
-                          '${_selectedKg.toStringAsFixed(0)} кг',
+                          '${_selectedKg.toStringAsFixed(0)} ${t(dict, 'common.kg')}',
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w900,
@@ -512,7 +517,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          '${(_selectedKg * drop.pricePerKg).round()} сом',
+                          '${(_selectedKg * drop.pricePerKg).round()} ${t(dict, 'common.som')}',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -545,7 +550,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                     controller: _noteController,
                     maxLines: 2,
                     decoration: InputDecoration(
-                      hintText: 'Кошумча (мис: "сөөк менен", "майсыз")...',
+                      hintText: t(dict, 'dropDetail.noteHint'),
                       hintStyle: const TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 13,
@@ -562,9 +567,9 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                   const SizedBox(height: 20),
 
                   // ═══ DELIVERY METHOD — pickup vs delivery ═══
-                  const Text(
-                    'Кантип аласыз?',
-                    style: TextStyle(
+                  Text(
+                    t(dict, 'dropDetail.deliveryQuestion'),
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
@@ -600,7 +605,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                         : AppColors.textMuted),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Өзүм алам',
+                                  t(dict, 'dropDetail.selfPickup'),
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
@@ -611,7 +616,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Базардан',
+                                  t(dict, 'dropDetail.fromBazar'),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: !_delivery
@@ -660,7 +665,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                             : AppColors.textMuted),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Жеткирүү',
+                                  t(dict, 'dropDetail.delivery'),
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
@@ -675,9 +680,9 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                 Text(
                                   drop.deliveryAvailable
                                       ? drop.deliveryFee > 0
-                                          ? '+${drop.deliveryFee} сом'
-                                          : 'Акысыз'
-                                      : 'Жок',
+                                          ? t(dict, 'dropDetail.deliveryFeePlus', {'fee': '${drop.deliveryFee}'})
+                                          : t(dict, 'common.free')
+                                      : t(dict, 'dropDetail.deliveryNone'),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: !drop.deliveryAvailable
@@ -707,7 +712,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                       onChanged: (_) => setState(() {}),
                       maxLines: 2,
                       decoration: InputDecoration(
-                        hintText: 'Жеткирүү дареги (мис: Бишкек, 7-кичи район, 21-үй, 45-кв)',
+                        hintText: t(dict, 'dropDetail.deliveryAddressHint'),
                         hintStyle: const TextStyle(
                           color: AppColors.textMuted,
                           fontSize: 13,
@@ -731,7 +736,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                               size: 13, color: AppColors.textMuted),
                           const SizedBox(width: 4),
                           Text(
-                            'Жеткирүү аймагы: ${drop.deliveryRadius}',
+                            t(dict, 'dropDetail.deliveryRadius', {'radius': '${drop.deliveryRadius}'}),
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -785,15 +790,15 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Эт:',
-                              style: TextStyle(
+                            Text(
+                              t(dict, 'dropDetail.summaryMeat'),
+                              style: const TextStyle(
                                 fontSize: 14,
                                 color: AppColors.textSecondary,
                               ),
                             ),
                             Text(
-                              '${_selectedKg.toStringAsFixed(0)} кг × ${drop.pricePerKg} сом',
+                              '${_selectedKg.toStringAsFixed(0)} ${t(dict, 'common.kg')} × ${drop.pricePerKg} ${t(dict, 'common.som')}',
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: AppColors.textPrimary,
@@ -807,15 +812,15 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Жеткирүү:',
-                                style: TextStyle(
+                              Text(
+                                t(dict, 'dropDetail.summaryDelivery'),
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: AppColors.textSecondary,
                                 ),
                               ),
                               Text(
-                                '+$deliveryFee сом',
+                                '+$deliveryFee ${t(dict, 'common.som')}',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: AppColors.textPrimary,
@@ -827,19 +832,19 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                         ],
                         if (_delivery && deliveryFee == 0) ...[
                           const SizedBox(height: 4),
-                          const Row(
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Жеткирүү:',
-                                style: TextStyle(
+                                t(dict, 'dropDetail.summaryDelivery'),
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: AppColors.textSecondary,
                                 ),
                               ),
                               Text(
-                                'Акысыз',
-                                style: TextStyle(
+                                t(dict, 'common.free'),
+                                style: const TextStyle(
                                   fontSize: 14,
                                   color: AppColors.success,
                                   fontWeight: FontWeight.w700,
@@ -854,16 +859,16 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Жалпы:',
-                              style: TextStyle(
+                            Text(
+                              t(dict, 'dropDetail.summaryTotal'),
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.textPrimary,
                               ),
                             ),
                             Text(
-                              '$totalPrice сом',
+                              '$totalPrice ${t(dict, 'common.som')}',
                               style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w900,
@@ -900,7 +905,9 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                     ),
                                   )
                                 : Text(
-                                    'Заказ берүү — ${_selectedKg.toStringAsFixed(0)} кг',
+                                    t(dict, 'dropDetail.orderButton', {
+                                      'kg': _selectedKg.toStringAsFixed(0),
+                                    }),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w800,
@@ -922,15 +929,15 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                       color: AppColors.accent.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(LucideIcons.alertCircle,
+                        const Icon(LucideIcons.alertCircle,
                             color: AppColors.accent, size: 20),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Бардык эт алынып бүттү! Кийинки drop\'ту күтүңүз.',
-                            style: TextStyle(
+                            t(dict, 'dropDetail.soldOutMessage'),
+                            style: const TextStyle(
                               fontSize: 14,
                               color: AppColors.accent,
                               fontWeight: FontWeight.w600,
@@ -948,7 +955,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
     );
   }
 
-  Widget _buildProgressSection(ButcherDrop drop) {
+  Widget _buildProgressSection(ButcherDrop drop, Map<String, dynamic>? dict) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -962,7 +969,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${drop.claimedWeightKg.toStringAsFixed(0)} кг алынды',
+                t(dict, 'dropDetail.kgClaimed', {'kg': drop.claimedWeightKg.toStringAsFixed(0)}),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -970,7 +977,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                 ),
               ),
               Text(
-                '${drop.totalWeightKg.toStringAsFixed(0)} кг жалпы',
+                t(dict, 'dropDetail.kgTotal', {'kg': drop.totalWeightKg.toStringAsFixed(0)}),
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -1001,7 +1008,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                   size: 14, color: AppColors.textSecondary),
               const SizedBox(width: 4),
               Text(
-                '${drop.orderCount} заказ',
+                t(dict, 'dropDetail.orderCount', {'n': '${drop.orderCount}'}),
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,
@@ -1010,7 +1017,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
               ),
               const Spacer(),
               Text(
-                '${drop.remainingWeightKg.toStringAsFixed(0)} кг калды',
+                t(dict, 'dropDetail.kgLeft', {'kg': drop.remainingWeightKg.toStringAsFixed(0)}),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -1026,7 +1033,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
     );
   }
 
-  Widget _buildSellerRow(ButcherDrop drop) {
+  Widget _buildSellerRow(ButcherDrop drop, Map<String, dynamic>? dict) {
     return Row(
       children: [
         CircleAvatar(
@@ -1048,7 +1055,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
               Row(
                 children: [
                   Text(
-                    drop.seller.name ?? 'Сатуучу',
+                    drop.seller.name ?? t(dict, 'dropDetail.sellerFallback'),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -1087,16 +1094,17 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
   Future<void> _placeOrder(ButcherDrop drop) async {
     // Check auth first
     final isAuth = ref.read(isAuthenticatedProvider);
+    final dict = ref.read(dictionaryProvider).valueOrNull;
     if (!isAuth) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Заказ берүү үчүн кириңиз'),
+          content: Text(t(dict, 'dropDetail.loginToOrder')),
           backgroundColor: AppColors.accent,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           action: SnackBarAction(
-            label: 'Кирүү',
+            label: t(dict, 'dropDetail.loginBtn'),
             textColor: Colors.white,
             onPressed: () => context.push('/auth/login'),
           ),
@@ -1133,7 +1141,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ката: $e'),
+          content: Text(t(dict, 'common.errorPrefix', {'message': '$e'})),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -1158,18 +1166,4 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
     }
   }
 
-  String _statusLabel(String status) {
-    switch (status) {
-      case 'OPEN':
-        return 'АЧЫК';
-      case 'UPCOMING':
-        return 'ЖАКЫНДА';
-      case 'SOLD_OUT':
-        return 'БҮТТҮ';
-      case 'FULFILLED':
-        return 'БЕРИЛДИ';
-      default:
-        return status;
-    }
-  }
 }

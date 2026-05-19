@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../domain/owned_animal_model.dart';
 import '../providers/herd_provider.dart';
 
@@ -13,6 +14,7 @@ class HerdScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final portfolioAsync = ref.watch(herdPortfolioProvider);
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondary,
@@ -22,7 +24,7 @@ class HerdScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'Ката: $err',
+              t(dict, 'herd.loadErrorPrefix', {'error': '$err'}),
               style: const TextStyle(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
@@ -35,7 +37,7 @@ class HerdScreen extends ConsumerWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverToBoxAdapter(
-                  child: _PortfolioHeader(summary: portfolio.summary),
+                  child: _PortfolioHeader(summary: portfolio.summary, dict: dict),
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
@@ -43,16 +45,16 @@ class HerdScreen extends ConsumerWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Менин малым',
-                          style: TextStyle(
+                        Text(
+                          t(dict, 'herd.myAnimals'),
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                             color: AppColors.textPrimary,
                           ),
                         ),
                         Text(
-                          '${portfolio.animals.length} баш',
+                          t(dict, 'herd.headsCount', {'n': '${portfolio.animals.length}'}),
                           style: const TextStyle(
                             fontSize: 13,
                             color: AppColors.textSecondary,
@@ -67,7 +69,7 @@ class HerdScreen extends ConsumerWidget {
                   sliver: SliverList.separated(
                     itemCount: portfolio.animals.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) => _AnimalCard(animal: portfolio.animals[i]),
+                    itemBuilder: (_, i) => _AnimalCard(animal: portfolio.animals[i], dict: dict),
                   ),
                 ),
               ],
@@ -81,7 +83,8 @@ class HerdScreen extends ConsumerWidget {
 
 class _PortfolioHeader extends StatelessWidget {
   final HerdSummary summary;
-  const _PortfolioHeader({required this.summary});
+  final Map<String, dynamic>? dict;
+  const _PortfolioHeader({required this.summary, required this.dict});
 
   @override
   Widget build(BuildContext context) {
@@ -115,9 +118,9 @@ class _PortfolioHeader extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
-                  'PORTFOLIO',
-                  style: TextStyle(
+                child: Text(
+                  t(dict, 'herd.portfolioLabel'),
+                  style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
@@ -131,7 +134,7 @@ class _PortfolioHeader extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '${_fmt(summary.currentValueKgs)} сом',
+            '${_fmt(summary.currentValueKgs)} ${t(dict, 'common.som')}',
             style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
@@ -149,7 +152,7 @@ class _PortfolioHeader extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                '${isProfit ? '+' : ''}${_fmt(summary.unrealizedProfitKgs)} сом (${isProfit ? '+' : ''}${summary.profitPercent}%)',
+                '${isProfit ? '+' : ''}${_fmt(summary.unrealizedProfitKgs)} ${t(dict, 'common.som')} (${isProfit ? '+' : ''}${summary.profitPercent}%)',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -164,17 +167,17 @@ class _PortfolioHeader extends StatelessWidget {
           Row(
             children: [
               _StatChip(
-                label: 'Мал',
+                label: t(dict, 'herd.statAnimals'),
                 value: '${summary.totalAnimals}',
                 icon: LucideIcons.layers,
               ),
               _StatChip(
-                label: 'Салмак +',
-                value: '${summary.totalWeightGainKg}кг',
+                label: t(dict, 'herd.statWeight'),
+                value: '${summary.totalWeightGainKg}${t(dict, 'common.kg')}',
                 icon: LucideIcons.scale,
               ),
               _StatChip(
-                label: 'Пайыз',
+                label: t(dict, 'herd.statPoints'),
                 value: '${summary.totalLoyaltyPoints}',
                 icon: LucideIcons.gift,
               ),
@@ -225,7 +228,8 @@ class _StatChip extends StatelessWidget {
 
 class _AnimalCard extends StatelessWidget {
   final OwnedAnimal animal;
-  const _AnimalCard({required this.animal});
+  final Map<String, dynamic>? dict;
+  const _AnimalCard({required this.animal, required this.dict});
 
   @override
   Widget build(BuildContext context) {
@@ -300,7 +304,7 @@ class _AnimalCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          _statusLabel(animal.status),
+                          _statusLabel(animal.status, dict),
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
@@ -313,7 +317,7 @@ class _AnimalCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${animal.breed} • ${animal.ageMonths} ай • ${animal.weightKg}кг',
+                    '${animal.breed} • ${animal.ageMonths} ${t(dict, 'common.months')} • ${animal.weightKg}${t(dict, 'common.kg')}',
                     style: const TextStyle(
                       fontSize: 11,
                       color: AppColors.textSecondary,
@@ -390,18 +394,18 @@ IconData _categoryIcon(String category) {
   }
 }
 
-String _statusLabel(String status) {
+String _statusLabel(String status, Map<String, dynamic>? dict) {
   switch (status) {
     case 'WITH_CARETAKER':
-      return 'МАЛЧЫДА';
+      return t(dict, 'herd.statusWithCaretaker');
     case 'AT_OWNER':
-      return 'ӨЗҮҢДӨ';
+      return t(dict, 'herd.statusAtOwner');
     case 'READY_TO_SELL':
-      return 'САТЫЛАТ';
+      return t(dict, 'herd.statusReadyToSell');
     case 'SOLD':
-      return 'САТЫЛДЫ';
+      return t(dict, 'herd.statusSold');
     case 'BUTCHERED':
-      return 'СОЮЛДУ';
+      return t(dict, 'herd.statusButchered');
     default:
       return status;
   }

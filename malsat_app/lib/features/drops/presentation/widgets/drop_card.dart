@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../domain/drop_model.dart';
 
-class DropCard extends StatelessWidget {
+class DropCard extends ConsumerWidget {
   final ButcherDrop drop;
   final VoidCallback onTap;
 
@@ -18,7 +20,8 @@ class DropCard extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     final photo = drop.media.isNotEmpty
         ? drop.media.first.mediaUrl
         : _fallbackPhotos[drop.category];
@@ -75,7 +78,7 @@ class DropCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        _statusLabel(drop.status),
+                        t(dict, 'dropStatus.${drop.status}'),
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -104,10 +107,11 @@ class DropCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Text(
                               daysLeft == 0
-                                  ? 'Бүгүн'
+                                  ? t(dict, 'common.today')
                                   : daysLeft == 1
-                                      ? 'Эртең'
-                                      : '$daysLeft күн',
+                                      ? t(dict, 'common.tomorrow')
+                                      : t(dict, 'common.daysShort',
+                                          {'n': '$daysLeft'}),
                               style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
@@ -143,7 +147,7 @@ class DropCard extends StatelessWidget {
 
                   // Price per kg — big and bold
                   Text(
-                    '${drop.pricePerKg} сом/кг',
+                    '${drop.pricePerKg} ${t(dict, 'common.somPerKg')}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -157,6 +161,10 @@ class DropCard extends StatelessWidget {
                     claimed: drop.claimedWeightKg,
                     total: drop.totalWeightKg,
                     percent: drop.progressPercent,
+                    label: t(dict, 'drop.kgClaimed', {
+                      'claimed': drop.claimedWeightKg.toStringAsFixed(0),
+                      'total': drop.totalWeightKg.toStringAsFixed(0),
+                    }),
                   ),
                   const SizedBox(height: 8),
 
@@ -213,31 +221,19 @@ class DropCard extends StatelessWidget {
     }
   }
 
-  String _statusLabel(String status) {
-    switch (status) {
-      case 'OPEN':
-        return 'АЧЫК';
-      case 'UPCOMING':
-        return 'ЖАКЫНДА';
-      case 'SOLD_OUT':
-        return 'БҮТТҮ';
-      case 'FULFILLED':
-        return 'БЕРИЛДИ';
-      default:
-        return status;
-    }
-  }
 }
 
 class _ProgressBar extends StatelessWidget {
   final double claimed;
   final double total;
   final int percent;
+  final String label;
 
   const _ProgressBar({
     required this.claimed,
     required this.total,
     required this.percent,
+    required this.label,
   });
 
   @override
@@ -245,7 +241,6 @@ class _ProgressBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Bar
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: SizedBox(
@@ -261,7 +256,7 @@ class _ProgressBar extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          '${claimed.toStringAsFixed(0)} / ${total.toStringAsFixed(0)} кг алынды',
+          label,
           style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,

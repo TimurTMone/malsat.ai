@@ -4,7 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/i18n/app_localizations.dart';
+import '../../../../core/state/view_mode.dart';
 import '../../../../core/widgets/listing_card.dart';
+import '../../../../core/widgets/listing_card_large.dart';
+import '../../../../core/widgets/listing_card_row.dart';
+import '../../../../core/widgets/shimmer.dart';
+import '../../../../core/widgets/view_mode_toggle.dart';
 import '../providers/home_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -32,6 +37,7 @@ class _HomeContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final listingsAsync = ref.watch(latestListingsProvider);
+    final viewMode = ref.watch(listingViewModeProvider);
 
     return SafeArea(
       child: RefreshIndicator(
@@ -169,9 +175,9 @@ class _HomeContent extends ConsumerWidget {
                           color: const Color(0xFFE0B547),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Text(
-                          'ЭКИ ЖОЛУ • ANY ANIMAL. YOUR WAY.',
-                          style: TextStyle(
+                        child: Text(
+                          t(dict, 'home.heroBadge'),
+                          style: const TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w800,
                             color: Color(0xFF1B4332),
@@ -180,9 +186,9 @@ class _HomeContent extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Мал сатып ал. Же малчы жалдап пайда тап.',
-                        style: TextStyle(
+                      Text(
+                        t(dict, 'home.heroTitle'),
+                        style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -190,9 +196,9 @@ class _HomeContent extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Ар бир жарыяда эки тандоо: Өзүм алам • Малчы жалдайм',
-                        style: TextStyle(
+                      Text(
+                        t(dict, 'home.heroSubtitle'),
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Colors.white70,
                         ),
@@ -210,20 +216,20 @@ class _HomeContent extends ConsumerWidget {
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
                                 ),
-                                child: const Column(
+                                child: Column(
                                   children: [
                                     Text(
-                                      'Өзүм алам',
-                                      style: TextStyle(
+                                      t(dict, 'home.iBuy'),
+                                      style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w800,
                                         color: Colors.white,
                                       ),
                                     ),
-                                    SizedBox(height: 2),
+                                    const SizedBox(height: 2),
                                     Text(
-                                      'Сатуучудан алуу',
-                                      style: TextStyle(
+                                      t(dict, 'home.iBuyDesc'),
+                                      style: const TextStyle(
                                         fontSize: 10,
                                         color: Colors.white70,
                                       ),
@@ -243,20 +249,20 @@ class _HomeContent extends ConsumerWidget {
                                   color: const Color(0xFFE0B547),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Column(
+                                child: Column(
                                   children: [
                                     Text(
-                                      'Малчы жалдайм',
-                                      style: TextStyle(
+                                      t(dict, 'home.iHire'),
+                                      style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w800,
                                         color: Color(0xFF1B4332),
                                       ),
                                     ),
-                                    SizedBox(height: 2),
+                                    const SizedBox(height: 2),
                                     Text(
-                                      'Пайда алам',
-                                      style: TextStyle(
+                                      t(dict, 'home.iHireDesc'),
+                                      style: const TextStyle(
                                         fontSize: 10,
                                         color: Color(0xFF1B4332),
                                       ),
@@ -302,21 +308,21 @@ class _HomeContent extends ConsumerWidget {
                               color: Colors.white, size: 24),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Эт базар — Жаңы союлган эт',
-                                style: TextStyle(
+                                t(dict, 'home.meatBannerTitle'),
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,
                                   color: Colors.white,
                                 ),
                               ),
                               Text(
-                                '5кг, 10кг, 15кг — килограмм менен заказ кыл',
-                                style: TextStyle(
+                                t(dict, 'home.meatBannerSubtitle'),
+                                style: const TextStyle(
                                   fontSize: 11,
                                   color: Colors.white70,
                                 ),
@@ -333,7 +339,28 @@ class _HomeContent extends ConsumerWidget {
               ),
               const SizedBox(height: 20),
 
-              // Listings grid
+              // Section header + view-mode toggle (Unaa-style row)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t(dict, 'home.latestListings'),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.4,
+                        ),
+                      ),
+                    ),
+                    const ViewModeToggle(),
+                  ],
+                ),
+              ),
+
+              // Listings -- rendered per view mode
               listingsAsync.when(
                 data: (listings) {
                   if (listings.isEmpty) {
@@ -352,28 +379,38 @@ class _HomeContent extends ConsumerWidget {
                   }
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 18,
-                        mainAxisSpacing: 24,
-                        childAspectRatio: 0.58,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 280),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, anim) => FadeTransition(
+                        opacity: anim,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.02),
+                            end: Offset.zero,
+                          ).animate(anim),
+                          child: child,
+                        ),
                       ),
-                      itemCount: listings.length,
-                      itemBuilder: (context, index) => ListingCard(
-                        listing: listings[index],
-                        dict: dict,
-                        locale: locale,
+                      child: KeyedSubtree(
+                        key: ValueKey(viewMode),
+                        child: LayoutBuilder(
+                          builder: (ctx, c) => _buildListings(
+                            listings, viewMode, dict, locale, c.maxWidth),
+                        ),
                       ),
                     ),
                   );
                 },
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(40),
-                  child: Center(child: CircularProgressIndicator()),
+                loading: () => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: List.generate(
+                      3,
+                      (_) => const ShimmerCard(height: 200),
+                    ),
+                  ),
                 ),
                 error: (e, st) => Padding(
                   padding: const EdgeInsets.all(40),
@@ -398,6 +435,60 @@ class _HomeContent extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+Widget _buildListings(
+  List listings,
+  ListingViewMode mode,
+  Map<String, dynamic> dict,
+  String locale,
+  double maxWidth,
+) {
+  switch (mode) {
+    case ListingViewMode.large:
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: listings.length,
+        itemBuilder: (context, index) => ListingCardLarge(
+          listing: listings[index],
+          locale: locale,
+        ),
+      );
+    case ListingViewMode.grid:
+      final cols = maxWidth >= 900
+          ? 4
+          : maxWidth >= 600
+              ? 3
+              : 2;
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: cols,
+          crossAxisSpacing: 14,
+          mainAxisSpacing: 20,
+          childAspectRatio: 0.58,
+        ),
+        itemCount: listings.length,
+        itemBuilder: (context, index) => ListingCard(
+          listing: listings[index],
+          dict: dict,
+          locale: locale,
+        ),
+      );
+    case ListingViewMode.list:
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: listings.length,
+        itemBuilder: (context, index) => ListingCardRow(
+          listing: listings[index],
+          dict: dict,
+          locale: locale,
+        ),
+      );
   }
 }
 

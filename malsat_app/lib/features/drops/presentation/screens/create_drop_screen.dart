@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../providers/drops_provider.dart';
 
 class CreateDropScreen extends ConsumerStatefulWidget {
@@ -57,12 +58,13 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Эт сатуу',
-          style: TextStyle(
+        title: Text(
+          t(dict, 'createDrop.title'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
@@ -86,25 +88,25 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                 ),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(LucideIcons.beef, color: Colors.white, size: 22),
-                  SizedBox(width: 10),
+                  const Icon(LucideIcons.beef, color: Colors.white, size: 22),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Жаңы эт Drop түзүү',
-                          style: TextStyle(
+                          t(dict, 'createDrop.headerTitle'),
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
                           ),
                         ),
                         Text(
-                          'Сатуучулар эт союп, килограмм менен сатат',
-                          style: TextStyle(fontSize: 11, color: Colors.white70),
+                          t(dict, 'createDrop.headerSubtitle'),
+                          style: const TextStyle(fontSize: 11, color: Colors.white70),
                         ),
                       ],
                     ),
@@ -115,11 +117,11 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
             const SizedBox(height: 24),
 
             // Photo picker — REQUIRED
-            _label('Сүрөттөр *'),
+            _label(t(dict, 'createDrop.photosRequired')),
             const SizedBox(height: 4),
-            const Text(
-              'Малдын сүрөтүн жүктөңүз — сатып алуучулар көрөт',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            Text(
+              t(dict, 'createDrop.photosHint'),
+              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 10),
             SizedBox(
@@ -138,13 +140,13 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                         borderRadius: BorderRadius.circular(14),
                         color: AppColors.backgroundSecondary,
                       ),
-                      child: const Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(LucideIcons.camera, size: 28, color: AppColors.primary),
-                          SizedBox(height: 4),
-                          Text('Сүрөт кошуу',
-                              style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                          const Icon(LucideIcons.camera, size: 28, color: AppColors.primary),
+                          const SizedBox(height: 4),
+                          Text(t(dict, 'createDrop.addPhotoBtn'),
+                              style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -181,7 +183,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                                 color: AppColors.primary,
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Text('Башкы', style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700)),
+                              child: Text(t(dict, 'createDrop.mainPhoto'), style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700)),
                             ),
                           ),
                       ],
@@ -193,41 +195,41 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
             const SizedBox(height: 20),
 
             // Category
-            _label('Мал түрү *'),
+            _label(t(dict, 'createDrop.categoryRequired')),
             const SizedBox(height: 8),
             Row(
               children: [
-                _catBtn('CATTLE', 'Уй', LucideIcons.beef,
+                _catBtn('CATTLE', t(dict, 'createDrop.catCattle'), LucideIcons.beef,
                     AppColors.cattleBackground, AppColors.cattleForeground),
                 const SizedBox(width: 8),
-                _catBtn('SHEEP', 'Кой', LucideIcons.cloud,
+                _catBtn('SHEEP', t(dict, 'createDrop.catSheep'), LucideIcons.cloud,
                     AppColors.sheepBackground, AppColors.sheepForeground),
                 const SizedBox(width: 8),
-                _catBtn('HORSE', 'Жылкы', LucideIcons.wind,
+                _catBtn('HORSE', t(dict, 'createDrop.catHorse'), LucideIcons.wind,
                     AppColors.horseBackground, AppColors.horseForeground),
                 const SizedBox(width: 8),
-                _catBtn('ARASHAN', 'Эчки', LucideIcons.award,
+                _catBtn('ARASHAN', t(dict, 'createDrop.catGoat'), LucideIcons.award,
                     AppColors.arashanBackground, AppColors.arashanForeground),
               ],
             ),
             const SizedBox(height: 20),
 
             // Title
-            _label('Аталышы *'),
+            _label(t(dict, 'createDrop.titleRequired')),
             const SizedBox(height: 6),
-            _field(_titleC, 'Жаңы союлган козу эти — Ысык-Көл'),
+            _field(_titleC, t(dict, 'createDrop.titlePlaceholder')),
             const SizedBox(height: 16),
 
             // Description
-            _label('Сүрөттөмө'),
+            _label(t(dict, 'listing.description')),
             const SizedBox(height: 6),
-            _field(_descC, 'Тоолук козу, жашыл чөп менен багылган...', lines: 3),
+            _field(_descC, t(dict, 'createDrop.descriptionPlaceholder'), lines: 3),
             const SizedBox(height: 16),
 
             // Breed
-            _label('Породасы'),
+            _label(t(dict, 'listing.breed')),
             const SizedBox(height: 6),
-            _field(_breedC, 'Кыргыз тоолук'),
+            _field(_breedC, t(dict, 'createDrop.breedPlaceholder')),
             const SizedBox(height: 16),
 
             // Weight + Price per kg
@@ -237,9 +239,9 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _label('Жалпы салмак (кг) *'),
+                      _label(t(dict, 'createDrop.totalWeightRequired')),
                       const SizedBox(height: 6),
-                      _field(_weightC, '35', keyboard: TextInputType.number),
+                      _field(_weightC, t(dict, 'createDrop.weightPlaceholder'), keyboard: TextInputType.number),
                     ],
                   ),
                 ),
@@ -248,9 +250,9 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _label('Баасы (сом/кг) *'),
+                      _label(t(dict, 'createDrop.priceRequired')),
                       const SizedBox(height: 6),
-                      _field(_priceC, '650', keyboard: TextInputType.number),
+                      _field(_priceC, t(dict, 'createDrop.pricePlaceholder'), keyboard: TextInputType.number),
                     ],
                   ),
                 ),
@@ -259,13 +261,13 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
             const SizedBox(height: 16),
 
             // Min order
-            _label('Минимум заказ (кг)'),
+            _label(t(dict, 'createDrop.minOrder')),
             const SizedBox(height: 6),
-            _field(_minC, '3', keyboard: TextInputType.number),
+            _field(_minC, t(dict, 'createDrop.minPlaceholder'), keyboard: TextInputType.number),
             const SizedBox(height: 16),
 
             // Butcher date
-            _label('Союу күнү *'),
+            _label(t(dict, 'createDrop.butcherDateRequired')),
             const SizedBox(height: 6),
             GestureDetector(
               onTap: () async {
@@ -304,13 +306,13 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
             const SizedBox(height: 16),
 
             // Pickup address
-            _label('Алуу жери (адрес) *'),
+            _label(t(dict, 'createDrop.pickupRequired')),
             const SizedBox(height: 6),
-            _field(_addressC, 'Каракол, чоң базар'),
+            _field(_addressC, t(dict, 'createDrop.pickupPlaceholder')),
             const SizedBox(height: 6),
-            _label('Айыл / Шаар'),
+            _label(t(dict, 'createDrop.village')),
             const SizedBox(height: 6),
-            _field(_villageC, 'Каракол'),
+            _field(_villageC, t(dict, 'createDrop.villagePlaceholder')),
             const SizedBox(height: 20),
 
             // Delivery toggle
@@ -327,10 +329,10 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                       const Icon(LucideIcons.truck,
                           size: 20, color: AppColors.primary),
                       const SizedBox(width: 10),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Жеткирүү кызматы',
-                          style: TextStyle(
+                          t(dict, 'createDrop.deliveryToggleTitle'),
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -347,10 +349,10 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                   ),
                   if (_deliveryAvailable) ...[
                     const SizedBox(height: 10),
-                    _field(_deliveryFeeC, '0 (акысыз болсо)',
+                    _field(_deliveryFeeC, t(dict, 'createDrop.deliveryFeePlaceholder'),
                         keyboard: TextInputType.number),
                     const SizedBox(height: 8),
-                    _field(_deliveryRadiusC, 'Бишкек шаары'),
+                    _field(_deliveryRadiusC, t(dict, 'createDrop.deliveryRadiusPlaceholder')),
                   ],
                 ],
               ),
@@ -379,11 +381,11 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Жалпы баасы:',
-                        style: TextStyle(
+                    Text(t(dict, 'createDrop.totalPriceLabel'),
+                        style: const TextStyle(
                             fontSize: 14, color: AppColors.textSecondary)),
                     Text(
-                      '${((double.tryParse(_weightC.text) ?? 0) * (int.tryParse(_priceC.text) ?? 0)).round()} сом',
+                      '${((double.tryParse(_weightC.text) ?? 0) * (int.tryParse(_priceC.text) ?? 0)).round()} ${t(dict, 'common.som')}',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
@@ -415,9 +417,9 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                         child: CircularProgressIndicator(
                             strokeWidth: 2.5, color: Colors.white),
                       )
-                    : const Text(
-                        'Эт Drop жарыялоо',
-                        style: TextStyle(
+                    : Text(
+                        t(dict, 'createDrop.publishBtn'),
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w800),
                       ),
               ),
@@ -542,11 +544,12 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
       // (photos already uploaded, urls stored — drop cards will show them)
 
       if (!mounted) return;
+      final dict = ref.read(dictionaryProvider).valueOrNull;
       ref.invalidate(dropsListProvider);
       context.pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Эт Drop жарыяланды!'),
+          content: Text(t(dict, 'createDrop.publishedToast')),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

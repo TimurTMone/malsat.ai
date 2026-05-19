@@ -4,8 +4,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
+import '../../../../core/state/view_mode.dart';
+import '../../../../core/widgets/view_mode_toggle.dart';
 import '../../domain/auction_model.dart';
 import '../providers/auctions_provider.dart';
+import '../widgets/auction_card_compact.dart';
+import '../widgets/auction_card_row.dart';
 
 class AuctionsScreen extends ConsumerWidget {
   const AuctionsScreen({super.key});
@@ -13,6 +18,8 @@ class AuctionsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auctionsAsync = ref.watch(auctionsListProvider);
+    final viewMode = ref.watch(listingViewModeProvider);
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -50,21 +57,21 @@ class AuctionsScreen extends ConsumerWidget {
                               color: Colors.white, size: 22),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Аукцион',
-                                style: TextStyle(
+                                t(dict, 'auctions.title'),
+                                style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white,
                                 ),
                               ),
                               Text(
-                                'Базардан түз — баа коюп ал',
-                                style: TextStyle(
+                                t(dict, 'auctions.subtitle'),
+                                style: const TextStyle(
                                   fontSize: 13,
                                   color: Colors.white70,
                                 ),
@@ -78,18 +85,44 @@ class AuctionsScreen extends ConsumerWidget {
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
-                        children: const [
+                        children: [
                           _InfoChip(
-                              icon: LucideIcons.zap, label: 'Тирүү аукцион'),
-                          SizedBox(width: 8),
+                              icon: LucideIcons.zap,
+                              label: t(dict, 'auctions.chipLive')),
+                          const SizedBox(width: 8),
                           _InfoChip(
-                              icon: LucideIcons.timer, label: 'Тез аяктайт'),
-                          SizedBox(width: 8),
+                              icon: LucideIcons.timer,
+                              label: t(dict, 'auctions.chipEndingSoon')),
+                          const SizedBox(width: 8),
                           _InfoChip(
-                              icon: LucideIcons.users, label: 'Көп катышуучу'),
+                              icon: LucideIcons.users,
+                              label:
+                                  t(dict, 'auctions.chipManyParticipants')),
                         ],
                       ),
                     ),
+                  ],
+                ),
+              ),
+            ),
+            // Section header + view-mode toggle row
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 16, 14),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t(dict, 'auctions.liveAuctions'),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.4,
+                        ),
+                      ),
+                    ),
+                    const ViewModeToggle(),
                   ],
                 ),
               ),
@@ -98,16 +131,17 @@ class AuctionsScreen extends ConsumerWidget {
             auctionsAsync.when(
               data: (resp) {
                 if (resp.auctions.isEmpty) {
-                  return const SliverFillRemaining(
+                  return SliverFillRemaining(
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(LucideIcons.gavel,
+                          const Icon(LucideIcons.gavel,
                               size: 48, color: AppColors.textMuted),
-                          SizedBox(height: 12),
-                          Text('Азыр аукциондор жок',
-                              style: TextStyle(color: AppColors.textMuted)),
+                          const SizedBox(height: 12),
+                          Text(t(dict, 'auctions.noAuctions'),
+                              style: const TextStyle(
+                                  color: AppColors.textMuted)),
                         ],
                       ),
                     ),
@@ -115,15 +149,8 @@ class AuctionsScreen extends ConsumerWidget {
                 }
                 return SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _AuctionCard(auction: resp.auctions[index]),
-                      ),
-                      childCount: resp.auctions.length,
-                    ),
-                  ),
+                  sliver: _buildAuctionsSliver(
+                      resp.auctions, viewMode, context),
                 );
               },
               loading: () => const SliverFillRemaining(
@@ -137,12 +164,18 @@ class AuctionsScreen extends ConsumerWidget {
                       const Icon(LucideIcons.alertCircle,
                           size: 48, color: AppColors.error),
                       const SizedBox(height: 8),
-                      const Text('Аукциондор жүктөлбөдү'),
-                      TextButton(
-                        onPressed: () =>
-                            ref.refresh(auctionsListProvider.future),
-                        child: const Text('Кайра аракет'),
-                      ),
+                      Consumer(builder: (context, ref, _) {
+                        final d = ref.watch(dictionaryProvider).valueOrNull;
+                        return Text(t(d, 'auctions.failedLoad'));
+                      }),
+                      Consumer(builder: (context, ref, _) {
+                        final d = ref.watch(dictionaryProvider).valueOrNull;
+                        return TextButton(
+                          onPressed: () =>
+                              ref.refresh(auctionsListProvider.future),
+                          child: Text(t(d, 'common.retry')),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -152,6 +185,48 @@ class AuctionsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+Widget _buildAuctionsSliver(
+    List<Auction> auctions, ListingViewMode mode, BuildContext context) {
+  switch (mode) {
+    case ListingViewMode.large:
+      return SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _AuctionCard(auction: auctions[index]),
+          ),
+          childCount: auctions.length,
+        ),
+      );
+    case ListingViewMode.grid:
+      final width = MediaQuery.of(context).size.width;
+      final cols = width >= 900
+          ? 4
+          : width >= 600
+              ? 3
+              : 2;
+      return SliverGrid(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: cols,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.66,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => AuctionCardCompact(auction: auctions[index]),
+          childCount: auctions.length,
+        ),
+      );
+    case ListingViewMode.list:
+      return SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => AuctionCardRow(auction: auctions[index]),
+          childCount: auctions.length,
+        ),
+      );
   }
 }
 
@@ -187,12 +262,13 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-class _AuctionCard extends StatelessWidget {
+class _AuctionCard extends ConsumerWidget {
   final Auction auction;
   const _AuctionCard({required this.auction});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     final photo =
         auction.media.isNotEmpty ? auction.media.first.mediaUrl : null;
     return GestureDetector(
@@ -267,7 +343,9 @@ class _AuctionCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          auction.isEndingSoon ? 'АЯКТАП КАЛДЫ' : 'ТИРҮҮ',
+                          auction.isEndingSoon
+                              ? t(dict, 'auctions.endingSoonFull')
+                              : t(dict, 'auctions.live'),
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w900,
@@ -353,9 +431,9 @@ class _AuctionCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Учурдагы баа',
-                              style: TextStyle(
+                            Text(
+                              t(dict, 'auctions.currentBid'),
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: AppColors.textMuted,
                                 fontWeight: FontWeight.w600,
@@ -382,7 +460,7 @@ class _AuctionCard extends StatelessWidget {
                                   size: 12, color: AppColors.textMuted),
                               const SizedBox(width: 3),
                               Text(
-                                '${auction.bidCount} баа',
+                                t(dict, 'auctions.bidCount', {'n': '${auction.bidCount}'}),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textSecondary,

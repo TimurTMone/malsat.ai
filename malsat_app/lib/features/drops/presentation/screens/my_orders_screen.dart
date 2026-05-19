@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../domain/meat_order_model.dart';
 import '../providers/drops_provider.dart';
 
@@ -12,13 +13,14 @@ class MyOrdersScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersAsync = ref.watch(myOrdersProvider);
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Менин заказдарым',
-          style: TextStyle(
+        title: Text(
+          t(dict, 'myOrders.title'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
@@ -34,25 +36,25 @@ class MyOrdersScreen extends ConsumerWidget {
         child: ordersAsync.when(
           data: (orders) {
             if (orders.isEmpty) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(LucideIcons.shoppingBag,
+                    const Icon(LucideIcons.shoppingBag,
                         size: 48, color: AppColors.textMuted),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
-                      'Заказдар жок',
-                      style: TextStyle(
+                      t(dict, 'myOrders.noOrders'),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textMuted,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Эт базардан заказ бериңиз',
-                      style: TextStyle(
+                      t(dict, 'myOrders.noOrdersSub'),
+                      style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textMuted,
                       ),
@@ -67,6 +69,7 @@ class MyOrdersScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) => _OrderCard(
                 order: orders[index],
+                dict: dict,
                 onTap: () => context.push('/order/${orders[index].id}'),
               ),
             );
@@ -76,10 +79,10 @@ class MyOrdersScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Ката кетти'),
+                Text(t(dict, 'common.error')),
                 TextButton(
                   onPressed: () => ref.refresh(myOrdersProvider.future),
-                  child: const Text('Кайра аракет'),
+                  child: Text(t(dict, 'common.retry')),
                 ),
               ],
             ),
@@ -92,8 +95,9 @@ class MyOrdersScreen extends ConsumerWidget {
 
 class _OrderCard extends StatelessWidget {
   final MeatOrder order;
+  final Map<String, dynamic>? dict;
   final VoidCallback onTap;
-  const _OrderCard({required this.order, required this.onTap});
+  const _OrderCard({required this.order, required this.dict, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +118,7 @@ class _OrderCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    order.drop?.title ?? 'Заказ #${order.id.substring(0, 8)}',
+                    order.drop?.title ?? t(dict, 'myOrders.fallbackTitle', {'id': order.id.substring(0, 8)}),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -132,7 +136,7 @@ class _OrderCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    _statusLabel(order.status),
+                    t(dict, 'myOrderStatus.${order.status}'),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -150,7 +154,7 @@ class _OrderCard extends StatelessWidget {
                 const Icon(LucideIcons.scale, size: 14, color: AppColors.primary),
                 const SizedBox(width: 6),
                 Text(
-                  '${order.weightKg.toStringAsFixed(0)} кг',
+                  '${order.weightKg.toStringAsFixed(0)} ${t(dict, 'common.kg')}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -159,7 +163,7 @@ class _OrderCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Text(
-                  '${order.totalPriceKgs} сом',
+                  '${order.totalPriceKgs} ${t(dict, 'common.som')}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -167,14 +171,14 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Icon(LucideIcons.chevronRight,
+                const Icon(LucideIcons.chevronRight,
                     size: 18, color: AppColors.textMuted),
               ],
             ),
             const SizedBox(height: 10),
 
             // Mini status timeline
-            _MiniTimeline(status: order.status),
+            _MiniTimeline(status: order.status, dict: dict),
 
             // Action hint for pending orders
             if (order.awaitingPayment) ...[
@@ -187,14 +191,14 @@ class _OrderCard extends StatelessWidget {
                   color: const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(LucideIcons.qrCode,
+                    const Icon(LucideIcons.qrCode,
                         size: 14, color: Color(0xFF92400E)),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     Text(
-                      'Төлөм жасап, чек жүктөңүз →',
-                      style: TextStyle(
+                      t(dict, 'myOrders.actionPay'),
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF92400E),
@@ -232,35 +236,13 @@ class _OrderCard extends StatelessWidget {
         return AppColors.textMuted;
     }
   }
-
-  String _statusLabel(String status) {
-    switch (status) {
-      case 'PENDING':
-        return 'ТӨЛӨМ КҮТҮҮДӨ';
-      case 'PAID':
-        return 'ЧЕК ТЕКШЕРҮҮДӨ';
-      case 'CONFIRMED':
-        return 'КАБЫЛ АЛЫНДЫ';
-      case 'BUTCHERING':
-        return 'СОЮЛУУДА';
-      case 'PACKAGING':
-        return 'ТАҢГАКТАЛУУДА';
-      case 'DELIVERING':
-        return 'ЖЕТКИРИЛҮҮДӨ';
-      case 'DELIVERED':
-        return 'ЖЕТКИРИЛДИ';
-      case 'CANCELLED':
-        return 'ЖОККО ЧЫГДЫ';
-      default:
-        return status;
-    }
-  }
 }
 
 /// Compact horizontal timeline for the order card
 class _MiniTimeline extends StatelessWidget {
   final String status;
-  const _MiniTimeline({required this.status});
+  final Map<String, dynamic>? dict;
+  const _MiniTimeline({required this.status, required this.dict});
 
   @override
   Widget build(BuildContext context) {
@@ -269,9 +251,9 @@ class _MiniTimeline extends StatelessWidget {
         children: [
           const Icon(LucideIcons.xCircle, size: 14, color: AppColors.error),
           const SizedBox(width: 4),
-          const Text(
-            'Жокко чыгарылды',
-            style: TextStyle(
+          Text(
+            t(dict, 'myOrders.cancelled'),
+            style: const TextStyle(
               fontSize: 11,
               color: AppColors.error,
               fontWeight: FontWeight.w600,

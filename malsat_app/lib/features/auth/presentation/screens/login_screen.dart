@@ -205,7 +205,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 OutlinedButton.icon(
                   onPressed: _isLoading ? null : _handleDemoLogin,
                   icon: const Icon(Icons.bolt, size: 18),
-                  label: const Text('Демо режим — заматта кирүү'),
+                  label: Text(t(dict, 'auth.demoMode')),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(color: AppColors.primary, width: 1.5),

@@ -15,10 +15,33 @@
       "Bash(curl -sI https://github.com/YurtahGroup/MalSat)",
       "Bash(git fetch *)",
       "Bash(git merge *)",
-      "Bash(git ls-remote *)"
+      "Bash(git ls-remote *)",
+      "Bash(grep -r \"TODO\\\\|FIXME\\\\|HACK\\\\|XXX\" /Users/muratbekomurzakov/Yurta/MalSatAi --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" --include=\"*.jsx\" --include=\"*.dart\" ! -path \"*/node_modules/*\" ! -path \"*/.next/*\" ! -path \"*/build/*\" ! -path \"*/.git/*\" ! -path \"*/ios/Pods/*\" -n)",
+      "Bash(find /Users/muratbekomurzakov/.claude -type d -name memory 2>/dev/null | head -10)",
+      "Read(//Users/muratbekomurzakov/.claude/**)",
+      "Bash(ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new altailabs 'echo \"=== UPTIME ===\" && uptime && echo \"\" && echo \"=== MINER CHECK: /var/tmp ===\" && ls -la /var/tmp/ 2>&1 | head -20 && echo \"\" && echo \"=== xmrig PROCESS ===\" && ps aux | grep -iE \"xmrig|systemd-logind|kdevtmpfsi|kinsing|monero|miner\" | grep -v grep && echo \"\" && echo \"=== TOP CPU PROCESSES ===\" && ps aux --sort=-%cpu | head -10 && echo \"\" && echo \"=== AUTHORIZED_KEYS ===\" && wc -l /root/.ssh/authorized_keys && cat /root/.ssh/authorized_keys')",
+      "Bash(ssh altailabs *)",
+      "Bash(curl -s -X POST https://api.altailabs.xyz/api/auth/login -H \"Content-Type: application/json\" -d '{\"phone\":\"+996555000000\"}')",
+      "Bash(curl -s -X POST https://api.altailabs.xyz/api/auth/verify -H \"Content-Type: application/json\" -d '{\"phone\":\"+996555000000\",\"code\":\"000000\"}')",
+      "Bash(mkdir -p /Users/muratbekomurzakov/.claude/projects/-Users-muratbekomurzakov-Yurta-MalSatAi/memory)",
+      "Bash(kill 7175 7173)",
+      "Bash(awk '{print $2}')",
+      "Bash(kill 11464)",
+      "Bash(flutter analyze *)",
+      "Bash(xargs -r kill)",
+      "Bash(awk '{print \"PID\", $2, \"started\", $9}')",
+      "Bash(grep -n \"_DeliveryTimeline\\\\|class _Delivery\\\\|updateOrderStatus\\\\|markAsPaid\\\\|/orders/\\\\${\" /Users/muratbekomurzakov/Yurta/MalSatAi/malsat_app/lib/features/drops/presentation/screens/order_detail_screen.dart)",
+      "Bash(scp -q /Users/muratbekomurzakov/Yurta/MalSatAi/src/app/api/auth/login/route.ts altailabs:/var/www/malsat.altailabs.club/src/app/api/auth/login/route.ts)",
+      "Bash(scp -q /Users/muratbekomurzakov/Yurta/MalSatAi/src/app/api/auth/verify/route.ts altailabs:/var/www/malsat.altailabs.club/src/app/api/auth/verify/route.ts)",
+      "Bash(curl -s -X POST https://api.altailabs.xyz/api/auth/login -H \"Content-Type: application/json\" -d '{\"phone\":\"+996700123456\"}')",
+      "Bash(curl -s -X POST https://api.altailabs.xyz/api/auth/verify -H \"Content-Type: application/json\" -d '{\"phone\":\"+996700123456\",\"code\":\"7777\"}')",
+      "Bash(python3 -c \"import json; json.load\\(open\\('lib/core/i18n/dictionaries/ky.json'\\)\\); json.load\\(open\\('lib/core/i18n/dictionaries/ru.json'\\)\\); json.load\\(open\\('lib/core/i18n/dictionaries/en.json'\\)\\); print\\('ok'\\)\")",
+      "Bash(python3 -c \"import json; print\\('ky', bool\\(json.load\\(open\\('lib/core/i18n/dictionaries/ky.json'\\)\\)\\)\\); print\\('ru', bool\\(json.load\\(open\\('lib/core/i18n/dictionaries/ru.json'\\)\\)\\)\\); print\\('en', bool\\(json.load\\(open\\('lib/core/i18n/dictionaries/en.json'\\)\\)\\)\\)\")",
+      "Bash(git add *)"
     ],
     "additionalDirectories": [
-      "/Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app"
+      "/Users/timurmone/Desktop/AppAltai/malsat-ai/malsat_app",
+      "/Users/muratbekomurzakov/.claude/projects/-Users-muratbekomurzakov-Yurta-MalSatAi"
     ]
   }
 }

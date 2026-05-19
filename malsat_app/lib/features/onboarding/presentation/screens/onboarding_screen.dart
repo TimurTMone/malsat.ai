@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/i18n/app_localizations.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 /// 3-question onboarding shown after the user's first OTP verification
@@ -61,9 +62,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       context.go('/');
     } catch (e) {
       if (!mounted) return;
+      final dict = ref.read(dictionaryProvider).valueOrNull;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Сактоо ишке ашпады: $e'),
+          content: Text(t(dict, 'onboarding.saveFailed', {'error': '$e'})),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -75,6 +77,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -103,18 +106,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Кош келиңиз!',
-                style: TextStyle(
+              Text(
+                t(dict, 'onboarding.welcome'),
+                style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
                   color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Сизге ылайыктуу жөндөө үчүн 3 суроо',
-                style: TextStyle(
+              Text(
+                t(dict, 'onboarding.subtitle'),
+                style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.textSecondary,
                 ),
@@ -122,13 +125,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               const SizedBox(height: 32),
 
               // Q1: Name
-              _SectionLabel('1. Сиздин атыңыз?'),
+              _SectionLabel(t(dict, 'onboarding.q1')),
               const SizedBox(height: 8),
               TextField(
                 controller: _nameController,
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'мис: Бакыт',
+                  hintText: t(dict, 'onboarding.namePlaceholder'),
                   prefixIcon: const Icon(LucideIcons.user, size: 20),
                   filled: true,
                   fillColor: AppColors.surface,
@@ -150,7 +153,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               const SizedBox(height: 28),
 
               // Q2: Herd size
-              _SectionLabel('2. Канча малыңыз бар?'),
+              _SectionLabel(t(dict, 'onboarding.q2')),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 10,
@@ -158,25 +161,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   _OptionChip(
                     label: '0–10',
-                    sub: 'Аз',
+                    sub: t(dict, 'onboarding.herdSmall'),
                     isSelected: _herdSize == '0-10',
                     onTap: () => setState(() => _herdSize = '0-10'),
                   ),
                   _OptionChip(
                     label: '11–50',
-                    sub: 'Орточо',
+                    sub: t(dict, 'onboarding.herdMedium'),
                     isSelected: _herdSize == '11-50',
                     onTap: () => setState(() => _herdSize = '11-50'),
                   ),
                   _OptionChip(
                     label: '51–200',
-                    sub: 'Чоң',
+                    sub: t(dict, 'onboarding.herdLarge'),
                     isSelected: _herdSize == '51-200',
                     onTap: () => setState(() => _herdSize = '51-200'),
                   ),
                   _OptionChip(
                     label: '200+',
-                    sub: 'Чарба',
+                    sub: t(dict, 'onboarding.herdFarm'),
                     isSelected: _herdSize == '200+',
                     onTap: () => setState(() => _herdSize = '200+'),
                   ),
@@ -185,29 +188,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               const SizedBox(height: 28),
 
               // Q3: Role
-              _SectionLabel('3. Эмне кылгыңыз келет?'),
+              _SectionLabel(t(dict, 'onboarding.q3')),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
                 children: [
                   _OptionChip(
-                    label: 'Сатам',
-                    sub: 'Сатуучу',
+                    label: t(dict, 'onboarding.roleSeller'),
+                    sub: t(dict, 'onboarding.roleSellerSub'),
                     icon: LucideIcons.tag,
                     isSelected: _role == 'SELLER',
                     onTap: () => setState(() => _role = 'SELLER'),
                   ),
                   _OptionChip(
-                    label: 'Сатып алам',
-                    sub: 'Сатып алуучу',
+                    label: t(dict, 'onboarding.roleBuyer'),
+                    sub: t(dict, 'onboarding.roleBuyerSub'),
                     icon: LucideIcons.shoppingCart,
                     isSelected: _role == 'BUYER',
                     onTap: () => setState(() => _role = 'BUYER'),
                   ),
                   _OptionChip(
-                    label: 'Экөөбү',
-                    sub: 'Алам жана сатам',
+                    label: t(dict, 'onboarding.roleBoth'),
+                    sub: t(dict, 'onboarding.roleBothSub'),
                     icon: LucideIcons.refreshCw,
                     isSelected: _role == 'BOTH',
                     onTap: () => setState(() => _role = 'BOTH'),
@@ -240,9 +243,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text(
-                          'Уланта берүү',
-                          style: TextStyle(
+                      : Text(
+                          t(dict, 'onboarding.continueBtn'),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                           ),
@@ -253,9 +256,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Center(
                 child: TextButton(
                   onPressed: _saving ? null : () => context.go('/'),
-                  child: const Text(
-                    'Кийинчерээк',
-                    style: TextStyle(
+                  child: Text(
+                    t(dict, 'onboarding.later'),
+                    style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.textMuted,
                     ),

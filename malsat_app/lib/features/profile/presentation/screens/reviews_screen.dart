@@ -19,7 +19,7 @@ class ReviewsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: dictAsync.when(
           data: (dict) => Text(
-            t(dict, 'profile.reviews'),
+            t(dict, 'reviews.title'),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
@@ -33,32 +33,37 @@ class ReviewsScreen extends ConsumerWidget {
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: () => ref.refresh(myProfileProvider.future),
-        child: profileAsync.when(
-          data: (profile) {
-            if (profile == null || profile.reviews.isEmpty) {
-              return const _EmptyState();
-            }
-            return ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: profile.reviews.length + 1,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _SummaryCard(
-                    average: profile.trustScore,
-                    count: profile.reviewsCount,
-                  );
-                }
-                return _ReviewCard(review: profile.reviews[index - 1]);
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text(e.toString())),
+      body: dictAsync.when(
+        data: (dict) => RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () => ref.refresh(myProfileProvider.future),
+          child: profileAsync.when(
+            data: (profile) {
+              if (profile == null || profile.reviews.isEmpty) {
+                return _EmptyState(dict: dict);
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: profile.reviews.length + 1,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return _SummaryCard(
+                      average: profile.trustScore,
+                      count: profile.reviewsCount,
+                      dict: dict,
+                    );
+                  }
+                  return _ReviewCard(review: profile.reviews[index - 1], dict: dict);
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text(e.toString())),
+          ),
         ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text(e.toString())),
       ),
     );
   }
@@ -67,8 +72,9 @@ class ReviewsScreen extends ConsumerWidget {
 class _SummaryCard extends StatelessWidget {
   final double average;
   final int count;
+  final Map<String, dynamic> dict;
 
-  const _SummaryCard({required this.average, required this.count});
+  const _SummaryCard({required this.average, required this.count, required this.dict});
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +101,7 @@ class _SummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '$count рецензия',
+                t(dict, 'reviews.countLabel', {'n': '$count'}),
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -111,8 +117,9 @@ class _SummaryCard extends StatelessWidget {
 
 class _ReviewCard extends StatelessWidget {
   final ReviewItem review;
+  final Map<String, dynamic> dict;
 
-  const _ReviewCard({required this.review});
+  const _ReviewCard({required this.review, required this.dict});
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +157,7 @@ class _ReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      review.reviewerName ?? 'Колдонуучу',
+                      review.reviewerName ?? t(dict, 'reviews.anon'),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -173,7 +180,7 @@ class _ReviewCard extends StatelessWidget {
                 ),
               ),
               Text(
-                _formatDate(review.createdAt),
+                _formatDate(review.createdAt, dict),
                 style: const TextStyle(
                   fontSize: 11,
                   color: AppColors.textMuted,
@@ -197,31 +204,32 @@ class _ReviewCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime d) {
+  String _formatDate(DateTime d, Map<String, dynamic> dict) {
     final now = DateTime.now();
     final diff = now.difference(d);
-    if (diff.inDays == 0) return 'Бүгүн';
-    if (diff.inDays == 1) return 'Кечээ';
-    if (diff.inDays < 7) return '${diff.inDays} күн';
+    if (diff.inDays == 0) return t(dict, 'reviews.today');
+    if (diff.inDays == 1) return t(dict, 'reviews.yesterday');
+    if (diff.inDays < 7) return t(dict, 'reviews.daysAgo', {'n': '${diff.inDays}'});
     return '${d.day}.${d.month.toString().padLeft(2, '0')}.${d.year}';
   }
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  final Map<String, dynamic> dict;
+  const _EmptyState({required this.dict});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      children: const [
-        SizedBox(height: 120),
-        Icon(LucideIcons.star, size: 48, color: AppColors.textMuted),
-        SizedBox(height: 12),
+      children: [
+        const SizedBox(height: 120),
+        const Icon(LucideIcons.star, size: 48, color: AppColors.textMuted),
+        const SizedBox(height: 12),
         Center(
           child: Text(
-            'Рецензиялар жок',
-            style: TextStyle(
+            t(dict, 'reviews.empty'),
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppColors.textMuted,
