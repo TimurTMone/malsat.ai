@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_spacing.dart';
+import '../constants/app_typography.dart';
 import 'notifications_sheet.dart';
 import 'world_switch.dart';
 
@@ -13,8 +14,9 @@ import 'world_switch.dart';
 class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
   const MalsatHeader({super.key});
 
-  static const double _toolbar = 52;
-  static const double _switchBand = 60;
+  static const double _toolbar = 56;
+  // World switch (46) + breathing room above it (16) + below (12).
+  static const double _switchBand = 74;
 
   @override
   Size get preferredSize => const Size.fromHeight(_toolbar + _switchBand);
@@ -24,15 +26,7 @@ class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
     return AppBar(
       toolbarHeight: _toolbar,
       titleSpacing: AppSpacing.lg,
-      title: const Text(
-        'MalSat',
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w900,
-          letterSpacing: -0.6,
-          color: AppColors.textPrimary,
-        ),
-      ),
+      title: Text('MalSat', style: AppTypography.wordmark(size: 21)),
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: AppSpacing.sm),
@@ -60,7 +54,7 @@ class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             AppSpacing.lg,
-            0,
+            AppSpacing.lg,
             AppSpacing.lg,
             AppSpacing.md,
           ),

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_world.dart';
 import 'app_colors.dart';
+import 'app_radius.dart';
+import 'app_typography.dart';
 
+/// The base MalSat theme — "Steppe Premium". Bone surfaces, warm ink,
+/// Manrope as the reading face. Per-world accents are layered on top by
+/// `worldTheme()`.
 class AppTheme {
   AppTheme._();
 
@@ -10,13 +16,17 @@ class AppTheme {
         useMaterial3: true,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
+          seedColor: AppColors.accent,
+          primary: AppColors.accent,
           surface: AppColors.surface,
           error: AppColors.error,
         ),
         extensions: const <ThemeExtension<dynamic>>[AppWorldPalette.neutral],
         scaffoldBackgroundColor: AppColors.background,
+        textTheme: GoogleFonts.manropeTextTheme().apply(
+          bodyColor: AppColors.textPrimary,
+          displayColor: AppColors.textPrimary,
+        ),
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.background,
           foregroundColor: AppColors.textPrimary,
@@ -29,108 +39,66 @@ class AppTheme {
           filled: true,
           fillColor: AppColors.backgroundSecondary,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.mdAll,
             borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.mdAll,
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
+            borderRadius: AppRadius.mdAll,
+            borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.mdAll,
             borderSide: const BorderSide(color: AppColors.error),
           ),
-          hintStyle: const TextStyle(
-            color: AppColors.textMuted,
-            fontSize: 15,
-            fontWeight: FontWeight.w400,
-          ),
+          labelStyle: AppTypography.bodyMuted,
+          hintStyle: AppTypography.body.copyWith(color: AppColors.textMuted),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.textPrimary,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 52),
+            foregroundColor: AppColors.surface,
+            minimumSize: const Size(double.infinity, 54),
             elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+            shape: const RoundedRectangleBorder(
+              borderRadius: AppRadius.pillAll,
             ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
-            ),
+            textStyle: AppTypography.button,
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.textPrimary,
-            minimumSize: const Size(double.infinity, 52),
-            side: const BorderSide(color: AppColors.textPrimary),
+            minimumSize: const Size(double.infinity, 54),
+            side: const BorderSide(color: AppColors.borderStrong),
             elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+            shape: const RoundedRectangleBorder(
+              borderRadius: AppRadius.pillAll,
             ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
-            ),
+            textStyle: AppTypography.button,
           ),
         ),
-        cardTheme: CardThemeData(
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.accent,
+            textStyle: AppTypography.title,
+          ),
+        ),
+        cardTheme: const CardThemeData(
           color: AppColors.surface,
           elevation: 0,
           margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
         ),
         dividerTheme: const DividerThemeData(
           color: AppColors.border,
           thickness: 1,
           space: 0,
-        ),
-        textTheme: const TextTheme(
-          headlineLarge: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.5,
-            color: AppColors.textPrimary,
-          ),
-          headlineMedium: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.3,
-            color: AppColors.textPrimary,
-          ),
-          titleLarge: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.2,
-            color: AppColors.textPrimary,
-          ),
-          bodyLarge: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textPrimary,
-          ),
-          bodyMedium: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textSecondary,
-          ),
-          bodySmall: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textMuted,
-          ),
         ),
       );
 }
