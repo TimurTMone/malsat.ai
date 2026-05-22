@@ -294,9 +294,9 @@ class _ShellScreen extends ConsumerWidget {
             const Padding(
               padding: EdgeInsets.fromLTRB(
                 AppSpacing.lg,
-                AppSpacing.xs,
+                AppSpacing.xl,
                 AppSpacing.lg,
-                AppSpacing.md,
+                AppSpacing.lg,
               ),
               child: WorldSwitch(),
             ),
