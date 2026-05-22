@@ -1,774 +1,74 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_radius.dart';
+import '../../../../core/constants/app_shadows.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/i18n/app_localizations.dart';
+import '../../../../core/state/world_provider.dart';
+import '../../../../core/theme/app_world.dart';
+import '../../../../core/widgets/pressable_scale.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../drops/presentation/providers/drops_provider.dart';
+import '../../../home/presentation/providers/home_provider.dart';
 import '../providers/sell_provider.dart';
 
+/// Sell tab — the 30-second listing flow. World-aware: a meat drop in the
+/// Meat world, a live animal in the Livestock world. Photo-first, one
+/// decision per step, big targets — built for a herder in a field.
 class SellScreen extends ConsumerWidget {
   const SellScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dictAsync = ref.watch(dictionaryProvider);
-    final isAuth = ref.watch(isAuthenticatedProvider);
-
-    if (!isAuth) {
-      return dictAsync.when(
-        data: (dict) => SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(LucideIcons.logIn,
-                    size: 48, color: AppColors.textMuted),
-                const SizedBox(height: 16),
-                Text(
-                  t(dict, 'common.login'),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => context.push('/auth/login'),
-                  child: Text(t(dict, 'common.login')),
-                ),
-              ],
-            ),
-          ),
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => const Center(child: Text('Error')),
-      );
-    }
-
-    return dictAsync.when(
-      data: (dict) => _SellChooser(dict: dict),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => const Center(child: Text('Error')),
-    );
+    final authed = ref.watch(isAuthenticatedProvider);
+    final world = ref.watch(worldProvider);
+    if (!authed) return const _AuthGate();
+    return _SellFlow(world: world, key: ValueKey(world));
   }
 }
 
-class _SellChooser extends ConsumerWidget {
-  final Map<String, dynamic> dict;
-  const _SellChooser({required this.dict});
+/// Sign-in gate — shown only when the user reaches Sell unauthenticated.
+class _AuthGate extends ConsumerWidget {
+  const _AuthGate();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
+    final accent = AppWorldPalette.of(context).accent;
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              t(dict, 'listing.create'),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              t(dict, 'sellForm.subtitle'),
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 20),
-
-            // Option 1: Sell live animal (existing listing)
-            _SellOption(
-              icon: LucideIcons.heart,
-              title: t(dict, 'sellForm.sellLiveTitle'),
-              subtitle: t(dict, 'sellForm.sellLiveSub'),
-              color: AppColors.primary,
-              bgColor: AppColors.primary.withValues(alpha: 0.06),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    appBar: AppBar(
-                      title: Text(t(dict, 'listing.create')),
-                      backgroundColor: AppColors.surface,
-                      elevation: 0,
-                    ),
-                    body: _SellForm(dict: dict),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Option 2: Sell meat (create a drop)
-            _SellOption(
-              icon: LucideIcons.beef,
-              title: t(dict, 'sellForm.sellMeatTitle'),
-              subtitle: t(dict, 'sellForm.sellMeatSub'),
-              color: AppColors.meatAccent,
-              bgColor: AppColors.meatAccentSurface,
-              onTap: () => context.push('/create-drop'),
-            ),
-            const SizedBox(height: 24),
-
-            // Seller tools section
-            Text(
-              t(dict, 'sellForm.sellerTools'),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _ToolTile(
-              icon: LucideIcons.inbox,
-              title: t(dict, 'sellForm.toolOrdersTitle'),
-              subtitle: t(dict, 'sellForm.toolOrdersSub'),
-              onTap: () => context.push('/seller-orders'),
-            ),
-            _ToolTile(
-              icon: LucideIcons.qrCode,
-              title: t(dict, 'sellForm.toolQrTitle'),
-              subtitle: t(dict, 'sellForm.toolQrSub'),
-              onTap: () => context.push('/payment-setup'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SellOption extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final Color bgColor;
-  final VoidCallback onTap;
-
-  const _SellOption({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.bgColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, size: 24, color: color),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: color,
-                      )),
-                  const SizedBox(height: 2),
-                  Text(subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      )),
-                ],
-              ),
-            ),
-            Icon(LucideIcons.chevronRight, size: 20, color: color),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ToolTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _ToolTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: AppColors.textSecondary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      )),
-                  Text(subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      )),
-                ],
-              ),
-            ),
-            const Icon(LucideIcons.chevronRight,
-                size: 18, color: AppColors.textMuted),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SellForm extends ConsumerWidget {
-  final Map<String, dynamic> dict;
-
-  const _SellForm({required this.dict});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final form = ref.watch(sellFormProvider);
-    final notifier = ref.read(sellFormProvider.notifier);
-
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              t(dict, 'listing.create'),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              t(dict, 'auth.loginSubtitle'),
-              style: const TextStyle(
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Photo picker grid
-            _PhotoPickerGrid(
-              images: form.images,
-              dict: dict,
-              onAdd: () async {
-                final picker = ImagePicker();
-                final picked = await picker.pickMultiImage(
-                  imageQuality: 80,
-                  maxWidth: 1200,
-                );
-                for (final file in picked) {
-                  notifier.addImage(PickedImage(
-                    path: file.path,
-                    name: file.name,
-                  ));
-                }
-              },
-              onRemove: (index) => notifier.removeImage(index),
-            ),
-
-            // AI auto-fill button (appears when photos are picked)
-            if (form.images.isNotEmpty && form.category == null)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: form.isSubmitting
-                        ? null
-                        : () async {
-                            final locale = ref.read(localeProvider);
-                            final result = await notifier
-                                .analyzeWithAi(locale.languageCode);
-                            if (result != null && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    result.confidence == 'high'
-                                        ? t(dict, 'sellForm.aiSuccess')
-                                        : t(dict, 'sellForm.aiCheck'),
-                                  ),
-                                  backgroundColor: AppColors.primary,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            }
-                          },
-                    icon: form.isSubmitting
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(LucideIcons.sparkles, size: 18),
-                    label: Text(form.isSubmitting
-                        ? t(dict, 'sellForm.aiAnalyzing')
-                        : t(dict, 'sellForm.aiAutoFill')),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.boostBlue,
-                      side: const BorderSide(color: AppColors.boostBlue),
-                      minimumSize: const Size(0, 44),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 20),
-
-            // Category selector
-            Text(
-              t(dict, 'listing.category'),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                _CategoryButton(
-                  icon: LucideIcons.wind,
-                  label: t(dict, 'categories.horse'),
-                  value: 'HORSE',
-                  isSelected: form.category == 'HORSE',
-                  bgColor: AppColors.horseBackground,
-                  fgColor: AppColors.horseForeground,
-                  onTap: () => notifier.setCategory('HORSE'),
-                ),
-                const SizedBox(width: 8),
-                _CategoryButton(
-                  icon: LucideIcons.beef,
-                  label: t(dict, 'categories.cattle'),
-                  value: 'CATTLE',
-                  isSelected: form.category == 'CATTLE',
-                  bgColor: AppColors.cattleBackground,
-                  fgColor: AppColors.cattleForeground,
-                  onTap: () => notifier.setCategory('CATTLE'),
-                ),
-                const SizedBox(width: 8),
-                _CategoryButton(
-                  icon: LucideIcons.cloud,
-                  label: t(dict, 'categories.sheep'),
-                  value: 'SHEEP',
-                  isSelected: form.category == 'SHEEP',
-                  bgColor: AppColors.sheepBackground,
-                  fgColor: AppColors.sheepForeground,
-                  onTap: () => notifier.setCategory('SHEEP'),
-                ),
-                const SizedBox(width: 8),
-                _CategoryButton(
-                  icon: LucideIcons.award,
-                  label: t(dict, 'categories.arashan'),
-                  value: 'ARASHAN',
-                  isSelected: form.category == 'ARASHAN',
-                  bgColor: AppColors.arashanBackground,
-                  fgColor: AppColors.arashanForeground,
-                  onTap: () => notifier.setCategory('ARASHAN'),
-                ),
-              ],
-            ),
-
-            // Horse subcategory selector
-            if (form.category == 'HORSE') ...[
-              const SizedBox(height: 14),
-              Text(
-                t(dict, 'sellForm.horseTypeLabel'),
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => notifier.setSubcategory('MEAT'),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: form.subcategory == 'MEAT'
-                              ? AppColors.meatAccent
-                              : AppColors.meatAccentSurface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: form.subcategory == 'MEAT'
-                                ? AppColors.meatAccent
-                                : const Color(0xFFFCA5A5),
-                            width: form.subcategory == 'MEAT' ? 2 : 1,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(LucideIcons.beef,
-                                size: 22,
-                                color: form.subcategory == 'MEAT'
-                                    ? Colors.white
-                                    : AppColors.meatAccent),
-                            const SizedBox(height: 4),
-                            Text(
-                              t(dict, 'sellForm.horseMeatTitle'),
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: form.subcategory == 'MEAT'
-                                    ? Colors.white
-                                    : AppColors.meatAccent,
-                              ),
-                            ),
-                            Text(
-                              t(dict, 'sellForm.horseMeatSub'),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: form.subcategory == 'MEAT'
-                                    ? Colors.white70
-                                    : AppColors.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => notifier.setSubcategory('KOK_BORU'),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: form.subcategory == 'KOK_BORU'
-                              ? const Color(0xFF1565C0)
-                              : const Color(0xFFE3F2FD),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: form.subcategory == 'KOK_BORU'
-                                ? const Color(0xFF1565C0)
-                                : const Color(0xFF90CAF9),
-                            width: form.subcategory == 'KOK_BORU' ? 2 : 1,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(LucideIcons.trophy,
-                                size: 22,
-                                color: form.subcategory == 'KOK_BORU'
-                                    ? Colors.white
-                                    : const Color(0xFF1565C0)),
-                            const SizedBox(height: 4),
-                            Text(
-                              t(dict, 'sellForm.horseKokBoruTitle'),
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: form.subcategory == 'KOK_BORU'
-                                    ? Colors.white
-                                    : const Color(0xFF1565C0),
-                              ),
-                            ),
-                            Text(
-                              t(dict, 'sellForm.horseKokBoruSub'),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: form.subcategory == 'KOK_BORU'
-                                    ? Colors.white70
-                                    : AppColors.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 20),
-
-            // Title
-            _FieldLabel(t(dict, 'listing.title')),
-            const SizedBox(height: 6),
-            TextField(
-              onChanged: notifier.setTitle,
-              decoration: InputDecoration(
-                hintText: t(dict, 'listing.title'),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Price
-            _FieldLabel(t(dict, 'listing.price')),
-            const SizedBox(height: 6),
-            TextField(
-              onChanged: notifier.setPrice,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: '0',
-                suffixText: t(dict, 'common.som'),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Breed
-            _FieldLabel(t(dict, 'listing.breed')),
-            const SizedBox(height: 6),
-            TextField(
-              onChanged: (v) => notifier.setBreed(v.isEmpty ? null : v),
-              decoration: InputDecoration(
-                hintText: t(dict, 'listing.breed'),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Age + Weight row
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _FieldLabel(t(dict, 'listing.age')),
-                      const SizedBox(height: 6),
-                      TextField(
-                        onChanged: (v) =>
-                            notifier.setAge(v.isEmpty ? null : v),
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: '0',
-                          suffixText: t(dict, 'common.months'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _FieldLabel(t(dict, 'listing.weight')),
-                      const SizedBox(height: 6),
-                      TextField(
-                        onChanged: (v) =>
-                            notifier.setWeight(v.isEmpty ? null : v),
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: '0',
-                          suffixText: t(dict, 'common.kg'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Gender
-            _FieldLabel(t(dict, 'gender.label')),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                _GenderChip(
-                  label: t(dict, 'gender.male'),
-                  isSelected: form.gender == 'MALE',
-                  onTap: () => notifier.setGender(
-                      form.gender == 'MALE' ? null : 'MALE'),
-                ),
-                const SizedBox(width: 8),
-                _GenderChip(
-                  label: t(dict, 'gender.female'),
-                  isSelected: form.gender == 'FEMALE',
-                  onTap: () => notifier.setGender(
-                      form.gender == 'FEMALE' ? null : 'FEMALE'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Description
-            _FieldLabel(t(dict, 'listing.description')),
-            const SizedBox(height: 6),
-            TextField(
-              onChanged: (v) =>
-                  notifier.setDescription(v.isEmpty ? null : v),
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: t(dict, 'listing.description'),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Error
-            if (form.error != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  form.error!,
-                  style: const TextStyle(
-                    color: AppColors.error,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-
-            // Submit
-            ElevatedButton(
-              onPressed: form.isValid && !form.isSubmitting
-                  ? () async {
-                      final success = await ref
-                          .read(sellFormProvider.notifier)
-                          .submit();
-                      if (success && context.mounted) {
-                        context.go('/');
-                      }
-                    }
-                  : null,
-              child: form.isSubmitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Text(t(dict, 'listing.publish')),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FieldLabel extends StatelessWidget {
-  final String text;
-  const _FieldLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      ),
-    );
-  }
-}
-
-class _CategoryButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool isSelected;
-  final Color bgColor;
-  final Color fgColor;
-  final VoidCallback onTap;
-
-  const _CategoryButton({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.isSelected,
-    required this.bgColor,
-    required this.fgColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : bgColor,
-            borderRadius: BorderRadius.circular(12),
-            border: isSelected
-                ? Border.all(color: AppColors.primary, width: 2)
-                : null,
-          ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 22, color: isSelected ? Colors.white : fgColor),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? Colors.white : fgColor,
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: AppWorldPalette.of(context).accentSurface,
+                  shape: BoxShape.circle,
                 ),
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
+                child: Icon(LucideIcons.store, size: 34, color: accent),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(t(dict, 'quickSell.authTitle'),
+                  textAlign: TextAlign.center, style: AppTypography.h1),
+              const SizedBox(height: AppSpacing.xs),
+              Text(t(dict, 'quickSell.authSub'),
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyMuted),
+              const SizedBox(height: AppSpacing.xl),
+              _PrimaryButton(
+                label: t(dict, 'common.login'),
+                accent: accent,
+                onTap: () => context.push('/auth/login'),
               ),
             ],
           ),
@@ -778,150 +78,879 @@ class _CategoryButton extends StatelessWidget {
   }
 }
 
-class _PhotoPickerGrid extends StatelessWidget {
-  final List<PickedImage> images;
-  final Map<String, dynamic> dict;
-  final VoidCallback onAdd;
-  final ValueChanged<int> onRemove;
+// ─────────────────────────────────────────────────────────────────────
 
-  const _PhotoPickerGrid({
-    required this.images,
-    required this.dict,
-    required this.onAdd,
-    required this.onRemove,
-  });
+class _SellFlow extends ConsumerStatefulWidget {
+  final AppWorld world;
+  const _SellFlow({super.key, required this.world});
+
+  @override
+  ConsumerState<_SellFlow> createState() => _SellFlowState();
+}
+
+class _SellFlowState extends ConsumerState<_SellFlow> {
+  static const _steps = 5;
+
+  int _step = 0;
+  final List<XFile> _photos = [];
+  String? _category;
+  final _title = TextEditingController();
+  final _price = TextEditingController();
+  final _weight = TextEditingController();
+  final _village = TextEditingController();
+  DateTime _butcherDate = DateTime.now().add(const Duration(days: 3));
+  bool _submitting = false;
+  bool _done = false;
+  String? _error;
+
+  bool get _isMeat => widget.world == AppWorld.meat;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _price.dispose();
+    _weight.dispose();
+    _village.dispose();
+    super.dispose();
+  }
+
+  bool get _canContinue {
+    switch (_step) {
+      case 0:
+        return _photos.isNotEmpty;
+      case 1:
+        return _category != null;
+      case 2:
+        final base =
+            _title.text.trim().isNotEmpty && _price.text.trim().isNotEmpty;
+        return _isMeat ? base && _weight.text.trim().isNotEmpty : base;
+      case 3:
+        return _village.text.trim().isNotEmpty;
+      default:
+        return true;
+    }
+  }
+
+  Future<void> _pickPhoto() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetTop),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: AppSpacing.sm),
+            ListTile(
+              leading: const Icon(LucideIcons.camera),
+              title: const Text('Camera'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(LucideIcons.image),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    final picked = await ImagePicker()
+        .pickImage(source: source, imageQuality: 80, maxWidth: 1200);
+    if (picked != null) setState(() => _photos.add(picked));
+  }
+
+  void _next() {
+    FocusScope.of(context).unfocus();
+    if (_step < _steps - 1) {
+      setState(() => _step++);
+    } else {
+      _publish();
+    }
+  }
+
+  void _back() {
+    FocusScope.of(context).unfocus();
+    if (_step > 0) setState(() => _step--);
+  }
+
+  Future<void> _publish() async {
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+    try {
+      if (_isMeat) {
+        final api = ref.read(dropsApiProvider);
+        for (final p in _photos) {
+          await api.uploadPhoto(File(p.path), filename: p.name);
+        }
+        await api.createDrop(
+          title: _title.text.trim(),
+          category: _category!,
+          totalWeightKg: double.parse(_weight.text.trim()),
+          pricePerKg: int.parse(_price.text.trim()),
+          butcherDate: _butcherDate,
+          pickupAddress: _village.text.trim(),
+          village: _village.text.trim(),
+        );
+        ref.invalidate(dropsListProvider);
+      } else {
+        final api = ref.read(sellApiProvider);
+        final res = await api.createListing(
+          category: _category!,
+          title: _title.text.trim(),
+          priceKgs: int.parse(_price.text.trim()),
+          weightKg: double.tryParse(_weight.text.trim()),
+          village: _village.text.trim(),
+        );
+        final listingId = res['id'] as String;
+        for (var i = 0; i < _photos.length; i++) {
+          await api.uploadMedia(
+            filePath: _photos[i].path,
+            fileName: _photos[i].name,
+            listingId: listingId,
+            isPrimary: i == 0,
+          );
+        }
+        ref.invalidate(latestListingsProvider);
+      }
+      if (mounted) setState(() => _done = true);
+    } catch (_) {
+      final dict = ref.read(dictionaryProvider).valueOrNull;
+      if (mounted) setState(() => _error = t(dict, 'quickSell.errGeneric'));
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  void _reset() {
+    setState(() {
+      _step = 0;
+      _photos.clear();
+      _category = null;
+      _title.clear();
+      _price.clear();
+      _weight.clear();
+      _village.clear();
+      _done = false;
+      _error = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 100,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
+    final accent = AppWorldPalette.of(context).accent;
+
+    if (_done) return _SuccessView(accent: accent, onAnother: _reset);
+
+    return SafeArea(
+      child: Column(
         children: [
-          // Add button
-          GestureDetector(
-            onTap: onAdd,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(12),
+          _ProgressBar(step: _step, total: _steps, accent: accent),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 240),
+              switchInCurve: Curves.easeOutCubic,
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.06, 0),
+                    end: Offset.zero,
+                  ).animate(anim),
+                  child: child,
+                ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(LucideIcons.camera,
-                      size: 28, color: AppColors.textMuted),
-                  const SizedBox(height: 4),
-                  Text(
-                    t(dict, 'listing.addPhoto'),
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textMuted,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              child: SingleChildScrollView(
+                key: ValueKey(_step),
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: _stepContent(dict, accent),
               ),
             ),
           ),
-          // Picked images
-          ...images.asMap().entries.map((entry) {
-            final index = entry.key;
-            final img = entry.value;
-            return Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: SizedBox(
-                      width: 100,
-                      height: 100,
-                      child: kIsWeb
-                          ? Image.network(img.path, fit: BoxFit.cover)
-                          : Image.file(File(img.path), fit: BoxFit.cover),
-                    ),
-                  ),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: GestureDetector(
-                      onTap: () => onRemove(index),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(LucideIcons.x,
-                            size: 14, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                  if (index == 0)
-                    Positioned(
-                      bottom: 4,
-                      left: 4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          t(dict, 'sellForm.mainPhoto'),
-                          style: const TextStyle(
-                            fontSize: 9,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+              child: Text(_error!,
+                  style: const TextStyle(
+                      color: AppColors.error,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600)),
+            ),
+          _BottomBar(
+            showBack: _step > 0,
+            canContinue: _canContinue && !_submitting,
+            submitting: _submitting,
+            isLast: _step == _steps - 1,
+            accent: accent,
+            nextLabel: _step == _steps - 1
+                ? t(dict, 'quickSell.publish')
+                : t(dict, 'common.next'),
+            publishingLabel: t(dict, 'quickSell.publishing'),
+            backLabel: t(dict, 'common.back'),
+            onBack: _back,
+            onNext: _next,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepContent(Map<String, dynamic>? dict, Color accent) {
+    switch (_step) {
+      case 0:
+        return _stepHeader(
+          t(dict, 'quickSell.stepPhoto'),
+          t(dict, 'quickSell.stepPhotoSub'),
+          _PhotoStep(
+            photos: _photos,
+            accent: accent,
+            addLabel: t(dict, 'quickSell.addPhoto'),
+            onAdd: _pickPhoto,
+            onRemove: (i) => setState(() => _photos.removeAt(i)),
+          ),
+        );
+      case 1:
+        return _stepHeader(
+          t(dict, 'quickSell.stepCategory'),
+          null,
+          _CategoryStep(
+            isMeat: _isMeat,
+            selected: _category,
+            accent: accent,
+            dict: dict,
+            onPick: (c) => setState(() {
+              _category = c;
+              _step = 2;
+            }),
+          ),
+        );
+      case 2:
+        return _stepHeader(
+          t(
+              dict,
+              _isMeat
+                  ? 'quickSell.stepDetailsMeat'
+                  : 'quickSell.stepDetailsLivestock'),
+          null,
+          Column(
+            children: [
+              _Field(
+                controller: _title,
+                label: t(dict, 'quickSell.titleField'),
+                icon: LucideIcons.tag,
+                onChanged: (_) => setState(() {}),
               ),
-            );
-          }),
+              const SizedBox(height: AppSpacing.md),
+              _Field(
+                controller: _weight,
+                label: t(
+                    dict,
+                    _isMeat
+                        ? 'quickSell.totalWeight'
+                        : 'quickSell.weightField'),
+                icon: LucideIcons.scale,
+                number: true,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _Field(
+                controller: _price,
+                label: t(
+                    dict,
+                    _isMeat
+                        ? 'quickSell.pricePerKg'
+                        : 'quickSell.priceField'),
+                icon: LucideIcons.banknote,
+                number: true,
+                onChanged: (_) => setState(() {}),
+              ),
+            ],
+          ),
+        );
+      case 3:
+        return _stepHeader(
+          t(dict, 'quickSell.stepLocation'),
+          null,
+          Column(
+            children: [
+              _Field(
+                controller: _village,
+                label: t(dict, 'quickSell.villageField'),
+                icon: LucideIcons.mapPin,
+                onChanged: (_) => setState(() {}),
+              ),
+              if (_isMeat) ...[
+                const SizedBox(height: AppSpacing.md),
+                _DateField(
+                  label: t(dict, 'quickSell.butcherDate'),
+                  date: _butcherDate,
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _butcherDate,
+                      firstDate: DateTime.now(),
+                      lastDate:
+                          DateTime.now().add(const Duration(days: 60)),
+                    );
+                    if (picked != null) {
+                      setState(() => _butcherDate = picked);
+                    }
+                  },
+                ),
+              ],
+            ],
+          ),
+        );
+      default:
+        return _stepHeader(
+          t(dict, 'quickSell.stepReview'),
+          null,
+          _ReviewCard(
+            photo: _photos.isNotEmpty ? File(_photos.first.path) : null,
+            category: t(dict, 'categories.${_category?.toLowerCase()}'),
+            title: _title.text.trim(),
+            price: _price.text.trim(),
+            priceUnit: t(dict, _isMeat ? 'common.somPerKg' : 'common.som'),
+            weight: _weight.text.trim(),
+            village: _village.text.trim(),
+          ),
+        );
+    }
+  }
+
+  Widget _stepHeader(String title, String? sub, Widget body) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: AppTypography.h1),
+        if (sub != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          Text(sub, style: AppTypography.bodyMuted),
+        ],
+        const SizedBox(height: AppSpacing.xl),
+        body,
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────── components
+
+class _ProgressBar extends StatelessWidget {
+  final int step;
+  final int total;
+  final Color accent;
+
+  const _ProgressBar(
+      {required this.step, required this.total, required this.accent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xs),
+      child: Row(
+        children: [
+          for (var i = 0; i < total; i++) ...[
+            if (i > 0) const SizedBox(width: 6),
+            Expanded(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 240),
+                height: 5,
+                decoration: BoxDecoration(
+                  color: i <= step ? accent : AppColors.border,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _GenderChip extends StatelessWidget {
+class _PhotoStep extends StatelessWidget {
+  final List<XFile> photos;
+  final Color accent;
+  final String addLabel;
+  final VoidCallback onAdd;
+  final ValueChanged<int> onRemove;
+
+  const _PhotoStep({
+    required this.photos,
+    required this.accent,
+    required this.addLabel,
+    required this.onAdd,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: onAdd,
+          child: Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppWorldPalette.of(context).accentSurface,
+              borderRadius: AppRadius.lgAll,
+              border: Border.all(
+                  color: accent.withValues(alpha: 0.4), width: 1.5),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(LucideIcons.camera, size: 40, color: accent),
+                const SizedBox(height: AppSpacing.sm),
+                Text(addLabel,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        color: accent)),
+              ],
+            ),
+          ),
+        ),
+        if (photos.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (var i = 0; i < photos.length; i++)
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: AppRadius.mdAll,
+                      child: Image.file(File(photos[i].path),
+                          width: 84, height: 84, fit: BoxFit.cover),
+                    ),
+                    Positioned(
+                      top: 2,
+                      right: 2,
+                      child: GestureDetector(
+                        onTap: () => onRemove(i),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle),
+                          padding: const EdgeInsets.all(3),
+                          child: const Icon(LucideIcons.x,
+                              size: 14, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _CategoryStep extends StatelessWidget {
+  final bool isMeat;
+  final String? selected;
+  final Color accent;
+  final Map<String, dynamic>? dict;
+  final ValueChanged<String> onPick;
+
+  const _CategoryStep({
+    required this.isMeat,
+    required this.selected,
+    required this.accent,
+    required this.dict,
+    required this.onPick,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cats = <List<dynamic>>[
+      ['CATTLE', LucideIcons.beef, 'categories.cattle'],
+      ['SHEEP', LucideIcons.cloud, 'categories.sheep'],
+      ['HORSE', LucideIcons.wind, 'categories.horse'],
+      if (!isMeat) ['ARASHAN', LucideIcons.star, 'categories.arashan'],
+    ];
+    return Column(
+      children: [
+        for (final c in cats)
+          PressableScale(
+            onTap: () => onPick(c[0] as String),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: AppRadius.lgAll,
+                border: Border.all(
+                  color: selected == c[0] ? accent : AppColors.border,
+                  width: selected == c[0] ? 2 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(c[1] as IconData, size: 24, color: accent),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(t(dict, c[2] as String),
+                        style: AppTypography.title.copyWith(fontSize: 16)),
+                  ),
+                  const Icon(LucideIcons.chevronRight,
+                      size: 20, color: AppColors.textMuted),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _Field extends StatelessWidget {
+  final TextEditingController controller;
   final String label;
-  final bool isSelected;
+  final IconData icon;
+  final bool number;
+  final ValueChanged<String> onChanged;
+
+  const _Field({
+    required this.controller,
+    required this.label,
+    required this.icon,
+    required this.onChanged,
+    this.number = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      keyboardType: number ? TextInputType.number : TextInputType.text,
+      style: AppTypography.body.copyWith(fontWeight: FontWeight.w600),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 19),
+      ),
+    );
+  }
+}
+
+class _DateField extends StatelessWidget {
+  final String label;
+  final DateTime date;
   final VoidCallback onTap;
 
-  const _GenderChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
+  const _DateField(
+      {required this.label, required this.date, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.background,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+          color: AppColors.backgroundSecondary,
+          borderRadius: AppRadius.mdAll,
+        ),
+        child: Row(
+          children: [
+            const Icon(LucideIcons.calendar,
+                size: 19, color: AppColors.textSecondary),
+            const SizedBox(width: AppSpacing.md),
+            Text('$label:  ', style: AppTypography.bodyMuted),
+            Text('${date.day}.${date.month}.${date.year}',
+                style: AppTypography.body
+                    .copyWith(fontWeight: FontWeight.w700)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReviewCard extends StatelessWidget {
+  final File? photo;
+  final String category;
+  final String title;
+  final String price;
+  final String priceUnit;
+  final String weight;
+  final String village;
+
+  const _ReviewCard({
+    required this.photo,
+    required this.category,
+    required this.title,
+    required this.price,
+    required this.priceUnit,
+    required this.weight,
+    required this.village,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = AppWorldPalette.of(context).accent;
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppRadius.lgAll,
+        border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.card,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (photo != null)
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(AppRadius.lg)),
+              child: Image.file(photo!,
+                  height: 168, width: double.infinity, fit: BoxFit.cover),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(category.toUpperCase(),
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                        color: accent)),
+                const SizedBox(height: AppSpacing.xs),
+                Text(title, style: AppTypography.h2),
+                const SizedBox(height: AppSpacing.sm),
+                Text('$price $priceUnit',
+                    style:
+                        AppTypography.priceLarge.copyWith(color: accent)),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    const Icon(LucideIcons.scale,
+                        size: 14, color: AppColors.textMuted),
+                    const SizedBox(width: 4),
+                    Text('$weight kg', style: AppTypography.bodyMuted),
+                    const SizedBox(width: AppSpacing.md),
+                    const Icon(LucideIcons.mapPin,
+                        size: 14, color: AppColors.textMuted),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(village,
+                          style: AppTypography.bodyMuted,
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomBar extends StatelessWidget {
+  final bool showBack;
+  final bool canContinue;
+  final bool submitting;
+  final bool isLast;
+  final Color accent;
+  final String nextLabel;
+  final String publishingLabel;
+  final String backLabel;
+  final VoidCallback onBack;
+  final VoidCallback onNext;
+
+  const _BottomBar({
+    required this.showBack,
+    required this.canContinue,
+    required this.submitting,
+    required this.isLast,
+    required this.accent,
+    required this.nextLabel,
+    required this.publishingLabel,
+    required this.backLabel,
+    required this.onBack,
+    required this.onNext,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.md),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border:
+            Border(top: BorderSide(color: AppColors.border, width: 0.5)),
+      ),
+      child: Row(
+        children: [
+          if (showBack) ...[
+            GestureDetector(
+              onTap: onBack,
+              child: Container(
+                height: 52,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundSecondary,
+                  borderRadius: AppRadius.pillAll,
+                ),
+                child: Text(backLabel,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary)),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Expanded(
+            child: _PrimaryButton(
+              label: submitting ? publishingLabel : nextLabel,
+              accent: accent,
+              enabled: canContinue,
+              loading: submitting,
+              icon: isLast && !submitting ? LucideIcons.check : null,
+              onTap: onNext,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrimaryButton extends StatelessWidget {
+  final String label;
+  final Color accent;
+  final bool enabled;
+  final bool loading;
+  final IconData? icon;
+  final VoidCallback onTap;
+
+  const _PrimaryButton({
+    required this.label,
+    required this.accent,
+    required this.onTap,
+    this.enabled = true,
+    this.loading = false,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled && !loading ? onTap : null,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 160),
+        opacity: enabled ? 1 : 0.4,
+        child: Container(
+          height: 52,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: accent,
+            borderRadius: AppRadius.pillAll,
+            boxShadow: enabled
+                ? [
+                    BoxShadow(
+                      color: accent.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (loading)
+                const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white),
+                )
+              else ...[
+                if (icon != null) ...[
+                  Icon(icon, size: 19, color: Colors.white),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                Text(label,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white)),
+              ],
+            ],
           ),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : AppColors.textPrimary,
+      ),
+    );
+  }
+}
+
+class _SuccessView extends ConsumerWidget {
+  final Color accent;
+  final VoidCallback onAnother;
+
+  const _SuccessView({required this.accent, required this.onAnother});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dict = ref.watch(dictionaryProvider).valueOrNull;
+    return SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 92,
+                height: 92,
+                decoration:
+                    BoxDecoration(color: accent, shape: BoxShape.circle),
+                child: const Icon(LucideIcons.check,
+                    size: 44, color: Colors.white),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(t(dict, 'quickSell.doneTitle'),
+                  style: AppTypography.h1, textAlign: TextAlign.center),
+              const SizedBox(height: AppSpacing.xs),
+              Text(t(dict, 'quickSell.doneSub'),
+                  style: AppTypography.bodyMuted,
+                  textAlign: TextAlign.center),
+              const SizedBox(height: AppSpacing.xl),
+              _PrimaryButton(
+                label: t(dict, 'quickSell.doneAnother'),
+                accent: accent,
+                onTap: onAnother,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              TextButton(
+                onPressed: () => context.go('/home'),
+                child: Text(t(dict, 'common.done')),
+              ),
+            ],
           ),
         ),
       ),
