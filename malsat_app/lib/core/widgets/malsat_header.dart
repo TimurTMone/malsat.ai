@@ -14,9 +14,9 @@ import 'world_switch.dart';
 class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
   const MalsatHeader({super.key});
 
-  static const double _toolbar = 56;
-  // World switch (46) + breathing room above it (16) + below (12).
-  static const double _switchBand = 74;
+  static const double _toolbar = 58;
+  // World switch (46) + generous breathing room above it (32) + below (14).
+  static const double _switchBand = 92;
 
   @override
   Size get preferredSize => const Size.fromHeight(_toolbar + _switchBand);
@@ -54,9 +54,9 @@ class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             AppSpacing.lg,
+            AppSpacing.xxxl,
             AppSpacing.lg,
-            AppSpacing.lg,
-            AppSpacing.md,
+            14,
           ),
           child: WorldSwitch(),
         ),
