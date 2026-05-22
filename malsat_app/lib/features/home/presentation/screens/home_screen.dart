@@ -3,8 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_radius.dart';
+import '../../../../core/constants/app_shadows.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/i18n/app_localizations.dart';
 import '../../../../core/state/view_mode.dart';
+import '../../../../core/theme/app_world.dart';
 import '../../../../core/widgets/listing_card.dart';
 import '../../../../core/widgets/listing_card_large.dart';
 import '../../../../core/widgets/listing_card_row.dart';
@@ -12,6 +17,7 @@ import '../../../../core/widgets/shimmer.dart';
 import '../../../../core/widgets/view_mode_toggle.dart';
 import '../providers/home_provider.dart';
 
+/// Livestock world browse — fixed-price animal listings.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -38,10 +44,11 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final listingsAsync = ref.watch(latestListingsProvider);
     final viewMode = ref.watch(listingViewModeProvider);
+    final accent = AppWorldPalette.of(context).accent;
 
     return SafeArea(
       child: RefreshIndicator(
-        color: AppColors.accent,
+        color: accent,
         onRefresh: () => ref.refresh(latestListingsProvider.future),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -49,310 +56,80 @@ class _HomeContent extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Search pill
+              // Search pill.
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                child: GestureDetector(
-                  onTap: () => context.go('/search'),
-                  child: Container(
-                    height: 52,
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(color: AppColors.borderStrong),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(LucideIcons.search,
-                            size: 18, color: AppColors.textPrimary),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                t(dict, 'search.searchPlaceholder'),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              Text(
-                                t(dict, 'common.all'),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.borderStrong),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(LucideIcons.slidersHorizontal,
-                              size: 16, color: AppColors.textPrimary),
-                        ),
-                      ],
-                    ),
-                  ),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
+                child: _SearchPill(
+                  placeholder: t(dict, 'search.searchPlaceholder'),
+                  hint: t(dict, 'common.all'),
+                  onTap: () => context.push('/search'),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
 
-              // Category tabs -- horizontal scroll, underline style
+              // Category quick-filters.
               SizedBox(
                 height: 44,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                   children: [
                     _CategoryTab(
                       icon: LucideIcons.wind,
                       label: t(dict, 'categories.horse'),
-                      onTap: () => context.go('/search?category=HORSE'),
+                      onTap: () => context.push('/search?category=HORSE'),
                     ),
                     _CategoryTab(
                       icon: LucideIcons.beef,
                       label: t(dict, 'categories.cattle'),
-                      onTap: () => context.go('/search?category=CATTLE'),
+                      onTap: () => context.push('/search?category=CATTLE'),
                     ),
                     _CategoryTab(
                       icon: LucideIcons.cloud,
                       label: t(dict, 'categories.sheep'),
-                      onTap: () => context.go('/search?category=SHEEP'),
+                      onTap: () => context.push('/search?category=SHEEP'),
                     ),
                     _CategoryTab(
                       icon: LucideIcons.award,
                       label: t(dict, 'categories.arashan'),
-                      onTap: () => context.go('/search?category=ARASHAN'),
+                      onTap: () => context.push('/search?category=ARASHAN'),
                     ),
                   ],
                 ),
               ),
               const Divider(height: 1),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
 
-              // Dual-mode unified hero — "Any animal. Your way."
+              // Dual-mode livestock hero — "Any animal. Your way."
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF1B4332), Color(0xFF2D6A4F)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primaryDark.withValues(alpha: 0.22),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE0B547),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          t(dict, 'home.heroBadge'),
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF1B4332),
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        t(dict, 'home.heroTitle'),
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          height: 1.25,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        t(dict, 'home.heroSubtitle'),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.white70,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => context.go('/search'),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 11),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      t(dict, 'home.iBuy'),
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      t(dict, 'home.iBuyDesc'),
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => context.push('/caretakers'),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 11),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE0B547),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      t(dict, 'home.iHire'),
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF1B4332),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      t(dict, 'home.iHireDesc'),
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: Color(0xFF1B4332),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: _LivestockHero(
+                  badge: t(dict, 'home.heroBadge'),
+                  title: t(dict, 'home.heroTitle'),
+                  subtitle: t(dict, 'home.heroSubtitle'),
+                  buyLabel: t(dict, 'home.iBuy'),
+                  buyDesc: t(dict, 'home.iBuyDesc'),
+                  hireLabel: t(dict, 'home.iHire'),
+                  hireDesc: t(dict, 'home.iHireDesc'),
+                  onBuy: () => context.push('/search'),
+                  onHire: () => context.push('/caretakers'),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.xl),
 
-              // ═══ MEAT DROPS BANNER — drives to the core feature ═══
+              // Section header + view-mode toggle.
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GestureDetector(
-                  onTap: () => context.go('/drops'),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF7F1D1D), Color(0xFFB91C1C)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(LucideIcons.beef,
-                              color: Colors.white, size: 24),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                t(dict, 'home.meatBannerTitle'),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                t(dict, 'home.meatBannerSubtitle'),
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(LucideIcons.chevronRight,
-                            color: Colors.white70, size: 20),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section header + view-mode toggle (Unaa-style row)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
                         t(dict, 'home.latestListings'),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.4,
-                        ),
+                        style: AppTypography.h2,
                       ),
                     ),
                     const ViewModeToggle(),
@@ -360,7 +137,7 @@ class _HomeContent extends ConsumerWidget {
                 ),
               ),
 
-              // Listings -- rendered per view mode
+              // Listings.
               listingsAsync.when(
                 data: (listings) {
                   if (listings.isEmpty) {
@@ -369,16 +146,14 @@ class _HomeContent extends ConsumerWidget {
                       child: Center(
                         child: Text(
                           t(dict, 'common.noResults'),
-                          style: const TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 15,
-                          ),
+                          style: AppTypography.bodyMuted,
                         ),
                       ),
                     );
                   }
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg),
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 280),
                       switchInCurve: Curves.easeOutCubic,
@@ -397,14 +172,15 @@ class _HomeContent extends ConsumerWidget {
                         key: ValueKey(viewMode),
                         child: LayoutBuilder(
                           builder: (ctx, c) => _buildListings(
-                            listings, viewMode, dict, locale, c.maxWidth),
+                              listings, viewMode, dict, locale, c.maxWidth),
                         ),
                       ),
                     ),
                   );
                 },
                 loading: () => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                   child: Column(
                     children: List.generate(
                       3,
@@ -417,13 +193,13 @@ class _HomeContent extends ConsumerWidget {
                   child: Center(
                     child: Column(
                       children: [
-                        const Text('Something went wrong',
-                            style: TextStyle(color: AppColors.textSecondary)),
-                        const SizedBox(height: 8),
+                        Text(t(dict, 'common.error'),
+                            style: AppTypography.bodyMuted),
+                        const SizedBox(height: AppSpacing.sm),
                         TextButton(
                           onPressed: () =>
                               ref.refresh(latestListingsProvider.future),
-                          child: const Text('Try again'),
+                          child: Text(t(dict, 'common.retry')),
                         ),
                       ],
                     ),
@@ -467,8 +243,8 @@ Widget _buildListings(
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: cols,
-          crossAxisSpacing: 14,
-          mainAxisSpacing: 20,
+          crossAxisSpacing: AppSpacing.lg,
+          mainAxisSpacing: AppSpacing.xl,
           childAspectRatio: 0.58,
         ),
         itemCount: listings.length,
@@ -489,6 +265,225 @@ Widget _buildListings(
           locale: locale,
         ),
       );
+  }
+}
+
+/// Tappable search field shortcut.
+class _SearchPill extends StatelessWidget {
+  final String placeholder;
+  final String hint;
+  final VoidCallback onTap;
+
+  const _SearchPill({
+    required this.placeholder,
+    required this.hint,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 54,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: AppRadius.pillAll,
+          border: Border.all(color: AppColors.border),
+          boxShadow: AppShadows.card,
+        ),
+        child: Row(
+          children: [
+            const Icon(LucideIcons.search,
+                size: 18, color: AppColors.textPrimary),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(placeholder,
+                      style: AppTypography.title.copyWith(fontSize: 14)),
+                  Text(hint, style: AppTypography.caption),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundSecondary,
+                borderRadius: AppRadius.smAll,
+              ),
+              child: const Icon(LucideIcons.slidersHorizontal,
+                  size: 16, color: AppColors.textPrimary),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Livestock world hero — buy an animal or hire a caretaker.
+class _LivestockHero extends StatelessWidget {
+  final String badge;
+  final String title;
+  final String subtitle;
+  final String buyLabel;
+  final String buyDesc;
+  final String hireLabel;
+  final String hireDesc;
+  final VoidCallback onBuy;
+  final VoidCallback onHire;
+
+  const _LivestockHero({
+    required this.badge,
+    required this.title,
+    required this.subtitle,
+    required this.buyLabel,
+    required this.buyDesc,
+    required this.hireLabel,
+    required this.hireDesc,
+    required this.onBuy,
+    required this.onHire,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppWorldPalette.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: palette.heroGradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: AppRadius.xlAll,
+        boxShadow: AppShadows.coloredGlow(palette.accent),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              borderRadius: AppRadius.smAll,
+            ),
+            child: Text(
+              badge.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              height: 1.22,
+              letterSpacing: -0.4,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: _HeroAction(
+                  label: buyLabel,
+                  desc: buyDesc,
+                  filled: false,
+                  onTap: onBuy,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _HeroAction(
+                  label: hireLabel,
+                  desc: hireDesc,
+                  filled: true,
+                  onTap: onHire,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroAction extends StatelessWidget {
+  final String label;
+  final String desc;
+  final bool filled;
+  final VoidCallback onTap;
+
+  const _HeroAction({
+    required this.label,
+    required this.desc,
+    required this.filled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = filled ? AppColors.textPrimary : Colors.white;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: filled
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.15),
+          borderRadius: AppRadius.mdAll,
+          border: filled
+              ? null
+              : Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: fg,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              desc,
+              style: TextStyle(
+                fontSize: 10,
+                color: filled
+                    ? AppColors.textSecondary
+                    : Colors.white.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -513,7 +508,7 @@ class _CategoryTab extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 22, color: AppColors.textSecondary),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               label,
               style: const TextStyle(

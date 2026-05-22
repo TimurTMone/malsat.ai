@@ -171,7 +171,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
+                    color: AppColors.meatAccent.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -182,7 +182,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.primary,
+                          color: AppColors.meatAccent,
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -194,7 +194,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
+                              color: AppColors.meatAccent,
                             ),
                           ),
                           Text(
@@ -323,7 +323,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                   child: Row(
                     children: [
                       const Icon(LucideIcons.mapPin,
-                          size: 18, color: AppColors.primary),
+                          size: 18, color: AppColors.meatAccent),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -400,19 +400,19 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                               color: isDisabled
                                   ? AppColors.backgroundSecondary
                                   : isSelected
-                                      ? AppColors.primary
+                                      ? AppColors.meatAccent
                                       : AppColors.surface,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: isSelected
-                                    ? AppColors.primary
+                                    ? AppColors.meatAccent
                                     : AppColors.border,
                                 width: isSelected ? 2 : 1,
                               ),
                               boxShadow: isSelected
                                   ? [
                                       BoxShadow(
-                                        color: AppColors.primary
+                                        color: AppColors.meatAccent
                                             .withValues(alpha: 0.3),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
@@ -464,12 +464,12 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                           height: 80,
                           decoration: BoxDecoration(
                             color: _customMode
-                                ? AppColors.primary
+                                ? AppColors.meatAccent
                                 : AppColors.surface,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: _customMode
-                                  ? AppColors.primary
+                                  ? AppColors.meatAccent
                                   : AppColors.border,
                               width: _customMode ? 2 : 1,
                             ),
@@ -512,7 +512,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
+                            color: AppColors.meatAccent,
                           ),
                         ),
                         const Spacer(),
@@ -537,7 +537,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                               drop.minOrderKg)
                           .round()
                           .clamp(1, 100),
-                      activeColor: AppColors.primary,
+                      activeColor: AppColors.meatAccent,
                       inactiveColor: AppColors.border,
                       onChanged: (v) =>
                           setState(() => _selectedKg = v.roundToDouble()),
@@ -586,12 +586,12 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
                               color: !_delivery
-                                  ? AppColors.primary.withValues(alpha: 0.08)
+                                  ? AppColors.meatAccent.withValues(alpha: 0.08)
                                   : AppColors.surface,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
                                 color: !_delivery
-                                    ? AppColors.primary
+                                    ? AppColors.meatAccent
                                     : AppColors.border,
                                 width: !_delivery ? 2 : 1,
                               ),
@@ -601,7 +601,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                 Icon(LucideIcons.store,
                                     size: 24,
                                     color: !_delivery
-                                        ? AppColors.primary
+                                        ? AppColors.meatAccent
                                         : AppColors.textMuted),
                                 const SizedBox(height: 6),
                                 Text(
@@ -610,7 +610,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
                                     color: !_delivery
-                                        ? AppColors.primary
+                                        ? AppColors.meatAccent
                                         : AppColors.textSecondary,
                                   ),
                                 ),
@@ -620,7 +620,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: !_delivery
-                                        ? AppColors.primary
+                                        ? AppColors.meatAccent
                                         : AppColors.textMuted,
                                   ),
                                 ),
@@ -642,14 +642,14 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                               color: !drop.deliveryAvailable
                                   ? AppColors.backgroundSecondary
                                   : _delivery
-                                      ? AppColors.primary.withValues(alpha: 0.08)
+                                      ? AppColors.meatAccent.withValues(alpha: 0.08)
                                       : AppColors.surface,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
                                 color: !drop.deliveryAvailable
                                     ? AppColors.border
                                     : _delivery
-                                        ? AppColors.primary
+                                        ? AppColors.meatAccent
                                         : AppColors.border,
                                 width: _delivery ? 2 : 1,
                               ),
@@ -661,7 +661,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                     color: !drop.deliveryAvailable
                                         ? AppColors.textMuted
                                         : _delivery
-                                            ? AppColors.primary
+                                            ? AppColors.meatAccent
                                             : AppColors.textMuted),
                                 const SizedBox(height: 6),
                                 Text(
@@ -672,7 +672,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                     color: !drop.deliveryAvailable
                                         ? AppColors.textMuted
                                         : _delivery
-                                            ? AppColors.primary
+                                            ? AppColors.meatAccent
                                             : AppColors.textSecondary,
                                   ),
                                 ),
@@ -688,7 +688,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                                     color: !drop.deliveryAvailable
                                         ? AppColors.textMuted
                                         : _delivery
-                                            ? AppColors.primary
+                                            ? AppColors.meatAccent
                                             : AppColors.textMuted,
                                     fontWeight: drop.deliveryAvailable &&
                                             drop.deliveryFee == 0
@@ -718,7 +718,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                           fontSize: 13,
                         ),
                         prefixIcon: const Icon(LucideIcons.mapPin,
-                            size: 18, color: AppColors.primary),
+                            size: 18, color: AppColors.meatAccent),
                         filled: true,
                         fillColor: AppColors.backgroundSecondary,
                         border: OutlineInputBorder(
@@ -780,10 +780,10 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.05),
+                      color: AppColors.meatAccent.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.2)),
+                          color: AppColors.meatAccent.withValues(alpha: 0.2)),
                     ),
                     child: Column(
                       children: [
@@ -872,7 +872,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                               style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w900,
-                                color: AppColors.primary,
+                                color: AppColors.meatAccent,
                               ),
                             ),
                           ],
@@ -996,7 +996,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                 valueColor: AlwaysStoppedAnimation<Color>(
                   drop.progressPercent >= 80
                       ? AppColors.accent
-                      : AppColors.primary,
+                      : AppColors.meatAccent,
                 ),
               ),
             ),
@@ -1023,7 +1023,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                   fontWeight: FontWeight.w700,
                   color: drop.remainingWeightKg <= 5
                       ? AppColors.accent
-                      : AppColors.primary,
+                      : AppColors.meatAccent,
                 ),
               ),
             ],
@@ -1065,7 +1065,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
                   if (drop.seller.isVerifiedBreeder) ...[
                     const SizedBox(width: 4),
                     const Icon(LucideIcons.badgeCheck,
-                        size: 16, color: AppColors.primary),
+                        size: 16, color: AppColors.meatAccent),
                   ],
                 ],
               ),
@@ -1160,7 +1160,7 @@ class _DropDetailScreenState extends ConsumerState<DropDetailScreen> {
       case 'SOLD_OUT':
         return AppColors.accent;
       case 'FULFILLED':
-        return AppColors.primaryDark;
+        return AppColors.meatAccentDark;
       default:
         return AppColors.textMuted;
     }

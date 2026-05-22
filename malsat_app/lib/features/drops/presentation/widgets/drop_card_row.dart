@@ -3,7 +3,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_radius.dart';
+import '../../../../core/constants/app_shadows.dart';
 import '../../../../core/i18n/app_localizations.dart';
+import '../../../../core/theme/app_world.dart';
 import '../../../../core/widgets/pressable_scale.dart';
 import '../../domain/drop_model.dart';
 
@@ -27,6 +30,7 @@ class DropCardRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dict = ref.watch(dictionaryProvider).valueOrNull;
+    final accent = AppWorldPalette.of(context).accent;
     final photo = drop.media.isNotEmpty
         ? drop.media.first.mediaUrl
         : _fallback[drop.category];
@@ -37,23 +41,16 @@ class DropCardRow extends ConsumerWidget {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-              spreadRadius: -2,
-            ),
-          ],
+          borderRadius: AppRadius.lgAll,
+          boxShadow: AppShadows.card,
         ),
         child: IntrinsicHeight(
           child: Row(
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(13),
-                  bottomLeft: Radius.circular(13),
+                  topLeft: Radius.circular(AppRadius.lg),
+                  bottomLeft: Radius.circular(AppRadius.lg),
                 ),
                 child: SizedBox(
                   width: 110,
@@ -61,9 +58,9 @@ class DropCardRow extends ConsumerWidget {
                   child: CachedNetworkImage(
                     imageUrl: photo ?? _fallback['CATTLE']!,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) =>
+                    placeholder: (_, _) =>
                         Container(color: AppColors.backgroundSecondary),
-                    errorWidget: (_, __, ___) => Container(
+                    errorWidget: (_, _, _) => Container(
                       color: AppColors.backgroundSecondary,
                       child: const Icon(LucideIcons.beef,
                           color: AppColors.textMuted),
@@ -132,11 +129,8 @@ class DropCardRow extends ConsumerWidget {
                               child: LinearProgressIndicator(
                                 value: drop.progressPercent / 100,
                                 backgroundColor: AppColors.backgroundSecondary,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  drop.progressPercent >= 80
-                                      ? AppColors.accent
-                                      : AppColors.primary,
-                                ),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(accent),
                               ),
                             ),
                           ),
@@ -157,10 +151,10 @@ class DropCardRow extends ConsumerWidget {
                       ),
                       Text(
                         '${drop.pricePerKg} ${t(dict, 'common.somPerKg')}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: accent,
                         ),
                       ),
                     ],

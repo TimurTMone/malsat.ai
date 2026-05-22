@@ -275,6 +275,11 @@ class _LoggedInProfile extends ConsumerWidget {
                 onTap: () => context.push('/reviews'),
               ),
               _MenuItem(
+                icon: LucideIcons.shoppingBag,
+                label: t(dict, 'nav.duken'),
+                onTap: () => context.push('/duken'),
+              ),
+              _MenuItem(
                 icon: LucideIcons.globe,
                 label: t(dict, 'profile.language'),
                 trailing: Text(

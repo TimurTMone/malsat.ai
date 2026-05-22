@@ -84,7 +84,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF7F1D1D), Color(0xFFB91C1C)],
+                  colors: [AppColors.meatAccentDark, AppColors.meatAccent],
                 ),
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -143,10 +143,10 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(LucideIcons.camera, size: 28, color: AppColors.primary),
+                          const Icon(LucideIcons.camera, size: 28, color: AppColors.meatAccent),
                           const SizedBox(height: 4),
                           Text(t(dict, 'createDrop.addPhotoBtn'),
-                              style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                              style: const TextStyle(fontSize: 11, color: AppColors.meatAccent, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -180,7 +180,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.primary,
+                                color: AppColors.meatAccent,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(t(dict, 'createDrop.mainPhoto'), style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w700)),
@@ -327,7 +327,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                   Row(
                     children: [
                       const Icon(LucideIcons.truck,
-                          size: 20, color: AppColors.primary),
+                          size: 20, color: AppColors.meatAccent),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -343,7 +343,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                         value: _deliveryAvailable,
                         onChanged: (v) =>
                             setState(() => _deliveryAvailable = v),
-                        activeTrackColor: AppColors.primary,
+                        activeTrackColor: AppColors.meatAccent,
                       ),
                     ],
                   ),
@@ -375,7 +375,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                 padding: const EdgeInsets.all(14),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.06),
+                  color: AppColors.meatAccent.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -389,7 +389,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.primary,
+                        color: AppColors.meatAccent,
                       ),
                     ),
                   ],
@@ -403,7 +403,7 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
               child: ElevatedButton(
                 onPressed: _isValid && !_submitting ? _submit : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFB91C1C),
+                  backgroundColor: AppColors.meatAccent,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -469,10 +469,10 @@ class _CreateDropScreenState extends ConsumerState<CreateDropScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: sel ? AppColors.primary : bg,
+            color: sel ? AppColors.meatAccent : bg,
             borderRadius: BorderRadius.circular(12),
             border:
-                sel ? Border.all(color: AppColors.primary, width: 2) : null,
+                sel ? Border.all(color: AppColors.meatAccent, width: 2) : null,
           ),
           child: Column(
             children: [

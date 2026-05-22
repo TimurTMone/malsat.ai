@@ -3,8 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_radius.dart';
+import '../../../../core/constants/app_shadows.dart';
+import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/i18n/app_localizations.dart';
 import '../../../../core/state/view_mode.dart';
+import '../../../../core/theme/app_world.dart';
 import '../../../../core/widgets/shimmer.dart';
 import '../../../../core/widgets/view_mode_toggle.dart';
 import '../providers/drops_provider.dart';
@@ -12,18 +17,61 @@ import '../widgets/drop_card.dart';
 import '../widgets/drop_card_compact.dart';
 import '../widgets/drop_card_row.dart';
 
-class DropsScreen extends ConsumerWidget {
+/// One selectable meat category. `code` is null for the "All" chip;
+/// otherwise it matches `ButcherDrop.category`.
+class _MeatCategory {
+  final String? code;
+  final String i18nKey;
+
+  const _MeatCategory(this.code, this.i18nKey);
+}
+
+const _kCategories = [
+  _MeatCategory(null, 'common.all'),
+  _MeatCategory('CATTLE', 'categories.cattle'),
+  _MeatCategory('HORSE', 'categories.horse'),
+  _MeatCategory('SHEEP', 'categories.sheep'),
+  _MeatCategory('ARASHAN', 'categories.arashan'),
+];
+
+/// Meat world main page — editorial intro, search, category filters, and
+/// the live meat-drops feed. No marketing banner: the user lands straight
+/// on content they can act on.
+class DropsScreen extends ConsumerStatefulWidget {
   const DropsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DropsScreen> createState() => _DropsScreenState();
+}
+
+class _DropsScreenState extends ConsumerState<DropsScreen> {
+  String? _category;
+  String _query = '';
+
+  List _filter(List drops) {
+    final q = _query.trim().toLowerCase();
+    return drops.where((d) {
+      if (_category != null && d.category != _category) return false;
+      if (q.isEmpty) return true;
+      final hay = [
+        d.title,
+        d.breed ?? '',
+        d.village ?? '',
+      ].join(' ').toLowerCase();
+      return hay.contains(q);
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final dropsAsync = ref.watch(dropsListProvider);
     final viewMode = ref.watch(listingViewModeProvider);
     final dict = ref.watch(dictionaryProvider).valueOrNull;
+    final accent = AppWorldPalette.of(context).accent;
 
     return SafeArea(
       child: RefreshIndicator(
-        color: AppColors.accent,
+        color: accent,
         onRefresh: () => ref.refresh(dropsListProvider.future),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -31,192 +79,153 @@ class DropsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero banner
+              // ── Editorial intro — what this app is, in three lines ──
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                child: Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF7F1D1D), Color(0xFFB91C1C)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFB91C1C).withValues(alpha: 0.25),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFCA5A5),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          t(dict, 'drops.heroBadge'),
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF7F1D1D),
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        t(dict, 'drops.heroTitle'),
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          height: 1.25,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        t(dict, 'drops.heroSubtitle'),
-                        style: const TextStyle(
-                            fontSize: 12, color: Colors.white70),
-                      ),
-                      const SizedBox(height: 14),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _InfoChip(
-                              icon: LucideIcons.beef,
-                              label: t(dict, 'drops.chipFresh'),
-                            ),
-                            const SizedBox(width: 8),
-                            _InfoChip(
-                              icon: LucideIcons.truck,
-                              label: t(dict, 'drops.chipPickup'),
-                            ),
-                            const SizedBox(width: 8),
-                            _InfoChip(
-                              icon: LucideIcons.shield,
-                              label: t(dict, 'drops.chipVerified'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Section title + actions row
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 0),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        t(dict, 'drops.sectionOpen'),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.4,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t(dict, 'drops.heroBadge'),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.0,
+                              color: accent,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            t(dict, 'drops.heroTitle'),
+                            style: AppTypography.display,
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            t(dict, 'drops.heroSubtitle'),
+                            style: AppTypography.bodyMuted,
+                          ),
+                        ],
                       ),
                     ),
-                    GestureDetector(
+                    const SizedBox(width: AppSpacing.md),
+                    _MyOrdersButton(
+                      label: t(dict, 'drops.myOrdersBtn'),
                       onTap: () => context.push('/orders/me'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundSecondary,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(LucideIcons.shoppingBag,
-                                size: 13, color: AppColors.textSecondary),
-                            const SizedBox(width: 4),
-                            Text(
-                              t(dict, 'drops.myOrdersBtn'),
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.lg),
 
-              // View-mode toggle row — right-aligned, Unaa-style
-              const Padding(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [ViewModeToggle()],
+              // ── Search ──
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: _SearchField(
+                  hint: t(dict, 'drops.searchHint'),
+                  onChanged: (v) => setState(() => _query = v),
                 ),
               ),
+              const SizedBox(height: AppSpacing.md),
 
-              // Drops list
+              // ── Category filters — navigate immediately ──
+              SizedBox(
+                height: 38,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg),
+                  itemCount: _kCategories.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: AppSpacing.sm),
+                  itemBuilder: (ctx, i) {
+                    final cat = _kCategories[i];
+                    return _CategoryChip(
+                      label: t(dict, cat.i18nKey),
+                      isActive: _category == cat.code,
+                      accent: accent,
+                      onTap: () => setState(() => _category = cat.code),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+
+              // ── Feed ──
               dropsAsync.when(
                 data: (drops) {
-                  if (drops.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.all(40),
-                      child: Center(
-                        child: Text(
-                          t(dict, 'drops.noOrders'),
-                          style: const TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 15,
+                  final filtered = _filter(drops);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0,
+                            AppSpacing.lg, AppSpacing.md),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  Text(t(dict, 'drops.sectionOpen'),
+                                      style: AppTypography.h2),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Text(
+                                    '${filtered.length}',
+                                    style: AppTypography.h2.copyWith(
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const ViewModeToggle(),
+                          ],
+                        ),
+                      ),
+                      if (filtered.isEmpty)
+                        _EmptyState(label: t(dict, 'common.noResults'))
+                      else
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.lg),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 280),
+                            switchInCurve: Curves.easeOutCubic,
+                            switchOutCurve: Curves.easeInCubic,
+                            transitionBuilder: (child, anim) =>
+                                FadeTransition(
+                              opacity: anim,
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(0, 0.02),
+                                  end: Offset.zero,
+                                ).animate(anim),
+                                child: child,
+                              ),
+                            ),
+                            child: KeyedSubtree(
+                              key: ValueKey('$viewMode-$_category'),
+                              child: LayoutBuilder(
+                                builder: (ctx, c) => _buildDrops(
+                                    context, filtered, viewMode, c.maxWidth),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 280),
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      transitionBuilder: (child, anim) => FadeTransition(
-                        opacity: anim,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0, 0.02),
-                            end: Offset.zero,
-                          ).animate(anim),
-                          child: child,
-                        ),
-                      ),
-                      child: KeyedSubtree(
-                        key: ValueKey(viewMode),
-                        child: LayoutBuilder(
-                          builder: (ctx, c) =>
-                              _buildDrops(context, drops, viewMode, c.maxWidth),
-                        ),
-                      ),
-                    ),
+                    ],
                   );
                 },
                 loading: () => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg),
                   child: Column(
                     children: List.generate(
                       3,
@@ -230,9 +239,8 @@ class DropsScreen extends ConsumerWidget {
                     child: Column(
                       children: [
                         Text(t(dict, 'common.error'),
-                            style: const TextStyle(
-                                color: AppColors.textSecondary)),
-                        const SizedBox(height: 8),
+                            style: AppTypography.bodyMuted),
+                        const SizedBox(height: AppSpacing.sm),
                         TextButton(
                           onPressed: () =>
                               ref.refresh(dropsListProvider.future),
@@ -263,7 +271,7 @@ Widget _buildDrops(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: drops.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
         itemBuilder: (ctx, index) => DropCard(
           drop: drops[index],
           onTap: () => context.push('/drop/${drops[index].id}'),
@@ -280,8 +288,8 @@ Widget _buildDrops(
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: cols,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 14,
+          crossAxisSpacing: AppSpacing.md,
+          mainAxisSpacing: AppSpacing.lg,
           childAspectRatio: 0.66,
         ),
         itemCount: drops.length,
@@ -303,34 +311,162 @@ Widget _buildDrops(
   }
 }
 
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
+/// Tappable search field that filters the visible drops.
+class _SearchField extends StatelessWidget {
+  final String hint;
+  final ValueChanged<String> onChanged;
 
-  const _InfoChip({required this.icon, required this.label});
+  const _SearchField({required this.hint, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      height: 50,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(6),
+        color: AppColors.surface,
+        borderRadius: AppRadius.pillAll,
+        border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.card,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 11, color: Colors.white70),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 10,
-              color: Colors.white70,
-              fontWeight: FontWeight.w600,
-            ),
+      child: TextField(
+        onChanged: onChanged,
+        textInputAction: TextInputAction.search,
+        style: AppTypography.body,
+        decoration: InputDecoration(
+          isCollapsed: true,
+          filled: false,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 15),
+          prefixIcon: const Icon(LucideIcons.search,
+              size: 19, color: AppColors.textSecondary),
+          hintText: hint,
+          hintStyle: AppTypography.body.copyWith(
+            color: AppColors.textMuted,
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A meat-category filter pill.
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final bool isActive;
+  final Color accent;
+  final VoidCallback onTap;
+
+  const _CategoryChip({
+    required this.label,
+    required this.isActive,
+    required this.accent,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutCubic,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        decoration: BoxDecoration(
+          color: isActive ? accent : AppColors.surface,
+          borderRadius: AppRadius.pillAll,
+          border: Border.all(
+            color: isActive ? accent : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: isActive ? Colors.white : AppColors.textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Compact pill linking to the buyer's own meat orders.
+class _MyOrdersButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _MyOrdersButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundSecondary,
+          borderRadius: AppRadius.pillAll,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(LucideIcons.shoppingBag,
+                size: 14, color: AppColors.textSecondary),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final String label;
+
+  const _EmptyState({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(40),
+      child: Center(
+        child: Column(
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: const BoxDecoration(
+                color: AppColors.backgroundSecondary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                LucideIcons.beef,
+                size: 30,
+                color: AppColors.textMuted,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyMuted,
+            ),
+          ],
+        ),
       ),
     );
   }

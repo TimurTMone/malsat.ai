@@ -21,10 +21,10 @@ class AuctionsScreen extends ConsumerWidget {
     final viewMode = ref.watch(listingViewModeProvider);
     final dict = ref.watch(dictionaryProvider).valueOrNull;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: RefreshIndicator(
-        color: AppColors.accent,
+    return Container(
+      color: AppColors.background,
+      child: RefreshIndicator(
+        color: AppColors.auctionAccent,
         onRefresh: () => ref.refresh(auctionsListProvider.future),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -36,7 +36,7 @@ class AuctionsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF7C2D12), Color(0xFFB91C1C)],
+                    colors: [Color(0xFFB45309), AppColors.auctionAccent],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -445,7 +445,7 @@ class _AuctionCard extends ConsumerWidget {
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w900,
-                                color: AppColors.primary,
+                                color: AppColors.auctionAccent,
                               ),
                             ),
                           ],

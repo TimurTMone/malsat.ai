@@ -56,13 +56,28 @@
     "messages": "Кабарлар",
     "profile": "Профиль",
     "bazar": "Базар",
+    "meat": "Эт",
+    "livestock": "Мал",
+    "explore": "Издөө",
+    "orders": "Заказдар",
     "duken": "Дүкөн",
     "herd": "Чарбам"
   },
   "bazar": {
     "meat": "Эт",
     "livestock": "Мал",
-    "auction": "Аукцион"
+    "auction": "Аукцион",
+    "forSale": "Сатууда"
+  },
+  "livestock": {
+    "browseTitle": "Мал боюнча тандаңыз",
+    "featuredTitle": "Тандалмалуу",
+    "kokBoruTitle": "Көк бөрү аттары",
+    "kokBoruDesc": "Спорт жана байге аттар",
+    "arashanTitle": "Арашан кой",
+    "arashanDesc": "Асыл тукум порода",
+    "sportTag": "СПОРТ",
+    "premiumTag": "ПРЕМИУМ"
   },
   "viewMode": {
     "large": "Чоң",
@@ -222,6 +237,7 @@
     "chipVerified": "Текшерилген",
     "sectionOpen": "Ачык заказдар",
     "myOrdersBtn": "Заказдарым",
+    "searchHint": "Эт, касапчы, айыл изде…",
     "noOrders": "Азырынча эт заказ жок"
   },
   "dropStatus": {

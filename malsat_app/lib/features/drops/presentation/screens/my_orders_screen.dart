@@ -8,30 +8,19 @@ import '../../domain/meat_order_model.dart';
 import '../providers/drops_provider.dart';
 
 class MyOrdersScreen extends ConsumerWidget {
-  const MyOrdersScreen({super.key});
+  /// When embedded as a bottom-nav tab the shell already supplies the
+  /// header, so the screen drops its own [Scaffold] + [AppBar].
+  final bool embedded;
+
+  const MyOrdersScreen({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersAsync = ref.watch(myOrdersProvider);
     final dict = ref.watch(dictionaryProvider).valueOrNull;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          t(dict, 'myOrders.title'),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
-      ),
-      body: RefreshIndicator(
-        color: AppColors.accent,
+    final body = RefreshIndicator(
+        color: AppColors.meatAccent,
         onRefresh: () => ref.refresh(myOrdersProvider.future),
         child: ordersAsync.when(
           data: (orders) {
@@ -88,7 +77,25 @@ class MyOrdersScreen extends ConsumerWidget {
             ),
           ),
         ),
+      );
+
+    if (embedded) return SafeArea(child: body);
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: Text(
+          t(dict, 'myOrders.title'),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
+      body: body,
     );
   }
 }
@@ -151,7 +158,7 @@ class _OrderCard extends StatelessWidget {
             // Weight + price
             Row(
               children: [
-                const Icon(LucideIcons.scale, size: 14, color: AppColors.primary),
+                const Icon(LucideIcons.scale, size: 14, color: AppColors.meatAccent),
                 const SizedBox(width: 6),
                 Text(
                   '${order.weightKg.toStringAsFixed(0)} ${t(dict, 'common.kg')}',
@@ -167,7 +174,7 @@ class _OrderCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
+                    color: AppColors.meatAccent,
                   ),
                 ),
                 const Spacer(),
@@ -227,7 +234,7 @@ class _OrderCard extends StatelessWidget {
       case 'PACKAGING':
         return const Color(0xFF7C3AED);
       case 'DELIVERING':
-        return AppColors.primary;
+        return AppColors.meatAccent;
       case 'DELIVERED':
         return AppColors.success;
       case 'CANCELLED':
@@ -297,9 +304,9 @@ class _MiniTimeline extends StatelessWidget {
                 height: 22,
                 decoration: BoxDecoration(
                   color: isCurrent
-                      ? AppColors.primary
+                      ? AppColors.meatAccent
                       : isComplete
-                          ? AppColors.primary.withValues(alpha: 0.15)
+                          ? AppColors.meatAccent.withValues(alpha: 0.15)
                           : AppColors.backgroundSecondary,
                   shape: BoxShape.circle,
                 ),
@@ -309,7 +316,7 @@ class _MiniTimeline extends StatelessWidget {
                   color: isCurrent
                       ? Colors.white
                       : isComplete
-                          ? AppColors.primary
+                          ? AppColors.meatAccent
                           : AppColors.textMuted,
                 ),
               ),
@@ -318,7 +325,7 @@ class _MiniTimeline extends StatelessWidget {
                   child: Container(
                     height: 2,
                     color: isComplete && i < currentIdx
-                        ? AppColors.primary
+                        ? AppColors.meatAccent
                         : AppColors.border,
                   ),
                 ),

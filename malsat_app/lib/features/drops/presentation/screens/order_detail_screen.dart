@@ -52,8 +52,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     super.dispose();
   }
 
-  Future<void> _refresh() async {
-    await ref.refresh(orderDetailProvider(widget.orderId).future);
+  Future<void> _refresh() {
+    return ref.refresh(orderDetailProvider(widget.orderId).future);
   }
 
   Map<String, dynamic>? get _d => ref.read(dictionaryProvider).valueOrNull;
@@ -79,7 +79,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
       body: RefreshIndicator(
-        color: AppColors.primary,
+        color: AppColors.meatAccent,
         onRefresh: _refresh,
         child: orderAsync.when(
           data: (order) => _buildContent(order),
@@ -527,7 +527,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.user, size: 18, color: AppColors.primary),
+          const Icon(LucideIcons.user, size: 18, color: AppColors.meatAccent),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -576,10 +576,10 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.06),
+              color: AppColors.meatAccent.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.15)),
+                  color: AppColors.meatAccent.withValues(alpha: 0.15)),
             ),
             child: Row(
               children: [
@@ -587,11 +587,11 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: AppColors.meatAccent.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(LucideIcons.truck,
-                      size: 18, color: AppColors.primary),
+                      size: 18, color: AppColors.meatAccent),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -662,11 +662,11 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: AppColors.meatAccent.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(LucideIcons.store,
-                      size: 18, color: AppColors.primary),
+                      size: 18, color: AppColors.meatAccent),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -807,7 +807,7 @@ class _SummaryChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: isPrimary
-            ? AppColors.primary.withValues(alpha: 0.08)
+            ? AppColors.meatAccent.withValues(alpha: 0.08)
             : AppColors.backgroundSecondary,
         borderRadius: BorderRadius.circular(10),
       ),
@@ -816,14 +816,14 @@ class _SummaryChip extends StatelessWidget {
         children: [
           Icon(icon,
               size: 15,
-              color: isPrimary ? AppColors.primary : AppColors.textSecondary),
+              color: isPrimary ? AppColors.meatAccent : AppColors.textSecondary),
           const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: isPrimary ? AppColors.primary : AppColors.textPrimary,
+              color: isPrimary ? AppColors.meatAccent : AppColors.textPrimary,
             ),
           ),
         ],
@@ -923,15 +923,15 @@ class _DeliveryTimeline extends ConsumerWidget {
                           height: 36,
                           decoration: BoxDecoration(
                             color: isCurrent
-                                ? AppColors.primary
+                                ? AppColors.meatAccent
                                 : isComplete
-                                    ? AppColors.primary.withValues(alpha: 0.15)
+                                    ? AppColors.meatAccent.withValues(alpha: 0.15)
                                     : AppColors.backgroundSecondary,
                             shape: BoxShape.circle,
                             border: isCurrent
                                 ? Border.all(
                                     color:
-                                        AppColors.primary.withValues(alpha: 0.3),
+                                        AppColors.meatAccent.withValues(alpha: 0.3),
                                     width: 3)
                                 : null,
                           ),
@@ -941,7 +941,7 @@ class _DeliveryTimeline extends ConsumerWidget {
                             color: isCurrent
                                 ? Colors.white
                                 : isComplete
-                                    ? AppColors.primary
+                                    ? AppColors.meatAccent
                                     : AppColors.textMuted,
                           ),
                         ),
@@ -950,7 +950,7 @@ class _DeliveryTimeline extends ConsumerWidget {
                             width: 2,
                             height: lineHeight,
                             color: isComplete && i < currentIdx
-                                ? AppColors.primary
+                                ? AppColors.meatAccent
                                 : AppColors.border,
                           ),
                       ],
@@ -1009,7 +1009,7 @@ class _DeliveryTimeline extends ConsumerWidget {
                       const Padding(
                         padding: EdgeInsets.only(top: 8),
                         child: Icon(Icons.check_circle,
-                            size: 18, color: AppColors.primary),
+                            size: 18, color: AppColors.meatAccent),
                       ),
                   ],
                 ),

@@ -56,13 +56,28 @@
     "messages": "Messages",
     "profile": "Profile",
     "bazar": "Bazaar",
+    "meat": "Meat",
+    "livestock": "Livestock",
+    "explore": "Explore",
+    "orders": "Orders",
     "duken": "Shop",
     "herd": "Herd"
   },
   "bazar": {
     "meat": "Meat",
     "livestock": "Livestock",
-    "auction": "Auction"
+    "auction": "Auction",
+    "forSale": "For sale"
+  },
+  "livestock": {
+    "browseTitle": "Browse by animal",
+    "featuredTitle": "Featured",
+    "kokBoruTitle": "Kök-Börü horses",
+    "kokBoruDesc": "Sport & prize stallions",
+    "arashanTitle": "Arashan sheep",
+    "arashanDesc": "Premium pedigree breed",
+    "sportTag": "SPORT",
+    "premiumTag": "PREMIUM"
   },
   "viewMode": {
     "large": "Hero",
@@ -222,6 +237,7 @@
     "chipVerified": "Verified",
     "sectionOpen": "Open drops",
     "myOrdersBtn": "My orders",
+    "searchHint": "Search meat, butcher, village…",
     "noOrders": "No meat orders yet"
   },
   "dropStatus": {

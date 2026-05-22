@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../theme/app_world.dart';
 import 'app_colors.dart';
 
 class AppTheme {
@@ -14,6 +15,7 @@ class AppTheme {
           surface: AppColors.surface,
           error: AppColors.error,
         ),
+        extensions: const <ThemeExtension<dynamic>>[AppWorldPalette.neutral],
         scaffoldBackgroundColor: AppColors.background,
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.background,

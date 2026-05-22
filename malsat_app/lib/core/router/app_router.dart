@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'route_names.dart';
+import '../state/world_provider.dart';
+import '../theme/world_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/malsat_header.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
@@ -13,7 +16,6 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/profile/presentation/screens/public_profile_screen.dart';
 import '../../features/messages/presentation/screens/chat_screen.dart';
-import '../../features/herd/presentation/screens/herd_screen.dart';
 import '../../features/herd/presentation/screens/animal_detail_screen.dart';
 import '../../features/herd/presentation/screens/caretakers_screen.dart';
 import '../../features/drops/presentation/screens/drop_detail_screen.dart';
@@ -27,7 +29,9 @@ import '../../features/favorites/presentation/screens/favorites_screen.dart';
 import '../../features/profile/presentation/screens/my_listings_screen.dart';
 import '../../features/profile/presentation/screens/reviews_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
-import '../../features/marketplace/presentation/screens/bazar_screen.dart';
+import '../../features/marketplace/presentation/screens/home_tab.dart';
+import '../../features/marketplace/presentation/screens/explore_tab.dart';
+import '../../features/marketplace/presentation/screens/activity_tab.dart';
 import '../../features/shop/presentation/screens/duken_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
@@ -37,45 +41,46 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 /// on auth expiry without needing a BuildContext.
 GlobalKey<NavigatorState> get rootNavigatorKey => _rootNavigatorKey;
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'home');
-final _shellNavigatorDropsKey = GlobalKey<NavigatorState>(debugLabel: 'drops');
+final _shellNavigatorExploreKey =
+    GlobalKey<NavigatorState>(debugLabel: 'explore');
 final _shellNavigatorSellKey = GlobalKey<NavigatorState>(debugLabel: 'sell');
-final _shellNavigatorMessagesKey =
-    GlobalKey<NavigatorState>(debugLabel: 'messages');
+final _shellNavigatorActivityKey =
+    GlobalKey<NavigatorState>(debugLabel: 'activity');
 final _shellNavigatorProfileKey =
     GlobalKey<NavigatorState>(debugLabel: 'profile');
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
+  initialLocation: '/home',
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return _ShellScreen(navigationShell: navigationShell);
       },
       branches: [
-        // Tab 0: Базар — unified marketplace (Эт / Мал / Аукцион via chips)
-        StatefulShellBranch(
-          navigatorKey: _shellNavigatorDropsKey,
-          routes: [
-            GoRoute(
-              name: 'bazar',
-              path: '/',
-              builder: (context, state) => const BazarScreen(),
-            ),
-          ],
-        ),
-        // Tab 1: Дүкөн — supply shop (vet medicine, feed, equipment) — placeholder
+        // Tab 0: Home — the active world's main page.
         StatefulShellBranch(
           navigatorKey: _shellNavigatorHomeKey,
           routes: [
             GoRoute(
-              name: 'duken',
-              path: '/duken',
-              builder: (context, state) => const DukenScreen(),
+              name: RouteNames.home,
+              path: '/home',
+              builder: (context, state) => const HomeTab(),
             ),
           ],
         ),
-        // Tab 2: + Сатуу — create listing or drop
+        // Tab 1: Explore — world-aware browse hub.
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorExploreKey,
+          routes: [
+            GoRoute(
+              name: RouteNames.explore,
+              path: '/explore',
+              builder: (context, state) => const ExploreTab(),
+            ),
+          ],
+        ),
+        // Tab 2: + Sell — create a meat drop or list an animal.
         StatefulShellBranch(
           navigatorKey: _shellNavigatorSellKey,
           routes: [
@@ -86,18 +91,18 @@ final appRouter = GoRouter(
             ),
           ],
         ),
-        // Tab 3: Чарбам — herd CRM (will evolve to include finance + reminders)
+        // Tab 3: Activity — meat orders, or the livestock herd.
         StatefulShellBranch(
-          navigatorKey: _shellNavigatorMessagesKey,
+          navigatorKey: _shellNavigatorActivityKey,
           routes: [
             GoRoute(
-              name: RouteNames.herd,
-              path: '/herd',
-              builder: (context, state) => const HerdScreen(),
+              name: RouteNames.activity,
+              path: '/activity',
+              builder: (context, state) => const ActivityTab(),
             ),
           ],
         ),
-        // Tab 4: Профиль
+        // Tab 4: Profile.
         StatefulShellBranch(
           navigatorKey: _shellNavigatorProfileKey,
           routes: [
@@ -109,6 +114,19 @@ final appRouter = GoRouter(
           ],
         ),
       ],
+    ),
+    // Legacy-path redirects — keep older `context.go` callers working.
+    GoRoute(path: '/', redirect: (_, _) => '/home'),
+    GoRoute(path: '/meat', redirect: (_, _) => '/home'),
+    GoRoute(path: '/livestock', redirect: (_, _) => '/home'),
+    GoRoute(path: '/drops', redirect: (_, _) => '/home'),
+    GoRoute(path: '/herd', redirect: (_, _) => '/activity'),
+    // Дүкөн — supply shop placeholder, pushed over the shell (Sprint 2).
+    GoRoute(
+      name: RouteNames.duken,
+      path: '/duken',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const DukenScreen(),
     ),
     // Full-screen routes (outside shell)
     GoRoute(
@@ -252,21 +270,28 @@ final appRouter = GoRouter(
   ],
 );
 
-class _ShellScreen extends StatelessWidget {
+/// The app shell — a fixed header (logo + world switch) and bottom nav,
+/// with the active branch in between. The whole shell is wrapped in the
+/// active world's theme, so one switch reskins everything at once.
+class _ShellScreen extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const _ShellScreen({required this.navigationShell});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const MalsatHeader(),
-      body: navigationShell,
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final world = ref.watch(worldProvider);
+    return Theme(
+      data: worldTheme(world),
+      child: Scaffold(
+        appBar: const MalsatHeader(),
+        body: navigationShell,
+        bottomNavigationBar: BottomNavBar(
+          currentIndex: navigationShell.currentIndex,
+          onTap: (index) => navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          ),
         ),
       ),
     );

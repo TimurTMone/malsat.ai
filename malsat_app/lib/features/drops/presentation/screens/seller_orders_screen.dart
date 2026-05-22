@@ -151,7 +151,7 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
                   (order.buyer?.name ?? '?')[0].toUpperCase(),
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+                    color: AppColors.meatAccent,
                   ),
                 ),
               ),
@@ -412,11 +412,11 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
       case 'BUTCHERING':
         return const Color(0xFF7C3AED);
       case 'PACKAGING':
-        return AppColors.primary;
+        return AppColors.meatAccent;
       case 'DELIVERING':
         return AppColors.success;
       default:
-        return AppColors.primary;
+        return AppColors.meatAccent;
     }
   }
 
@@ -433,7 +433,7 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
       case 'PACKAGING':
         return const Color(0xFF7C3AED);
       case 'DELIVERING':
-        return AppColors.primary;
+        return AppColors.meatAccent;
       case 'DELIVERED':
         return AppColors.success;
       case 'CANCELLED':
@@ -467,12 +467,12 @@ class _SellerOrderCardState extends State<_SellerOrderCard> {
                 ),
               ),
               ListTile(
-                leading: const Icon(LucideIcons.camera, color: AppColors.primary),
+                leading: const Icon(LucideIcons.camera, color: AppColors.meatAccent),
                 title: Text(t(dict, 'common.selectFromCameraLong')),
                 onTap: () => Navigator.pop(ctx, ImageSource.camera),
               ),
               ListTile(
-                leading: const Icon(LucideIcons.image, color: AppColors.primary),
+                leading: const Icon(LucideIcons.image, color: AppColors.meatAccent),
                 title: Text(t(dict, 'common.selectFromGalleryLong')),
                 onTap: () => Navigator.pop(ctx, ImageSource.gallery),
               ),

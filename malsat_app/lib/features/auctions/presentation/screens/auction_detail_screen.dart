@@ -149,7 +149,7 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
+                      colors: [AppColors.auctionAccentDark, AppColors.auctionAccent],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -251,11 +251,11 @@ class _AuctionDetailScreenState extends ConsumerState<AuctionDetailScreen> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.12),
+                          color: AppColors.auctionAccent.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(LucideIcons.store,
-                            color: AppColors.primary),
+                            color: AppColors.auctionAccent),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -469,7 +469,7 @@ class _InfoRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w800,
-            color: isHighlight ? AppColors.primary : AppColors.textPrimary,
+            color: isHighlight ? AppColors.auctionAccent : AppColors.textPrimary,
           ),
         ),
       ],

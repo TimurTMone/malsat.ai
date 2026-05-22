@@ -3,7 +3,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_radius.dart';
+import '../../../../core/constants/app_shadows.dart';
 import '../../../../core/i18n/app_localizations.dart';
+import '../../../../core/theme/app_world.dart';
 import '../../../../core/widgets/pressable_scale.dart';
 import '../../domain/drop_model.dart';
 
@@ -27,6 +30,7 @@ class DropCardCompact extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dict = ref.watch(dictionaryProvider).valueOrNull;
+    final accent = AppWorldPalette.of(context).accent;
     final photo = drop.media.isNotEmpty
         ? drop.media.first.mediaUrl
         : _fallback[drop.category];
@@ -36,15 +40,8 @@ class DropCardCompact extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-              spreadRadius: -2,
-            ),
-          ],
+          borderRadius: AppRadius.lgAll,
+          boxShadow: AppShadows.card,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,15 +50,15 @@ class DropCardCompact extends ConsumerWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(14)),
+                      top: Radius.circular(AppRadius.lg)),
                   child: AspectRatio(
                     aspectRatio: 1,
                     child: CachedNetworkImage(
                       imageUrl: photo ?? _fallback['CATTLE']!,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) =>
+                      placeholder: (_, _) =>
                           Container(color: AppColors.backgroundSecondary),
-                      errorWidget: (_, __, ___) => Container(
+                      errorWidget: (_, _, _) => Container(
                         color: AppColors.backgroundSecondary,
                         child: const Icon(LucideIcons.beef,
                             size: 28, color: AppColors.textMuted),
@@ -110,10 +107,10 @@ class DropCardCompact extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${drop.pricePerKg} ${t(dict, 'common.somPerKg')}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
+                      color: accent,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -124,11 +121,7 @@ class DropCardCompact extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: drop.progressPercent / 100,
                         backgroundColor: AppColors.backgroundSecondary,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          drop.progressPercent >= 80
-                              ? AppColors.accent
-                              : AppColors.primary,
-                        ),
+                        valueColor: AlwaysStoppedAnimation<Color>(accent),
                       ),
                     ),
                   ),

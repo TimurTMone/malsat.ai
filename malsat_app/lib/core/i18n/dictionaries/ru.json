@@ -56,13 +56,28 @@
     "messages": "Сообщения",
     "profile": "Профиль",
     "bazar": "Базар",
+    "meat": "Мясо",
+    "livestock": "Скот",
+    "explore": "Каталог",
+    "orders": "Заказы",
     "duken": "Магазин",
     "herd": "Хозяйство"
   },
   "bazar": {
     "meat": "Мясо",
     "livestock": "Скот",
-    "auction": "Аукцион"
+    "auction": "Аукцион",
+    "forSale": "В продаже"
+  },
+  "livestock": {
+    "browseTitle": "Выберите животное",
+    "featuredTitle": "Избранное",
+    "kokBoruTitle": "Кони Кок-Бору",
+    "kokBoruDesc": "Спортивные и призовые",
+    "arashanTitle": "Овца Арашан",
+    "arashanDesc": "Премиум-порода",
+    "sportTag": "СПОРТ",
+    "premiumTag": "ПРЕМИУМ"
   },
   "viewMode": {
     "large": "Большой",
@@ -222,6 +237,7 @@
     "chipVerified": "Проверено",
     "sectionOpen": "Открытые заказы",
     "myOrdersBtn": "Мои заказы",
+    "searchHint": "Поиск мяса, мясника, села…",
     "noOrders": "Пока нет заказов на мясо"
   },
   "dropStatus": {

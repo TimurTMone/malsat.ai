@@ -40,4 +40,28 @@ class AppColors {
   // Semantic
   static const Color error = Color(0xFFE31C5F);
   static const Color success = Color(0xFF008A05);
+
+  // ─────────────────────────────────────────────────────────────
+  // World accents — Design System 2.0
+  //
+  // The app has two co-equal worlds; each owns an accent so the user
+  // always knows where they are. Read these via the active world's
+  // AppWorldPalette (Theme extension) rather than directly when a
+  // widget needs to recolor per world.
+  // ─────────────────────────────────────────────────────────────
+
+  // Meat world — warm crimson: appetite, freshness.
+  static const Color meatAccent = Color(0xFFC81E1E);
+  static const Color meatAccentDark = Color(0xFF8E1414);
+  static const Color meatAccentSurface = Color(0xFFFDF2F2);
+
+  // Livestock world — pasture green: growth, trust.
+  static const Color livestockAccent = primary;
+  static const Color livestockAccentDark = primaryDark;
+  static const Color livestockAccentSurface = Color(0xFFEDFAF3);
+
+  // Auction sub-accent (lives inside the livestock world) — amber.
+  static const Color auctionAccent = Color(0xFFD97706);
+  static const Color auctionAccentDark = Color(0xFFB45309);
+  static const Color auctionAccentSurface = Color(0xFFFEF6E7);
 }

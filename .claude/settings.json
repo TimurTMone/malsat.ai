@@ -17,6 +17,8 @@
       "Bash(git merge *)",
       "Bash(git ls-remote *)",
       "Bash(grep -r \"TODO\\\\|FIXME\\\\|HACK\\\\|XXX\" /Users/muratbekomurzakov/Yurta/MalSatAi --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" --include=\"*.jsx\" --include=\"*.dart\" ! -path \"*/node_modules/*\" ! -path \"*/.next/*\" ! -path \"*/build/*\" ! -path \"*/.git/*\" ! -path \"*/ios/Pods/*\" -n)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
       "Bash(find /Users/muratbekomurzakov/.claude -type d -name memory 2>/dev/null | head -10)",
       "Read(//Users/muratbekomurzakov/.claude/**)",
       "Bash(ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new altailabs 'echo \"=== UPTIME ===\" && uptime && echo \"\" && echo \"=== MINER CHECK: /var/tmp ===\" && ls -la /var/tmp/ 2>&1 | head -20 && echo \"\" && echo \"=== xmrig PROCESS ===\" && ps aux | grep -iE \"xmrig|systemd-logind|kdevtmpfsi|kinsing|monero|miner\" | grep -v grep && echo \"\" && echo \"=== TOP CPU PROCESSES ===\" && ps aux --sort=-%cpu | head -10 && echo \"\" && echo \"=== AUTHORIZED_KEYS ===\" && wc -l /root/.ssh/authorized_keys && cat /root/.ssh/authorized_keys')",

@@ -112,8 +112,8 @@ class _SellChooser extends ConsumerWidget {
               icon: LucideIcons.beef,
               title: t(dict, 'sellForm.sellMeatTitle'),
               subtitle: t(dict, 'sellForm.sellMeatSub'),
-              color: const Color(0xFFB91C1C),
-              bgColor: const Color(0xFFFEE2E2),
+              color: AppColors.meatAccent,
+              bgColor: AppColors.meatAccentSurface,
               onTap: () => context.push('/create-drop'),
             ),
             const SizedBox(height: 24),
@@ -450,12 +450,12 @@ class _SellForm extends ConsumerWidget {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: form.subcategory == 'MEAT'
-                              ? const Color(0xFFB91C1C)
-                              : const Color(0xFFFEE2E2),
+                              ? AppColors.meatAccent
+                              : AppColors.meatAccentSurface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: form.subcategory == 'MEAT'
-                                ? const Color(0xFFB91C1C)
+                                ? AppColors.meatAccent
                                 : const Color(0xFFFCA5A5),
                             width: form.subcategory == 'MEAT' ? 2 : 1,
                           ),
@@ -466,7 +466,7 @@ class _SellForm extends ConsumerWidget {
                                 size: 22,
                                 color: form.subcategory == 'MEAT'
                                     ? Colors.white
-                                    : const Color(0xFFB91C1C)),
+                                    : AppColors.meatAccent),
                             const SizedBox(height: 4),
                             Text(
                               t(dict, 'sellForm.horseMeatTitle'),
@@ -475,7 +475,7 @@ class _SellForm extends ConsumerWidget {
                                 fontWeight: FontWeight.w700,
                                 color: form.subcategory == 'MEAT'
                                     ? Colors.white
-                                    : const Color(0xFFB91C1C),
+                                    : AppColors.meatAccent,
                               ),
                             ),
                             Text(

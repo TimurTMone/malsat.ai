@@ -240,7 +240,7 @@ class _PaymentSetupScreenState extends ConsumerState<PaymentSetupScreen> {
                     child: ElevatedButton(
                       onPressed: _saving ? null : _savePaymentInfo,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: AppColors.meatAccent,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
