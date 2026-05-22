@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'route_names.dart';
+import '../constants/app_spacing.dart';
 import '../state/world_provider.dart';
 import '../theme/world_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/malsat_header.dart';
+import '../widgets/world_switch.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/sell/presentation/screens/sell_screen.dart';
 // ignore: unused_import
@@ -285,7 +287,22 @@ class _ShellScreen extends ConsumerWidget {
       data: worldTheme(world),
       child: Scaffold(
         appBar: const MalsatHeader(),
-        body: navigationShell,
+        body: Column(
+          children: [
+            // World switch — pinned at the top of the page, ahead of the
+            // content, rather than tucked inside the nav header.
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.xs,
+                AppSpacing.lg,
+                AppSpacing.md,
+              ),
+              child: WorldSwitch(),
+            ),
+            Expanded(child: navigationShell),
+          ],
+        ),
         bottomNavigationBar: BottomNavBar(
           currentIndex: navigationShell.currentIndex,
           onTap: (index) => navigationShell.goBranch(

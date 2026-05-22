@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_spacing.dart';
 import '../constants/app_typography.dart';
 import 'notifications_sheet.dart';
-import 'world_switch.dart';
 
-/// App header — the MalSat wordmark, notifications, and the pinned
-/// Meat ⇄ Livestock world switch beneath. The switch is always visible,
-/// so the app's two-marketplace structure is the first thing a user
-/// (or an investor) sees.
-class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
+/// App header — just the MalSat wordmark and notifications. The Meat ⇄
+/// Livestock world switch sits below this, at the top of the page content
+/// (see `_ShellScreen`), not inside the nav bar.
+class MalsatHeader extends StatelessWidget implements PreferredSizeWidget {
   const MalsatHeader({super.key});
 
-  static const double _toolbar = 58;
-  // World switch (46) + generous breathing room above it (32) + below (14).
-  static const double _switchBand = 92;
+  static const double _toolbar = 52;
 
   @override
-  Size get preferredSize => const Size.fromHeight(_toolbar + _switchBand);
+  Size get preferredSize => const Size.fromHeight(_toolbar);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return AppBar(
       toolbarHeight: _toolbar,
       titleSpacing: AppSpacing.lg,
@@ -49,18 +44,6 @@ class MalsatHeader extends ConsumerWidget implements PreferredSizeWidget {
           ),
         ),
       ],
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(_switchBand),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.xxxl,
-            AppSpacing.lg,
-            14,
-          ),
-          child: WorldSwitch(),
-        ),
-      ),
     );
   }
 }
