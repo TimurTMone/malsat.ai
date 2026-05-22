@@ -79,6 +79,19 @@
     "sportTag": "SPORT",
     "premiumTag": "PREMIUM"
   },
+  "supply": {
+    "meatTitle": "Sell your meat",
+    "meatSub": "Post a drop — under a minute",
+    "livestockTitle": "Sell your livestock",
+    "livestockSub": "List an animal — under a minute",
+    "emptyMeatTitle": "No meat drops here yet",
+    "emptyLivestockTitle": "No animals here yet",
+    "emptySub": "Be the first to sell in your area — it takes a minute",
+    "emptyCta": "List yours",
+    "unitDrops": "drops",
+    "unitAnimals": "animals",
+    "villages": "villages"
+  },
   "viewMode": {
     "large": "Hero",
     "grid": "Grid",

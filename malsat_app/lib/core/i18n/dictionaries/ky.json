@@ -79,6 +79,19 @@
     "sportTag": "СПОРТ",
     "premiumTag": "ПРЕМИУМ"
   },
+  "supply": {
+    "meatTitle": "Этиңди сат",
+    "meatSub": "Бир мүнөттө жарыяла",
+    "livestockTitle": "Малыңды сат",
+    "livestockSub": "Бир мүнөттө жарыяла",
+    "emptyMeatTitle": "Бул жерде эт жок",
+    "emptyLivestockTitle": "Бул жерде мал жок",
+    "emptySub": "Биринчи болуп сатыңыз — бир мүнөт жетет",
+    "emptyCta": "Жарыялоо",
+    "unitDrops": "жарыя",
+    "unitAnimals": "мал",
+    "villages": "айылдан"
+  },
   "viewMode": {
     "large": "Чоң",
     "grid": "Тор",

@@ -10,7 +10,9 @@ import '../../../../core/constants/app_typography.dart';
 import '../../../../core/i18n/app_localizations.dart';
 import '../../../../core/state/view_mode.dart';
 import '../../../../core/theme/app_world.dart';
+import '../../../../core/widgets/recruit_empty_state.dart';
 import '../../../../core/widgets/shimmer.dart';
+import '../../../../core/widgets/supply_callout.dart';
 import '../../../../core/widgets/view_mode_toggle.dart';
 import '../providers/drops_provider.dart';
 import '../widgets/drop_card.dart';
@@ -68,6 +70,7 @@ class _DropsScreenState extends ConsumerState<DropsScreen> {
     final viewMode = ref.watch(listingViewModeProvider);
     final dict = ref.watch(dictionaryProvider).valueOrNull;
     final accent = AppWorldPalette.of(context).accent;
+    final loaded = dropsAsync.valueOrNull;
 
     return SafeArea(
       child: RefreshIndicator(
@@ -109,6 +112,16 @@ class _DropsScreenState extends ConsumerState<DropsScreen> {
                             t(dict, 'drops.heroSubtitle'),
                             style: AppTypography.bodyMuted,
                           ),
+                          if (loaded != null && loaded.isNotEmpty) ...[
+                            const SizedBox(height: AppSpacing.md),
+                            _LiquidityStrip(
+                              count: loaded.length,
+                              unit: t(dict, 'supply.unitDrops'),
+                              villages: _villageCount(loaded),
+                              villagesWord: t(dict, 'supply.villages'),
+                              accent: accent,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -118,6 +131,18 @@ class _DropsScreenState extends ConsumerState<DropsScreen> {
                       onTap: () => context.push('/orders/me'),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // ── Supply CTA — the marketplace lives on listings ──
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: SupplyCallout(
+                  title: t(dict, 'supply.meatTitle'),
+                  subtitle: t(dict, 'supply.meatSub'),
+                  onTap: () => context.go('/sell'),
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -191,7 +216,13 @@ class _DropsScreenState extends ConsumerState<DropsScreen> {
                         ),
                       ),
                       if (filtered.isEmpty)
-                        _EmptyState(label: t(dict, 'common.noResults'))
+                        RecruitEmptyState(
+                          icon: LucideIcons.beef,
+                          title: t(dict, 'supply.emptyMeatTitle'),
+                          subtitle: t(dict, 'supply.emptySub'),
+                          ctaLabel: t(dict, 'supply.emptyCta'),
+                          onTap: () => context.go('/sell'),
+                        )
                       else
                         Padding(
                           padding: const EdgeInsets.symmetric(
@@ -434,40 +465,58 @@ class _MyOrdersButton extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  final String label;
+/// Distinct villages across the loaded drops — a small liquidity proof.
+int _villageCount(List drops) =>
+    drops.map((d) => d.village).whereType<String>().toSet().length;
 
-  const _EmptyState({required this.label});
+/// Liquidity proof strip — "N drops · M villages". A live, honest signal
+/// that the marketplace has supply.
+class _LiquidityStrip extends StatelessWidget {
+  final int count;
+  final String unit;
+  final int villages;
+  final String villagesWord;
+  final Color accent;
+
+  const _LiquidityStrip({
+    required this.count,
+    required this.unit,
+    required this.villages,
+    required this.villagesWord,
+    required this.accent,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(40),
-      child: Center(
-        child: Column(
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: const BoxDecoration(
-                color: AppColors.backgroundSecondary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                LucideIcons.beef,
-                size: 30,
-                color: AppColors.textMuted,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: AppTypography.bodyMuted,
-            ),
-          ],
+    return Row(
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
         ),
-      ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          '$count $unit',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        if (villages > 0) ...[
+          Text('  ·  ',
+              style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+          Text(
+            '$villages $villagesWord',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

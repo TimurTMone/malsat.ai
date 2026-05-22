@@ -14,7 +14,9 @@ import '../../../../core/widgets/listing_card.dart';
 import '../../../../core/widgets/listing_card_large.dart';
 import '../../../../core/widgets/listing_card_row.dart';
 import '../../../../core/widgets/pressable_scale.dart';
+import '../../../../core/widgets/recruit_empty_state.dart';
 import '../../../../core/widgets/shimmer.dart';
+import '../../../../core/widgets/supply_callout.dart';
 import '../../../../core/widgets/view_mode_toggle.dart';
 import '../../../home/presentation/providers/home_provider.dart';
 
@@ -48,6 +50,7 @@ class LivestockHomeScreen extends ConsumerWidget {
     final dict = ref.watch(dictionaryProvider).valueOrNull;
     final locale = ref.watch(localeProvider).languageCode;
     final accent = AppWorldPalette.of(context).accent;
+    final loaded = listingsAsync.valueOrNull;
 
     return SafeArea(
       child: RefreshIndicator(
@@ -81,7 +84,29 @@ class LivestockHomeScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(t(dict, 'home.heroSubtitle'),
                         style: AppTypography.bodyMuted),
+                    if (loaded != null && loaded.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      _LiquidityStrip(
+                        count: loaded.length,
+                        unit: t(dict, 'supply.unitAnimals'),
+                        villages: _villageCount(loaded),
+                        villagesWord: t(dict, 'supply.villages'),
+                        accent: accent,
+                      ),
+                    ],
                   ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // ── Supply CTA — the marketplace lives on listings ──
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: SupplyCallout(
+                  title: t(dict, 'supply.livestockTitle'),
+                  subtitle: t(dict, 'supply.livestockSub'),
+                  onTap: () => context.go('/sell'),
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -189,12 +214,12 @@ class LivestockHomeScreen extends ConsumerWidget {
               listingsAsync.when(
                 data: (listings) {
                   if (listings.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.all(40),
-                      child: Center(
-                        child: Text(t(dict, 'common.noResults'),
-                            style: AppTypography.bodyMuted),
-                      ),
+                    return RecruitEmptyState(
+                      icon: LucideIcons.layers,
+                      title: t(dict, 'supply.emptyLivestockTitle'),
+                      subtitle: t(dict, 'supply.emptySub'),
+                      ctaLabel: t(dict, 'supply.emptyCta'),
+                      onTap: () => context.go('/sell'),
                     );
                   }
                   return Padding(
@@ -486,6 +511,61 @@ class _FeaturedCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Distinct villages across the loaded listings — a small liquidity proof.
+int _villageCount(List listings) =>
+    listings.map((l) => l.village).whereType<String>().toSet().length;
+
+/// Liquidity proof strip — "N animals · M villages".
+class _LiquidityStrip extends StatelessWidget {
+  final int count;
+  final String unit;
+  final int villages;
+  final String villagesWord;
+  final Color accent;
+
+  const _LiquidityStrip({
+    required this.count,
+    required this.unit,
+    required this.villages,
+    required this.villagesWord,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          '$count $unit',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        if (villages > 0) ...[
+          const Text('  ·  ',
+              style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+          Text(
+            '$villages $villagesWord',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

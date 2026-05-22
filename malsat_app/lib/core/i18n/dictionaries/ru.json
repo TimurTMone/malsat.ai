@@ -79,6 +79,19 @@
     "sportTag": "СПОРТ",
     "premiumTag": "ПРЕМИУМ"
   },
+  "supply": {
+    "meatTitle": "Продайте мясо",
+    "meatSub": "Разместите за минуту",
+    "livestockTitle": "Продайте скот",
+    "livestockSub": "Разместите за минуту",
+    "emptyMeatTitle": "Здесь пока нет мяса",
+    "emptyLivestockTitle": "Здесь пока нет животных",
+    "emptySub": "Будьте первым — это займёт минуту",
+    "emptyCta": "Разместить",
+    "unitDrops": "объявл.",
+    "unitAnimals": "голов",
+    "villages": "сёл"
+  },
   "viewMode": {
     "large": "Большой",
     "grid": "Сетка",
