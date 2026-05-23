@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="ky">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#B7410E" />
+<title>MalSat — v2.0 prototype</title>
+<style>
+  :root {
+    --ink: #1A1614;
+    --paper: #FAF7F2;
+    --mist: #E8E2D7;
+    --muted: #7A716A;
+    --terracotta: #B7410E;
+    --terracotta-deep: #8A2F08;
+    --hairline: rgba(26, 22, 20, 0.08);
+    --shadow: 0 24px 60px -20px rgba(26, 22, 20, 0.25);
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter",
+            system-ui, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #2A2520;
+    font-family: var(--font);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    height: 100vh;
+  }
+  /* Phone frame on desktop; full screen on mobile */
+  .stage {
+    width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .phone {
+    width: 390px; height: 844px;
+    background: var(--paper);
+    border-radius: 48px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow);
+  }
+  @media (max-width: 480px) {
+    .stage { padding: 0; }
+    .phone { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+  }
+  /* Screen container */
+  .screen {
+    position: absolute; inset: 0;
+    overflow-y: auto; overflow-x: hidden;
+    transform: translateX(100%);
+    transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+    background: var(--paper);
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen.active { transform: translateX(0); }
+  .screen.behind  { transform: translateX(-24%); }
+
+  /* ─── HOME ─────────────────────────────────────────────── */
+  .home { display: flex; flex-direction: column; height: 100%; }
+  .hero {
+    height: 44%;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(255, 220, 180, 0.35) 0%, transparent 55%),
+      linear-gradient(160deg, #C97842 0%, #8A2F08 50%, #2A1810 100%);
+    position: relative;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(26,22,20,0.45) 100%);
+  }
+  .brand {
+    position: absolute; top: 64px; left: 32px;
+    color: var(--paper);
+    font-size: 22px; font-weight: 700;
+    letter-spacing: -0.4px;
+  }
+  .lang {
+    position: absolute; top: 64px; right: 32px;
+    color: var(--paper);
+    font-size: 13px; font-weight: 500;
+    opacity: 0.7;
+    letter-spacing: 0.4px;
+  }
+  .ask {
+    padding: 40px 32px 16px;
+  }
+  .ask h1 {
+    font-size: 32px; font-weight: 700;
+    letter-spacing: -0.8px; line-height: 1.1;
+    margin: 0 0 4px;
+  }
+  .ask .sub {
+    font-size: 16px; color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .options { padding: 0 24px 24px; flex: 1; }
+  .opt {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 22px 8px;
+    border-bottom: 1px solid var(--hairline);
+    cursor: pointer;
+    transition: transform 160ms ease, opacity 160ms ease;
+  }
+  .opt:active { transform: scale(0.98); opacity: 0.7; }
+  .opt .ky {
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.4px;
+  }
+  .opt .en {
+    font-size: 13px; color: var(--muted);
+    letter-spacing: 0.3px;
+  }
+  .footer-link {
+    padding: 24px 32px 36px;
+    text-align: center;
+    font-size: 14px; color: var(--muted);
+    cursor: pointer;
+  }
+  .footer-link .accent { color: var(--terracotta); font-weight: 500; }
+
+  /* ─── GUEST COUNT ──────────────────────────────────────── */
+  .pad { padding: 80px 32px 40px; }
+  .back {
+    position: absolute; top: 56px; left: 24px;
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .back svg { width: 24px; height: 24px; }
+  .step {
+    font-size: 12px; color: var(--muted);
+    letter-spacing: 1.4px; text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .question {
+    font-size: 34px; font-weight: 700;
+    letter-spacing: -0.8px; line-height: 1.1;
+    margin: 0 0 8px;
+  }
+  .question-en {
+    font-size: 16px; color: var(--muted);
+    margin: 0 0 56px;
+  }
+  .count {
+    text-align: center;
+    font-size: 96px; font-weight: 700;
+    letter-spacing: -3px;
+    line-height: 1; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .count-label {
+    text-align: center;
+    font-size: 14px; color: var(--muted);
+    margin-top: 8px; margin-bottom: 40px;
+    letter-spacing: 0.3px;
+  }
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none; appearance: none;
+    background: transparent;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 4px; background: var(--mist); border-radius: 2px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    height: 32px; width: 32px;
+    background: var(--terracotta);
+    border-radius: 50%; margin-top: -14px;
+    box-shadow: 0 6px 14px rgba(183, 65, 14, 0.35);
+    cursor: grab;
+  }
+  .cta {
+    position: absolute; left: 24px; right: 24px; bottom: 40px;
+    padding: 20px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 18px;
+    border: 0;
+    font-family: inherit;
+    font-size: 17px; font-weight: 600;
+    letter-spacing: -0.2px;
+    cursor: pointer;
+    transition: transform 160ms ease;
+  }
+  .cta:active { transform: scale(0.98); }
+  .cta.terracotta { background: var(--terracotta); }
+
+  /* ─── PROPOSAL ─────────────────────────────────────────── */
+  .proposal-hero {
+    height: 240px;
+    background:
+      radial-gradient(ellipse at 70% 30%, rgba(255, 200, 150, 0.30) 0%, transparent 60%),
+      linear-gradient(160deg, #8A2F08 0%, #4A1A05 70%, #1A1614 100%);
+    position: relative;
+  }
+  .proposal-hero::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 55%, rgba(26,22,20,0.5) 100%);
+  }
+  .proposal-title {
+    position: absolute; bottom: 24px; left: 32px;
+    color: var(--paper);
+  }
+  .proposal-title .occ { font-size: 13px; letter-spacing: 1.4px; opacity: 0.8; text-transform: uppercase; }
+  .proposal-title h2 { font-size: 28px; font-weight: 700; margin: 6px 0 0; letter-spacing: -0.6px; }
+
+  .receipt { padding: 32px; }
+  .line {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .line:last-child { border-bottom: 0; }
+  .line .l { font-size: 17px; font-weight: 500; }
+  .line .r { font-size: 17px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .total {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 24px; padding-top: 24px;
+    border-top: 2px solid var(--ink);
+  }
+  .total .l { font-size: 14px; color: var(--muted); letter-spacing: 0.4px; text-transform: uppercase; }
+  .total .r { font-size: 28px; font-weight: 700; letter-spacing: -0.6px; }
+  .footnote {
+    margin: 20px 0 120px;
+    font-size: 13px; color: var(--muted); line-height: 1.5;
+  }
+  .secondary {
+    position: absolute; left: 24px; right: 24px; bottom: 108px;
+    padding: 16px; text-align: center;
+    background: transparent;
+    color: var(--terracotta);
+    border: 0; font-family: inherit;
+    font-size: 15px; font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* ─── SENT ─────────────────────────────────────────────── */
+  .sent {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 0 40px;
+  }
+  .check {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: var(--terracotta);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 32px;
+    animation: pop 540ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .check svg { width: 40px; height: 40px; color: var(--paper); }
+  @keyframes pop {
+    0%   { transform: scale(0.4); opacity: 0; }
+    60%  { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  .sent h2 {
+    font-size: 32px; font-weight: 700;
+    letter-spacing: -0.8px; margin: 0 0 12px;
+  }
+  .sent p {
+    font-size: 16px; color: var(--muted);
+    line-height: 1.5; margin: 0 0 8px;
+  }
+  .sent .small { font-size: 13px; opacity: 0.7; margin-top: 24px; }
+  .start-over {
+    position: absolute; bottom: 56px; left: 0; right: 0;
+    text-align: center;
+    font-size: 14px; color: var(--terracotta);
+    cursor: pointer; font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone">
+
+    <!-- ═══ SCREEN 1: HOME ═══════════════════════════════════ -->
+    <div id="screen-home" class="screen active">
+      <div class="home">
+        <div class="hero">
+          <div class="brand">MalSat</div>
+          <div class="lang">KY · RU · EN</div>
+        </div>
+        <div class="ask">
+          <h1>Кандай иш-чарага?</h1>
+          <p class="sub">What's the occasion?</p>
+        </div>
+        <div class="options">
+          <div class="opt" data-occ="janaza" data-occ-en="Funeral" data-default="80">
+            <div class="ky">Жаназа</div><div class="en">Funeral</div>
+          </div>
+          <div class="opt" data-occ="toi" data-occ-en="Wedding" data-default="120">
+            <div class="ky">Той</div><div class="en">Wedding</div>
+          </div>
+          <div class="opt" data-occ="tushoo" data-occ-en="Tushoo toi" data-default="40">
+            <div class="ky">Тушоо той</div><div class="en">Birthday</div>
+          </div>
+          <div class="opt" data-occ="kudai" data-occ-en="Kudai tamak" data-default="30">
+            <div class="ky">Кудай тамак</div><div class="en">Memorial</div>
+          </div>
+          <div class="opt" data-occ="today" data-occ-en="For today" data-default="0">
+            <div class="ky">Бугүн жейм</div><div class="en">For today</div>
+          </div>
+        </div>
+        <div class="footer-link" onclick="alert('In v2: opens seller flow.')">
+          <span class="accent">Мен сатам</span> · I sell
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN 2: GUEST COUNT ════════════════════════════ -->
+    <div id="screen-count" class="screen">
+      <div class="back" onclick="goTo('home')" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </div>
+      <div class="pad">
+        <div class="step">1 / 2</div>
+        <h1 class="question" id="q-occ">Той</h1>
+        <p class="question-en" id="q-occ-en">Wedding · How many guests?</p>
+        <div class="count" id="count-num">120</div>
+        <div class="count-label">guests</div>
+        <input type="range" id="count-slider" min="20" max="500" step="10" value="120" />
+      </div>
+      <button class="cta" onclick="buildProposal()">Continue</button>
+    </div>
+
+    <!-- ═══ SCREEN 3: PROPOSAL ══════════════════════════════ -->
+    <div id="screen-proposal" class="screen">
+      <div class="back" onclick="goTo('count')" aria-label="Back" style="color: white;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </div>
+      <div class="proposal-hero">
+        <div class="proposal-title">
+          <div class="occ" id="p-occ">WEDDING · 120 GUESTS</div>
+          <h2>We'll handle it.</h2>
+        </div>
+      </div>
+      <div class="receipt">
+        <div class="step">Proposal</div>
+        <h1 class="question" style="font-size: 22px; margin: 8px 0 24px;">
+          For 120 guests, families typically order:
+        </h1>
+        <div id="proposal-lines"></div>
+        <div class="total">
+          <div class="l">Total · Жалпы</div>
+          <div class="r" id="p-total">85,000 KGS</div>
+        </div>
+        <p class="footnote">
+          Includes halal slaughter by an imam, your choice of cuts (казы, чучук, ала-кесек),
+          and delivery to your venue 24 hours before the event.
+          You approve every step — нothing happens until you confirm.
+        </p>
+      </div>
+      <button class="secondary" onclick="alert('In v2: drill into specific animals and farms.')">
+        Show me the animals
+      </button>
+      <button class="cta terracotta" onclick="goTo('sent')">Send order</button>
+    </div>
+
+    <!-- ═══ SCREEN 4: SENT ══════════════════════════════════ -->
+    <div id="screen-sent" class="screen">
+      <div class="sent">
+        <div class="check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+               stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+        </div>
+        <h2>Жөнөтүлдү.</h2>
+        <p>Sent. A farmer in Naryn is reviewing your order.</p>
+        <p class="small">You'll hear back within 2 hours.</p>
+      </div>
+      <div class="start-over" onclick="goTo('home')">Start over</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const screens = ['home', 'count', 'proposal', 'sent'];
+  let chosen = { occ: 'Той', occEn: 'Wedding', count: 120 };
+
+  function goTo(name) {
+    screens.forEach(s => {
+      const el = document.getElementById('screen-' + s);
+      el.classList.remove('active', 'behind');
+    });
+    document.getElementById('screen-' + name).classList.add('active');
+    if (navigator.vibrate) navigator.vibrate(8);
+  }
+
+  // Home → Count
+  document.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      chosen.occ    = opt.querySelector('.ky').textContent;
+      chosen.occEn  = opt.dataset.occEn;
+      chosen.count  = parseInt(opt.dataset.default || '80', 10);
+      document.getElementById('q-occ').textContent = chosen.occ;
+      document.getElementById('q-occ-en').textContent = chosen.occEn + ' · How many guests?';
+      const slider = document.getElementById('count-slider');
+      slider.value = chosen.count;
+      document.getElementById('count-num').textContent = chosen.count;
+      goTo('count');
+    });
+  });
+
+  // Slider
+  const slider = document.getElementById('count-slider');
+  slider.addEventListener('input', e => {
+    chosen.count = parseInt(e.target.value, 10);
+    document.getElementById('count-num').textContent = chosen.count;
+    if (navigator.vibrate) navigator.vibrate(2);
+  });
+
+  // Build the proposal from guest count.
+  // ~1.2 kg of meat per guest at a family event in KG.
+  function buildProposal() {
+    const kg = Math.round(chosen.count * 1.2);
+    let lines = [];
+    let totalKgs = 0;
+
+    if (kg >= 200) {
+      lines.push({ l: '1 жылкы · 1 horse',     r: '~180 kg',  c: 108000 });
+      lines.push({ l: '1 кой · 1 sheep',       r: '~25 kg',   c: 14000  });
+    } else if (kg >= 120) {
+      lines.push({ l: '1 уй · 1 cow',          r: '~140 kg',  c: 70000  });
+      lines.push({ l: '1 кой · 1 sheep',       r: '~25 kg',   c: 14000  });
+    } else if (kg >= 60) {
+      lines.push({ l: '2 кой · 2 sheep',       r: '~50 kg',   c: 28000  });
+    } else if (kg >= 25) {
+      lines.push({ l: '1 кой · 1 sheep',       r: '~25 kg',   c: 14000  });
+    } else {
+      lines.push({ l: 'Жарым кой · ½ sheep',   r: '~12 kg',   c: 7000   });
+    }
+
+    lines.push({ l: 'Халал союу + кесүү · Halal slaughter + cuts', r: 'included', c: 3500 });
+    lines.push({ l: 'Жеткирүү · Delivery',                          r: 'Bishkek',  c: 2500 });
+
+    const total = lines.reduce((sum, x) => sum + x.c, 0);
+    const html = lines.map(x => `
+      <div class="line"><div class="l">${x.l}</div>
+      <div class="r">${x.c.toLocaleString()} KGS · ${x.r}</div></div>
+    `).join('');
+    document.getElementById('proposal-lines').innerHTML = html;
+    document.getElementById('p-total').textContent = total.toLocaleString() + ' KGS';
+    document.getElementById('p-occ').textContent =
+      chosen.occEn.toUpperCase() + ' · ' + chosen.count + ' GUESTS';
+    goTo('proposal');
+  }
+</script>
+</body>
+</html>

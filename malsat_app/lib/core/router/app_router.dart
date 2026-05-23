@@ -36,6 +36,11 @@ import '../../features/profile/presentation/screens/settings_screen.dart';
 import '../../features/marketplace/presentation/screens/activity_tab.dart';
 import '../../features/shop/presentation/screens/duken_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/v2/screens/v2_home_screen.dart';
+import '../../features/v2/screens/v2_count_screen.dart';
+import '../../features/v2/screens/v2_proposal_screen.dart';
+import '../../features/v2/screens/v2_sent_screen.dart';
+import '../../features/v2/v2_state.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -117,6 +122,30 @@ final appRouter = GoRouter(
         ),
       ],
     ),
+    // ── v2.0 redesign preview (Jobs/Ive direction, occasion-first) ──
+    GoRoute(
+      path: '/v2',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const V2HomeScreen(),
+    ),
+    GoRoute(
+      path: '/v2/count',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) =>
+          V2CountScreen(occasion: state.extra as V2Occasion),
+    ),
+    GoRoute(
+      path: '/v2/proposal',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) =>
+          V2ProposalScreen(draft: state.extra as V2OrderDraft),
+    ),
+    GoRoute(
+      path: '/v2/sent',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const V2SentScreen(),
+    ),
+
     // Legacy-path redirects — keep older `context.go` callers working.
     GoRoute(path: '/', redirect: (_, _) => '/meat'),
     GoRoute(path: '/home', redirect: (_, _) => '/meat'),
