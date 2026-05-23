@@ -71,6 +71,7 @@ model User {
   farmerAnimals          LivestockAnimal[] @relation("FarmerAnimals")
   tokenTransfersSent     TokenTransfer[]   @relation("TransferSender")
   tokenTransfersReceived TokenTransfer[]   @relation("TransferReceiver")
+  butcherPartner         ButcherPartner?   @relation("PartnerUser")
 
   @@index([regionId])
   @@index([phone])
@@ -108,6 +109,7 @@ model Listing {
   reviews       Review[]
   favorites     Favorite[]
   conversations Conversation[]
+  butcherOrders MeatOrder[]    @relation("ListingButcherOrders")
 
   @@index([sellerId])
   @@index([category])
@@ -204,12 +206,13 @@ model Region {
   lat      Float?
   lng      Float?
 
-  parent   Region?       @relation("RegionHierarchy", fields: [parentId], references: [id])
-  children Region[]      @relation("RegionHierarchy")
-  users    User[]
-  listings Listing[]
-  drops    ButcherDrop[]
-  hubs     Hub[]
+  parent          Region?          @relation("RegionHierarchy", fields: [parentId], references: [id])
+  children        Region[]         @relation("RegionHierarchy")
+  users           User[]
+  listings        Listing[]
+  drops           ButcherDrop[]
+  hubs            Hub[]
+  butcherPartners ButcherPartner[]
 
   @@index([parentId])
   @@index([type])
@@ -259,6 +262,24 @@ enum OrderStatus {
   CANCELLED
 }
 
+// Distinguishes a regular meat-by-the-kilo drop purchase from a
+// butcher-service order where the customer brings (or describes) their
+// own live animal and the partner butchers, portions, and delivers it.
+enum MeatOrderKind {
+  DROP_PURCHASE // customer bought meat from a butcher's scheduled drop
+  BUTCHER_SERVICE // customer's own animal, butchered halal & delivered
+}
+
+// For butcher-service orders: the cultural occasion the meat is for.
+// Drives default cut presets and how the partner prepares the animal.
+enum OccasionType {
+  JANAZA // жаназа / funeral
+  TOI // той / wedding or major celebration
+  TUSHOO_TOI // тушоо той / first-steps ceremony
+  KUDAI_TAMAK // кудай тамак / charity meal in someone's memory
+  OTHER
+}
+
 model ButcherDrop {
   id                String         @id @default(cuid())
   sellerId          String
@@ -287,11 +308,12 @@ model ButcherDrop {
   updatedAt         DateTime       @updatedAt
   expiresAt         DateTime?
 
-  seller   User        @relation("SellerDrops", fields: [sellerId], references: [id], onDelete: Cascade)
-  region   Region?     @relation(fields: [regionId], references: [id])
-  media    DropMedia[]
-  orders   MeatOrder[]
-  hubDrops HubDrop[] // which hubs this drop targets
+  seller         User            @relation("SellerDrops", fields: [sellerId], references: [id], onDelete: Cascade)
+  region         Region?         @relation(fields: [regionId], references: [id])
+  media          DropMedia[]
+  orders         MeatOrder[]
+  hubDrops       HubDrop[] // which hubs this drop targets
+  butcherPartner ButcherPartner? @relation("PartnerDrop")
 
   @@index([sellerId])
   @@index([status])
@@ -340,12 +362,58 @@ model MeatOrder {
   deliveredAt        DateTime?
   createdAt          DateTime    @default(now())
 
-  drop  ButcherDrop @relation(fields: [dropId], references: [id], onDelete: Cascade)
-  buyer User        @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  // ─── Butcher-service-only fields ────────────────────────────
+  // For DROP_PURCHASE orders these are all null. For BUTCHER_SERVICE
+  // orders, the customer's own animal info travels with the order.
+  kind              MeatOrderKind   @default(DROP_PURCHASE)
+  occasionType      OccasionType?
+  imamRequested     Boolean         @default(false)
+  cuttingPreset     String? // JSON array of selected cut codes
+  specialDua        String? // free-text, e.g. naming the deceased for жаназа
+  animalCategory    AnimalCategory? // species the customer is bringing
+  animalWeightKg    Float? // customer's best estimate
+  animalDescription String? // breed, colour, distinguishing marks
+  animalPhotoUrl    String? // optional uploaded photo of the animal
+  sourceListingId   String? // P1: link to the Listing the user bought
+
+  drop          ButcherDrop @relation(fields: [dropId], references: [id], onDelete: Cascade)
+  buyer         User        @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Cascade)
+  sourceListing Listing?    @relation("ListingButcherOrders", fields: [sourceListingId], references: [id], onDelete: SetNull)
 
   @@index([dropId])
   @@index([buyerId])
   @@index([status])
+  @@index([kind])
+}
+
+// A curated halal butcher partner. P0 ships with one per region. Each
+// partner is backed by a User account (so SellerOrdersScreen, photo
+// uploads, and auth all work unchanged) and a synthetic ButcherDrop row
+// that every butcher-service order points at via `dropId`.
+model ButcherPartner {
+  id                   String   @id @default(cuid())
+  userId               String   @unique // backing user account
+  syntheticDropId      String   @unique // catch-all drop for butcher-service orders
+  name                 String // "Бишкек Халал Союуш"
+  description          String?
+  regionId             String?
+  phone                String
+  halalCertUrl         String?
+  // JSON map of price per kg by AnimalCategory, e.g.
+  // {"CATTLE":120,"SHEEP":180,"HORSE":250,"ARASHAN":300}
+  pricePerKgByCategory String   @default("{\"CATTLE\":120,\"SHEEP\":180,\"HORSE\":250,\"ARASHAN\":300}")
+  imamFeeKgs           Int      @default(500) // surcharge if customer requests an imam
+  deliveryFeeKgs       Int      @default(800)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user          User        @relation("PartnerUser", fields: [userId], references: [id], onDelete: Cascade)
+  syntheticDrop ButcherDrop @relation("PartnerDrop", fields: [syntheticDropId], references: [id])
+  region        Region?     @relation(fields: [regionId], references: [id])
+
+  @@index([regionId])
+  @@index([isActive])
 }
 
 // ─── Hubs (Apartment complexes / Neighborhoods) ──────────────

@@ -65,4 +65,8 @@ class ApiEndpoints {
   static String token(String id) => '/api/tokens/$id';
   static String tokenBuy(String id) => '/api/tokens/$id/buy';
   static const String tokenPortfolio = '/api/tokens/portfolio';
+
+  // Butcher service — halal slaughter + delivery for the customer's own animal
+  static const String butcherPartners = '/api/butcher-partners';
+  static const String butcherService = '/api/butcher-service';
 }

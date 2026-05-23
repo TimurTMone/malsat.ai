@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class MeatOrder {
   final String id;
   final String dropId;
@@ -21,6 +23,22 @@ class MeatOrder {
   final DateTime? deliveringAt;
   final DateTime? deliveredAt;
   final DateTime createdAt;
+
+  // ─── Butcher-service-only ─────────────────────────────────────
+  // For DROP_PURCHASE orders these are all null / default. For
+  // BUTCHER_SERVICE orders, they describe the animal the customer is
+  // bringing and how they want it prepared (occasion, cuts, dua).
+  final String kind; // "DROP_PURCHASE" | "BUTCHER_SERVICE"
+  final String? occasionType;
+  final bool imamRequested;
+  final List<String>? cuttingPreset;
+  final String? specialDua;
+  final String? animalCategory;
+  final double? animalWeightKg;
+  final String? animalDescription;
+  final String? animalPhotoUrl;
+  final String? sourceListingId;
+
   final OrderDrop? drop;
   final OrderBuyer? buyer;
 
@@ -47,11 +65,35 @@ class MeatOrder {
     this.deliveringAt,
     this.deliveredAt,
     required this.createdAt,
+    this.kind = 'DROP_PURCHASE',
+    this.occasionType,
+    this.imamRequested = false,
+    this.cuttingPreset,
+    this.specialDua,
+    this.animalCategory,
+    this.animalWeightKg,
+    this.animalDescription,
+    this.animalPhotoUrl,
+    this.sourceListingId,
     this.drop,
     this.buyer,
   });
 
   factory MeatOrder.fromJson(Map<String, dynamic> j) {
+    final rawCutting = j['cuttingPreset'];
+    List<String>? cuttingList;
+    if (rawCutting is String && rawCutting.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawCutting);
+        if (decoded is List) {
+          cuttingList = decoded.map((e) => e.toString()).toList();
+        }
+      } catch (_) {
+        cuttingList = null;
+      }
+    } else if (rawCutting is List) {
+      cuttingList = rawCutting.map((e) => e.toString()).toList();
+    }
     return MeatOrder(
       id: j['id'] as String,
       dropId: j['dropId'] as String,
@@ -85,6 +127,16 @@ class MeatOrder {
           ? DateTime.parse(j['deliveredAt'] as String)
           : null,
       createdAt: DateTime.parse(j['createdAt'] as String),
+      kind: j['kind'] as String? ?? 'DROP_PURCHASE',
+      occasionType: j['occasionType'] as String?,
+      imamRequested: j['imamRequested'] as bool? ?? false,
+      cuttingPreset: cuttingList,
+      specialDua: j['specialDua'] as String?,
+      animalCategory: j['animalCategory'] as String?,
+      animalWeightKg: (j['animalWeightKg'] as num?)?.toDouble(),
+      animalDescription: j['animalDescription'] as String?,
+      animalPhotoUrl: j['animalPhotoUrl'] as String?,
+      sourceListingId: j['sourceListingId'] as String?,
       drop: j['drop'] != null
           ? OrderDrop.fromJson(j['drop'] as Map<String, dynamic>)
           : null,
@@ -93,6 +145,8 @@ class MeatOrder {
           : null,
     );
   }
+
+  bool get isButcherService => kind == 'BUTCHER_SERVICE';
 
   bool get isPending => status == 'PENDING';
   bool get isPaid => status == 'PAID';
