@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'route_names.dart';
-import '../constants/app_spacing.dart';
 import '../state/world_provider.dart';
 import '../theme/world_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 import '../widgets/malsat_header.dart';
-import '../widgets/world_switch.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/sell/presentation/screens/sell_screen.dart';
 // ignore: unused_import
@@ -26,13 +24,15 @@ import '../../features/drops/presentation/screens/order_detail_screen.dart';
 import '../../features/drops/presentation/screens/create_drop_screen.dart';
 import '../../features/drops/presentation/screens/seller_orders_screen.dart';
 import '../../features/drops/presentation/screens/payment_setup_screen.dart';
+import '../../features/butcher/presentation/screens/butcher_flow_screen.dart';
+import '../../features/drops/presentation/screens/drops_screen.dart';
+import '../../features/marketplace/presentation/screens/livestock_home_screen.dart';
+import '../theme/app_world.dart';
 import '../../features/auctions/presentation/screens/auction_detail_screen.dart';
 import '../../features/favorites/presentation/screens/favorites_screen.dart';
 import '../../features/profile/presentation/screens/my_listings_screen.dart';
 import '../../features/profile/presentation/screens/reviews_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
-import '../../features/marketplace/presentation/screens/home_tab.dart';
-import '../../features/marketplace/presentation/screens/explore_tab.dart';
 import '../../features/marketplace/presentation/screens/activity_tab.dart';
 import '../../features/shop/presentation/screens/duken_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -53,32 +53,32 @@ final _shellNavigatorProfileKey =
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/home',
+  initialLocation: '/meat',
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return _ShellScreen(navigationShell: navigationShell);
       },
       branches: [
-        // Tab 0: Home — the active world's main page.
+        // Tab 0: Meat — the meat world (Drops feed).
         StatefulShellBranch(
           navigatorKey: _shellNavigatorHomeKey,
           routes: [
             GoRoute(
-              name: RouteNames.home,
-              path: '/home',
-              builder: (context, state) => const HomeTab(),
+              name: RouteNames.meat,
+              path: '/meat',
+              builder: (context, state) => const DropsScreen(),
             ),
           ],
         ),
-        // Tab 1: Explore — world-aware browse hub.
+        // Tab 1: Livestock — the livestock world (Listings feed).
         StatefulShellBranch(
           navigatorKey: _shellNavigatorExploreKey,
           routes: [
             GoRoute(
-              name: RouteNames.explore,
-              path: '/explore',
-              builder: (context, state) => const ExploreTab(),
+              name: RouteNames.livestock,
+              path: '/livestock',
+              builder: (context, state) => const LivestockHomeScreen(),
             ),
           ],
         ),
@@ -118,10 +118,10 @@ final appRouter = GoRouter(
       ],
     ),
     // Legacy-path redirects — keep older `context.go` callers working.
-    GoRoute(path: '/', redirect: (_, _) => '/home'),
-    GoRoute(path: '/meat', redirect: (_, _) => '/home'),
-    GoRoute(path: '/livestock', redirect: (_, _) => '/home'),
-    GoRoute(path: '/drops', redirect: (_, _) => '/home'),
+    GoRoute(path: '/', redirect: (_, _) => '/meat'),
+    GoRoute(path: '/home', redirect: (_, _) => '/meat'),
+    GoRoute(path: '/explore', redirect: (_, _) => '/livestock'),
+    GoRoute(path: '/drops', redirect: (_, _) => '/meat'),
     GoRoute(path: '/herd', redirect: (_, _) => '/activity'),
     // Дүкөн — supply shop placeholder, pushed over the shell (Sprint 2).
     GoRoute(
@@ -262,6 +262,12 @@ final appRouter = GoRouter(
       builder: (context, state) => const PaymentSetupScreen(),
     ),
     GoRoute(
+      name: 'butcher-service',
+      path: '/butcher',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const ButcherFlowScreen(),
+    ),
+    GoRoute(
       name: 'auction-detail',
       path: '/auction/:id',
       parentNavigatorKey: _rootNavigatorKey,
@@ -272,9 +278,11 @@ final appRouter = GoRouter(
   ],
 );
 
-/// The app shell — a fixed header (logo + world switch) and bottom nav,
-/// with the active branch in between. The whole shell is wrapped in the
-/// active world's theme, so one switch reskins everything at once.
+/// The app shell — a fixed header (wordmark + bell) and bottom nav, with
+/// the active branch in between. The whole shell is wrapped in the
+/// current world's theme. Tapping the Meat or Livestock tab also writes
+/// the corresponding world into [worldProvider] so the rest of the app
+/// (Activity label, Sell flow, accent tinting) follows along.
 class _ShellScreen extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
@@ -283,32 +291,39 @@ class _ShellScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final world = ref.watch(worldProvider);
+    final idx = navigationShell.currentIndex;
+
+    // Keep worldProvider in sync with the active world tab on every
+    // build — fixes the cold-boot case where the persisted world (e.g.
+    // livestock) doesn't match the forced initialLocation ('/meat'), so
+    // the shared tabs (Activity label/icon, Sell flow) follow the tab
+    // the user actually sees. No-op when already in sync.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (idx == 0 && world != AppWorld.meat) {
+        ref.read(worldProvider.notifier).setWorld(AppWorld.meat);
+      } else if (idx == 1 && world != AppWorld.livestock) {
+        ref.read(worldProvider.notifier).setWorld(AppWorld.livestock);
+      }
+    });
+
     return Theme(
       data: worldTheme(world),
       child: Scaffold(
         appBar: const MalsatHeader(),
-        body: Column(
-          children: [
-            // World switch — pinned at the top of the page, ahead of the
-            // content, rather than tucked inside the nav header.
-            const Padding(
-              padding: EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.xl,
-                AppSpacing.lg,
-                AppSpacing.lg,
-              ),
-              child: WorldSwitch(),
-            ),
-            Expanded(child: navigationShell),
-          ],
-        ),
+        body: navigationShell,
         bottomNavigationBar: BottomNavBar(
-          currentIndex: navigationShell.currentIndex,
-          onTap: (index) => navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          ),
+          currentIndex: idx,
+          onTap: (index) {
+            if (index == 0) {
+              ref.read(worldProvider.notifier).setWorld(AppWorld.meat);
+            } else if (index == 1) {
+              ref.read(worldProvider.notifier).setWorld(AppWorld.livestock);
+            }
+            navigationShell.goBranch(
+              index,
+              initialLocation: index == idx,
+            );
+          },
         ),
       ),
     );

@@ -1,11 +1,9 @@
 class RouteNames {
   RouteNames._();
 
-  static const String home = 'home';
-  static const String explore = 'explore';
-  static const String activity = 'activity';
   static const String meat = 'meat';
   static const String livestock = 'livestock';
+  static const String activity = 'activity';
   static const String duken = 'duken';
   static const String auctions = 'auctions';
   static const String search = 'search';

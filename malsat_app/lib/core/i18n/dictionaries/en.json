@@ -793,5 +793,83 @@
     "freeForNow": "Free for now",
     "boostBtn": "Boost",
     "close": "Close"
+  },
+  "butcher": {
+    "entryCardTitle": "Butcher your animal",
+    "entryCardSubtitle": "Halal slaughter, cuts, delivery to your event",
+    "entryCardCta": "Start",
+    "headerTitle": "Send to butcher",
+    "intro": "Bring us your animal. We'll slaughter it halal, with dua, and deliver the meat to your event.",
+    "section": {
+      "animal": "About your animal",
+      "occasion": "What's the occasion?",
+      "cuts": "How to butcher?",
+      "halal": "Halal & dua",
+      "delivery": "Where & when",
+      "review": "Summary"
+    },
+    "occasion": {
+      "janaza": "Janaza (funeral)",
+      "toi": "Toi (celebration)",
+      "tushooToi": "Tushoo toi (first steps)",
+      "kudaiTamak": "Kudai tamak (memorial)",
+      "other": "Other"
+    },
+    "cut": {
+      "whole": "Whole (do not portion)",
+      "halvesQuarters": "Halves / quarters",
+      "cubedEsh": "Cubed (for besh / kuurdak)",
+      "groundKyima": "Ground (kyima)",
+      "organsAndTailFat": "Organs / tail fat separated",
+      "boneIn": "Bone-in",
+      "boneless": "Boneless"
+    },
+    "halal": {
+      "imamToggle": "Have an imam recite dua",
+      "imamHelp": "An imam joins us, says bismillah, and recites the dua.",
+      "trust": "Slaughtered facing the qibla, by tradition",
+      "specialDuaLabel": "Special dua (optional)",
+      "specialDuaHint": "e.g. in memory of Almazbek aji"
+    },
+    "animal": {
+      "categoryLabel": "Animal type",
+      "weightLabel": "Estimated weight (kg)",
+      "weightHint": "e.g. 380",
+      "descriptionLabel": "Description (optional)",
+      "descriptionHint": "e.g. red bull with a white mark, 2 years old"
+    },
+    "delivery": {
+      "addressLabel": "Delivery address",
+      "addressHint": "Event address, e.g. Vostok-5, building 21",
+      "dateLabel": "Slaughter date",
+      "dateToday": "Today",
+      "dateTomorrow": "Tomorrow",
+      "phoneLabel": "Contact phone",
+      "noteLabel": "Note (optional)",
+      "noteHint": "Door code, host name, anything else we should know"
+    },
+    "receipt": {
+      "butchering": "Butchering ({weight} kg × {perKg} c)",
+      "imamFee": "Imam service",
+      "delivery": "Delivery",
+      "total": "Total",
+      "payNote": "Cash on delivery. No upfront payment.",
+      "estimate": "Estimate — final price after weighing"
+    },
+    "cta": {
+      "submit": "Send to butcher",
+      "creating": "Sending…"
+    },
+    "success": "Order accepted",
+    "errors": {
+      "fillRequired": "Please fill the required fields",
+      "noPartner": "No butcher partner serves this region yet",
+      "submit": "Couldn't send the order, please try again"
+    },
+    "partner": {
+      "loading": "Finding a butcher…",
+      "halalCert": "Halal cert verified",
+      "imamFeeNote": "Imam service is a separate fee ({fee} c)"
+    }
   }
 }

@@ -28,7 +28,7 @@ class WorldSwitch extends ConsumerWidget {
     }
 
     return Container(
-      height: 46,
+      height: 44,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.backgroundSecondary,
@@ -52,9 +52,9 @@ class WorldSwitch extends ConsumerWidget {
                   borderRadius: AppRadius.pillAll,
                   boxShadow: [
                     BoxShadow(
-                      color: accent.withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 3),
+                      color: accent.withValues(alpha: 0.20),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -106,14 +106,14 @@ class _Half extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 16, color: fg),
+            Icon(icon, size: 15, color: fg),
             const SizedBox(width: 7),
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.2,
+                fontSize: 13.5,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                letterSpacing: 0.0,
                 color: fg,
               ),
               child: Text(label),

@@ -947,7 +947,10 @@ class _SuccessView extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               TextButton(
-                onPressed: () => context.go('/home'),
+                onPressed: () {
+                  final world = ref.read(worldProvider);
+                  context.go(world == AppWorld.meat ? '/meat' : '/livestock');
+                },
                 child: Text(t(dict, 'common.done')),
               ),
             ],

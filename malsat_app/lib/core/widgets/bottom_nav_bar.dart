@@ -8,10 +8,13 @@ import '../i18n/app_localizations.dart';
 import '../state/world_provider.dart';
 import '../theme/app_world.dart';
 
-/// Bottom navigation — five world-agnostic slots: Home, Explore, Sell,
-/// Activity, Profile. The slots are constant; their content and the
-/// Activity label adapt to the active world, and the active item is
-/// tinted with that world's accent.
+/// Bottom navigation — five slots. The first two are the worlds (Meat /
+/// Livestock) as first-class destinations; the centre is Sell; the last
+/// two are Activity (world-aware label + icon) and Profile. The Meat and
+/// Livestock tabs always wear their own world's accent (terracotta /
+/// sage) so the user sees both worlds coloured by identity, not by which
+/// is "currently active." The shared tabs pick up whichever world the
+/// user last set.
 class BottomNavBar extends ConsumerWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -26,7 +29,7 @@ class BottomNavBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dict = ref.watch(dictionaryProvider).valueOrNull;
     final world = ref.watch(worldProvider);
-    final accent = AppWorldPalette.forWorld(world).accent;
+    final currentAccent = AppWorldPalette.forWorld(world).accent;
     final isMeat = world == AppWorld.meat;
 
     return Container(
@@ -39,43 +42,48 @@ class BottomNavBar extends ConsumerWidget {
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 60,
+          height: 64,
           child: Row(
             children: [
+              // Tab 0: Meat — always wears terracotta when active.
               _NavItem(
-                icon: LucideIcons.home,
-                label: t(dict, 'nav.home'),
+                icon: LucideIcons.beef,
+                label: t(dict, 'nav.meat'),
                 isActive: currentIndex == 0,
-                accent: accent,
+                accent: AppColors.meatAccent,
                 onTap: () => _go(0),
               ),
+              // Tab 1: Livestock — always wears sage when active.
               _NavItem(
-                icon: LucideIcons.search,
-                label: t(dict, 'nav.explore'),
+                icon: LucideIcons.layers,
+                label: t(dict, 'nav.livestock'),
                 isActive: currentIndex == 1,
-                accent: accent,
+                accent: AppColors.livestockAccent,
                 onTap: () => _go(1),
               ),
+              // Tab 2: Sell — central + raised, uses current world accent.
               _NavItem(
                 icon: LucideIcons.plusCircle,
                 label: t(dict, 'nav.sell'),
                 isActive: currentIndex == 2,
-                accent: accent,
+                accent: currentAccent,
                 isPrimary: true,
                 onTap: () => _go(2),
               ),
+              // Tab 3: Activity — world-aware label + icon.
               _NavItem(
                 icon: isMeat ? LucideIcons.shoppingBag : LucideIcons.layers,
                 label: t(dict, isMeat ? 'nav.orders' : 'nav.herd'),
                 isActive: currentIndex == 3,
-                accent: accent,
+                accent: currentAccent,
                 onTap: () => _go(3),
               ),
+              // Tab 4: Profile.
               _NavItem(
                 icon: LucideIcons.userCircle,
                 label: t(dict, 'nav.profile'),
                 isActive: currentIndex == 4,
-                accent: accent,
+                accent: currentAccent,
                 onTap: () => _go(4),
               ),
             ],
@@ -124,17 +132,17 @@ class _NavItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedScale(
-              scale: isActive ? 1.0 : 0.92,
+              scale: isActive ? 1.0 : 0.94,
               duration: const Duration(milliseconds: 160),
               curve: Curves.easeOutCubic,
-              child: Icon(icon, size: isPrimary ? 27 : 24, color: color),
+              child: Icon(icon, size: isPrimary ? 26 : 22, color: color),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             Text(
               label,
               style: AppTypography.navLabel.copyWith(
                 color: color,
-                fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
               ),
               overflow: TextOverflow.ellipsis,
             ),

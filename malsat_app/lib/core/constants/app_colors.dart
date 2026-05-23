@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
 
-/// MalSat colour system — "Steppe Premium".
+/// MalSat colour system — Steppe Premium, refined.
 ///
-/// A warm, earthen palette: bone surfaces, warm-ink type, and two
-/// heritage accents — terracotta clay for the Meat world, sagebrush
-/// olive for the Livestock world. No pure white, no pure black —
-/// every surface is warmed, the way felt and leather are warm.
+/// The page is paper, not cream — a warm near-white (`background`) that
+/// reads global, with the deeper bone reserved for inset surfaces and
+/// secondary chips. Two heritage accents — terracotta clay for Meat,
+/// sagebrush olive for Livestock — and a tighter, softer category
+/// palette than the previous revision (so tiles feel like watercolour,
+/// not poster paint). No pure white, no pure black.
 class AppColors {
   AppColors._();
 
   // ── Surfaces ──────────────────────────────────────────────────
-  /// App background — warm bone.
-  static const Color background = Color(0xFFF3EEE3);
+  /// App canvas — pure white. Content carries the warmth, not the page.
+  static const Color background = Color(0xFFFFFFFF);
 
-  /// Inset / chip background — a deeper bone.
-  static const Color backgroundSecondary = Color(0xFFEAE3D3);
+  /// Inset / chip background — a barely-there warm gray.
+  static const Color backgroundSecondary = Color(0xFFF4F1EA);
 
-  /// Cards and raised surfaces — a warm near-white.
-  static const Color surface = Color(0xFFFDFBF5);
+  /// Cards and raised surfaces — also pure white. Depth is hierarchy
+  /// (typography, spacing, photography), not tint.
+  static const Color surface = Color(0xFFFFFFFF);
 
-  static const Color border = Color(0xFFE3DBC9);
-  static const Color borderStrong = Color(0xFFCFC5AE);
+  static const Color border = Color(0xFFE9E4D8);
+  static const Color borderStrong = Color(0xFFC9C0AB);
 
   // ── Ink ───────────────────────────────────────────────────────
-  static const Color textPrimary = Color(0xFF1F1B14); // warm near-black
-  static const Color textSecondary = Color(0xFF6E6553); // warm taupe
-  static const Color textMuted = Color(0xFFA89E88);
+  static const Color textPrimary = Color(0xFF111111); // crisp near-black
+  static const Color textSecondary = Color(0xFF6B6657); // warm taupe
+  static const Color textMuted = Color(0xFFA9A28E);
 
   // ── Brand ─────────────────────────────────────────────────────
   /// Neutral brand accent — terracotta clay.
@@ -40,33 +43,33 @@ class AppColors {
   // Meat — terracotta clay: warmth, fire, appetite.
   static const Color meatAccent = Color(0xFFC8502D);
   static const Color meatAccentDark = Color(0xFF9A3A1E);
-  static const Color meatAccentSurface = Color(0xFFF3E1D6);
+  static const Color meatAccentSurface = Color(0xFFF6E7DC);
 
   // Livestock — sagebrush olive: pasture, growth, the steppe.
   static const Color livestockAccent = primary;
   static const Color livestockAccentDark = primaryDark;
-  static const Color livestockAccentSurface = Color(0xFFE8EAD8);
+  static const Color livestockAccentSurface = Color(0xFFEDEFDF);
 
   // Auctions — burnished ochre.
   static const Color auctionAccent = Color(0xFFC8862A);
   static const Color auctionAccentDark = Color(0xFF99641A);
-  static const Color auctionAccentSurface = Color(0xFFF2E6CE);
+  static const Color auctionAccentSurface = Color(0xFFF6ECD6);
 
-  // ── Category tints — muted earthen pairs ──────────────────────
-  static const Color horseBackground = Color(0xFFEFE6D3); // sand
+  // ── Category tints — soft watercolour pairs ──────────────────
+  static const Color horseBackground = Color(0xFFF4ECDD); // sand
   static const Color horseForeground = Color(0xFF6B5430);
-  static const Color cattleBackground = Color(0xFFF0E2D6); // clay
+  static const Color cattleBackground = Color(0xFFF5E8DD); // clay
   static const Color cattleForeground = Color(0xFF7A4326);
-  static const Color sheepBackground = Color(0xFFE7EADA); // sage
+  static const Color sheepBackground = Color(0xFFEEF0E2); // sage
   static const Color sheepForeground = Color(0xFF4C5733);
-  static const Color arashanBackground = Color(0xFFEAE1E2); // dusty plum
+  static const Color arashanBackground = Color(0xFFF0E8E9); // dusty plum
   static const Color arashanForeground = Color(0xFF5E4750);
 
   // ── Monetization ──────────────────────────────────────────────
   static const Color premiumGold = Color(0xFFC8862A);
-  static const Color premiumGoldLight = Color(0xFFF2E6CE);
+  static const Color premiumGoldLight = Color(0xFFF6ECD6);
   static const Color boostBlue = Color(0xFF3F5E78);
-  static const Color boostBlueLight = Color(0xFFDFE6EC);
+  static const Color boostBlueLight = Color(0xFFE2E9EF);
 
   // ── Semantic ──────────────────────────────────────────────────
   static const Color error = Color(0xFFB3261E);

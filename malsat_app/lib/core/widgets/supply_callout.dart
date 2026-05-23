@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../constants/app_colors.dart';
 import '../constants/app_radius.dart';
+import '../constants/app_shadows.dart';
 import '../constants/app_spacing.dart';
 import '../constants/app_typography.dart';
 import '../theme/app_world.dart';
@@ -24,35 +26,28 @@ class SupplyCallout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = AppWorldPalette.of(context).accent;
-    final surface = AppWorldPalette.of(context).accentSurface;
 
     return PressableScale(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: surface,
+          color: AppColors.surface,
           borderRadius: AppRadius.lgAll,
-          border: Border.all(color: accent.withValues(alpha: 0.25)),
+          border: Border.all(color: AppColors.border),
+          boxShadow: AppShadows.card,
         ),
         child: Row(
           children: [
             Container(
-              width: 46,
-              height: 46,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: accent,
                 borderRadius: AppRadius.mdAll,
-                boxShadow: [
-                  BoxShadow(
-                    color: accent.withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
               ),
               child: const Icon(LucideIcons.plus,
-                  size: 24, color: Colors.white),
+                  size: 22, color: Colors.white),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -60,13 +55,14 @@ class SupplyCallout extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style: AppTypography.title.copyWith(fontSize: 16)),
+                      style: AppTypography.title.copyWith(fontSize: 15)),
                   const SizedBox(height: 2),
                   Text(subtitle, style: AppTypography.caption),
                 ],
               ),
             ),
-            Icon(LucideIcons.chevronRight, size: 20, color: accent),
+            Icon(LucideIcons.chevronRight,
+                size: 20, color: AppColors.textMuted),
           ],
         ),
       ),
