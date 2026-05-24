@@ -1,131 +1,111 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../v2_state.dart';
+import '../v2_bottom_nav.dart';
+import '../v2_listings_data.dart';
 import '../v2_theme.dart';
 
-/// MalSat v2 — Home.
+/// MalSat v2 — Home (Lalafo/OLX-style marketplace).
 ///
-/// One photograph (gradient until commissioned), one question,
-/// five answers. No tabs, no header, no nav drawer.
-class V2HomeScreen extends StatelessWidget {
+/// Familiar pattern: header, search bar, category chips, 2-column grid
+/// of listing cards, bottom nav. Same vocabulary as every marketplace
+/// users already know. Bottom nav makes the browse/event separation
+/// unmistakable.
+class V2HomeScreen extends StatefulWidget {
   const V2HomeScreen({super.key});
 
   @override
+  State<V2HomeScreen> createState() => _V2HomeScreenState();
+}
+
+class _V2HomeScreenState extends State<V2HomeScreen> {
+  V2Category _active = V2Category.all;
+  String _query = '';
+
+  List<V2Listing> get _filtered {
+    final q = _query.trim().toLowerCase();
+    return v2Listings.where((l) {
+      if (_active != V2Category.all && l.category != _active) return false;
+      if (q.isEmpty) return true;
+      return l.kindKy.toLowerCase().contains(q) ||
+          l.kindRu.toLowerCase().contains(q) ||
+          l.villageKy.toLowerCase().contains(q) ||
+          l.villageRu.toLowerCase().contains(q);
+    }).toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final filtered = _filtered;
+
     return Scaffold(
       backgroundColor: V2.paper,
       body: SafeArea(
-        top: false,
+        bottom: false,
         child: Column(
           children: [
-            const _Hero(),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Кандай иш-чарага?', style: V2.display),
-                    const SizedBox(height: 4),
-                    Text(
-                      "What's the occasion?",
-                      style: V2.body.copyWith(fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
+            const _Header(),
+            _SearchBar(
+              onChanged: (v) => setState(() => _query = v),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            _CategoryChips(
+              active: _active,
+              onPick: (c) {
+                HapticFeedback.selectionClick();
+                setState(() => _active = c);
+              },
+            ),
+            const SizedBox(height: 8),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemCount: V2Occasion.all.length,
-                  separatorBuilder: (_, _) =>
-                      const Divider(height: 1, color: V2.hairline),
-                  itemBuilder: (context, i) {
-                    final occ = V2Occasion.all[i];
-                    return _OccasionRow(occasion: occ);
-                  },
-                ),
-              ),
+              child: filtered.isEmpty
+                  ? const _Empty()
+                  : GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 0.66,
+                      ),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, i) =>
+                          _ListingCard(listing: filtered[i]),
+                    ),
             ),
-            _Footer(),
           ],
         ),
       ),
+      bottomNavigationBar: const V2BottomNav(currentIndex: 0),
     );
   }
 }
 
-class _Hero extends StatelessWidget {
-  const _Hero();
+class _Header extends StatelessWidget {
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Container(
-      height: size.height * 0.34,
-      decoration: const BoxDecoration(gradient: V2.heroGradient),
-      child: Stack(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 16, 8),
+      child: Row(
         children: [
-          // Radial highlight for depth without imagery.
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(-0.4, -0.6),
-                  radius: 1.0,
-                  colors: [Color(0x4DFFDCB4), Color(0x00000000)],
-                ),
-              ),
+          const Text(
+            'MalSat',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+              color: V2.ink,
             ),
           ),
-          // Vignette
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0x00000000), Color(0x731A1614)],
-                  stops: [0.55, 1.0],
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(32, 16, 32, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'MalSat',
-                    style: TextStyle(
-                      color: V2.paper,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.4,
-                    ),
-                  ),
-                  Text(
-                    'KY · RU · EN',
-                    style: TextStyle(
-                      color: V2.paper.withValues(alpha: 0.7),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          const Spacer(),
+          IconButton(
+            iconSize: 26,
+            color: V2.ink,
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () {},
           ),
         ],
       ),
@@ -133,40 +113,35 @@ class _Hero extends StatelessWidget {
   }
 }
 
-class _OccasionRow extends StatelessWidget {
-  final V2Occasion occasion;
-  const _OccasionRow({required this.occasion});
+class _SearchBar extends StatelessWidget {
+  final ValueChanged<String> onChanged;
+  const _SearchBar({required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        context.push('/v2/count', extra: occasion);
-      },
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFEAE0),
+          borderRadius: BorderRadius.circular(14),
+        ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
           children: [
-            Text(
-              occasion.ky,
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.4,
-                color: V2.ink,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              occasion.en,
-              style: const TextStyle(
-                fontSize: 13,
-                letterSpacing: 0.3,
-                color: V2.muted,
+            const Icon(Icons.search, color: V2.muted, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                onChanged: onChanged,
+                style: const TextStyle(fontSize: 16, color: V2.ink),
+                decoration: const InputDecoration(
+                  isCollapsed: true,
+                  border: InputBorder.none,
+                  hintText: 'Издөө · Поиск',
+                  hintStyle: TextStyle(color: V2.muted, fontSize: 16),
+                ),
               ),
             ),
           ],
@@ -176,39 +151,237 @@ class _OccasionRow extends StatelessWidget {
   }
 }
 
-class _Footer extends StatelessWidget {
+class _CategoryChips extends StatelessWidget {
+  final V2Category active;
+  final ValueChanged<V2Category> onPick;
+
+  const _CategoryChips({required this.active, required this.onPick});
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(32, 24, 32, 16),
-        child: InkWell(
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('v2: opens supplier flow')),
-            );
-          },
-          child: const Center(
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Мен сатам',
-                    style: TextStyle(
-                      color: V2.terracotta,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
+    return SizedBox(
+      height: 40,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: V2Category.values.map((c) {
+          final isActive = c == active;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => onPick(c),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isActive ? V2.ink : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isActive ? V2.ink : V2.mist,
+                    width: 1.2,
                   ),
-                  TextSpan(
-                    text: '  ·  I sell',
-                    style: TextStyle(color: V2.muted, fontSize: 14),
+                ),
+                child: Text(
+                  c.ky,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isActive ? V2.paper : V2.ink,
                   ),
-                ],
+                ),
               ),
             ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _ListingCard extends StatelessWidget {
+  final V2Listing listing;
+  const _ListingCard({required this.listing});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: V2.paper,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          context.push('/v2/listing/${listing.id}');
+        },
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: V2.mist, width: 1),
           ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _Thumb(listing: listing),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${_fmt(listing.priceKgs)} сом',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: V2.ink,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                        letterSpacing: -0.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      listing.detailKy,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: V2.ink,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on,
+                            size: 13, color: V2.muted),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            '${listing.villageKy} · ${listing.agoKy}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: V2.muted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _fmt(int p) {
+    final s = p.toString();
+    final buf = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
+      buf.write(s[i]);
+    }
+    return buf.toString();
+  }
+}
+
+class _Thumb extends StatelessWidget {
+  final V2Listing listing;
+  const _Thumb({required this.listing});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(14),
+        topRight: Radius.circular(14),
+      ),
+      child: AspectRatio(
+        aspectRatio: 1.05,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                listing.tone.withValues(alpha: 0.85),
+                Color.lerp(listing.tone, const Color(0xFF1A1614), 0.4)!,
+              ],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Center(
+                child: Text(
+                  listing.kindKy,
+                  style: TextStyle(
+                    color: V2.paper.withValues(alpha: 0.92),
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Positioned(
+                left: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xCC000000),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '~${listing.weightKg} кг',
+                    style: const TextStyle(
+                      color: V2.paper,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Empty extends StatelessWidget {
+  const _Empty();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.search_off, size: 48, color: V2.muted),
+            const SizedBox(height: 12),
+            const Text(
+              'Эч нерсе табылган жок',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: V2.ink,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text('Ничего не найдено',
+                style: const TextStyle(color: V2.muted, fontSize: 14)),
+          ],
         ),
       ),
     );

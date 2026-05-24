@@ -108,6 +108,91 @@ class V2Cta extends StatelessWidget {
   }
 }
 
+/// Farmer-and-parent button: 64pt tall, 19pt label, big tap target.
+/// This is the primary CTA on all v2 screens — never use the slim
+/// [V2Cta] for buyer-facing actions.
+class V2BigCta extends StatelessWidget {
+  final String label;
+  final String? sublabel;
+  final IconData? icon;
+  final VoidCallback? onTap;
+  final bool accent;
+  final bool outlined;
+
+  const V2BigCta({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.sublabel,
+    this.icon,
+    this.accent = false,
+    this.outlined = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = outlined
+        ? V2.paper
+        : (accent ? V2.terracotta : V2.ink);
+    final fg = outlined ? V2.ink : V2.paper;
+    final border = outlined
+        ? const Border.fromBorderSide(BorderSide(color: V2.ink, width: 2))
+        : null;
+
+    return SizedBox(
+      width: double.infinity,
+      child: Material(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: border,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: fg, size: 24),
+                  const SizedBox(width: 12),
+                ],
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: fg,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    if (sublabel != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        sublabel!,
+                        style: TextStyle(
+                          color: fg.withValues(alpha: 0.75),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Slim leading-back chip used on every non-home screen.
 class V2BackButton extends StatelessWidget {
   final VoidCallback onTap;

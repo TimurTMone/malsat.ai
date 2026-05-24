@@ -37,6 +37,8 @@ import '../../features/marketplace/presentation/screens/activity_tab.dart';
 import '../../features/shop/presentation/screens/duken_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/v2/screens/v2_home_screen.dart';
+import '../../features/v2/screens/v2_event_picker_screen.dart';
+import '../../features/v2/screens/v2_listing_detail_screen.dart';
 import '../../features/v2/screens/v2_count_screen.dart';
 import '../../features/v2/screens/v2_proposal_screen.dart';
 import '../../features/v2/screens/v2_sent_screen.dart';
@@ -122,11 +124,27 @@ final appRouter = GoRouter(
         ),
       ],
     ),
-    // ── v2.0 redesign preview (Jobs/Ive direction, occasion-first) ──
+    // ── v2.0 redesign preview ──
+    //
+    // Home is a clear fork between browse-the-marketplace and
+    // order-for-an-event. The event flow (picker → count → proposal →
+    // sent) lives as a secondary path; the primary flow is browse →
+    // listing detail → CALL / BUY.
     GoRoute(
       path: '/v2',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const V2HomeScreen(),
+    ),
+    GoRoute(
+      path: '/v2/listing/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) =>
+          V2ListingDetailScreen(id: state.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/v2/event',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const V2EventPickerScreen(),
     ),
     GoRoute(
       path: '/v2/count',
