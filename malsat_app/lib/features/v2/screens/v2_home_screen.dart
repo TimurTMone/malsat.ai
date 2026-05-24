@@ -20,7 +20,7 @@ class V2HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             const _Hero(),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Align(
@@ -146,7 +146,7 @@ class _OccasionRow extends StatelessWidget {
       },
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
